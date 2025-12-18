@@ -14,7 +14,7 @@
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
-    "test": "vitest",
+    "test": "vitest --run",
     "test:coverage": "vitest --coverage",
     "test:integration": "FIRESTORE_EMULATOR_HOST=localhost:8080 vitest --run src/integration/",
     "test:e2e": "FIRESTORE_EMULATOR_HOST=localhost:8080 vitest --run src/e2e/",
