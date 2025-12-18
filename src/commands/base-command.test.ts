@@ -63,6 +63,76 @@ describe('BaseCommand', () => {
     it('should define profile flag', () => {
       expect(BaseCommand.baseFlags.profile).toBeDefined();
     });
+
+    describe('format alias flags', () => {
+      it('should define --json flag as alias for --format=json', () => {
+        expect(BaseCommand.baseFlags.json).toBeDefined();
+        expect(BaseCommand.baseFlags.json.type).toBe('boolean');
+      });
+
+      it('should define --yaml flag as alias for --format=yaml', () => {
+        expect(BaseCommand.baseFlags.yaml).toBeDefined();
+        expect(BaseCommand.baseFlags.yaml.type).toBe('boolean');
+      });
+
+      it('should define --table flag as alias for --format=table', () => {
+        expect(BaseCommand.baseFlags.table).toBeDefined();
+        expect(BaseCommand.baseFlags.table.type).toBe('boolean');
+      });
+
+      it('should have json, yaml, table flags default to false', () => {
+        expect(BaseCommand.baseFlags.json.default).toBe(false);
+        expect(BaseCommand.baseFlags.yaml.default).toBe(false);
+        expect(BaseCommand.baseFlags.table.default).toBe(false);
+      });
+
+      it('should have exclusive constraints between format aliases', () => {
+        expect(BaseCommand.baseFlags.json.exclusive).toContain('yaml');
+        expect(BaseCommand.baseFlags.json.exclusive).toContain('table');
+        expect(BaseCommand.baseFlags.yaml.exclusive).toContain('json');
+        expect(BaseCommand.baseFlags.yaml.exclusive).toContain('table');
+        expect(BaseCommand.baseFlags.table.exclusive).toContain('json');
+        expect(BaseCommand.baseFlags.table.exclusive).toContain('yaml');
+      });
+    });
+  });
+
+  describe('resolveFormat', () => {
+    it('should return json when --json flag is true', () => {
+      const cmd = new TestCommand([], {} as Config);
+      const format = (cmd as any).resolveFormat({ json: true });
+      expect(format).toBe('json');
+    });
+
+    it('should return yaml when --yaml flag is true', () => {
+      const cmd = new TestCommand([], {} as Config);
+      const format = (cmd as any).resolveFormat({ yaml: true });
+      expect(format).toBe('yaml');
+    });
+
+    it('should return table when --table flag is true', () => {
+      const cmd = new TestCommand([], {} as Config);
+      const format = (cmd as any).resolveFormat({ table: true });
+      expect(format).toBe('table');
+    });
+
+    it('should use --format value when no alias flags are set', () => {
+      const cmd = new TestCommand([], {} as Config);
+      const format = (cmd as any).resolveFormat({ format: 'yaml' });
+      expect(format).toBe('yaml');
+    });
+
+    it('should default to json when no flags are set', () => {
+      const cmd = new TestCommand([], {} as Config);
+      const format = (cmd as any).resolveFormat({});
+      expect(format).toBe('json');
+    });
+
+    it('should prioritize alias flags over --format', () => {
+      const cmd = new TestCommand([], {} as Config);
+      const format = (cmd as any).resolveFormat({ format: 'table', yaml: true });
+      expect(format).toBe('yaml');
+    });
   });
 
   describe('services', () => {

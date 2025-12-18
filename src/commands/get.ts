@@ -17,6 +17,8 @@ export class GetCommand extends BaseCommand {
   static override examples = [
     '<%= config.bin %> get users/user123',
     '<%= config.bin %> get users/user123 --format=yaml',
+    '<%= config.bin %> get users/user123 --yaml',
+    '<%= config.bin %> get users/user123 --table',
     '<%= config.bin %> get users/user123 --watch',
     '<%= config.bin %> get users/user123 --watch --show-initial',
   ];
@@ -49,7 +51,7 @@ export class GetCommand extends BaseCommand {
   async run(): Promise<void> {
     const { args, flags } = await this.parse(GetCommand);
     const documentPath = args.documentPath;
-    const format = (flags.format || 'json') as OutputFormat;
+    const format = this.resolveFormat(flags);
     const watch = flags.watch;
     const showInitial = flags['show-initial'];
     const quiet = flags.quiet;

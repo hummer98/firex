@@ -48,6 +48,9 @@ export interface Messages {
   'flag.batchSize': string;
   'flag.show': string;
   'flag.quiet': string;
+  'flag.json': string;
+  'flag.yaml': string;
+  'flag.table': string;
 
   // Success messages
   'msg.documentCreated': string;
@@ -136,6 +139,9 @@ const jaMessages: Messages = {
   'flag.batchSize': 'バッチサイズ (デフォルト: 500)',
   'flag.show': '現在の設定を表示する',
   'flag.quiet': 'メタ情報を非表示にして純粋なデータのみ出力',
+  'flag.json': 'JSON形式で出力 (--format=json のエイリアス)',
+  'flag.yaml': 'YAML形式で出力 (--format=yaml のエイリアス)',
+  'flag.table': 'テーブル形式で出力 (--format=table のエイリアス)',
 
   // Success messages
   'msg.documentCreated': 'ドキュメントを作成しました',
@@ -224,6 +230,9 @@ const enMessages: Messages = {
   'flag.batchSize': 'Batch size (default: 500)',
   'flag.show': 'Show current configuration',
   'flag.quiet': 'Suppress meta information and output only pure data',
+  'flag.json': 'Output in JSON format (alias for --format=json)',
+  'flag.yaml': 'Output in YAML format (alias for --format=yaml)',
+  'flag.table': 'Output in table format (alias for --format=table)',
 
   // Success messages
   'msg.documentCreated': 'Document created',

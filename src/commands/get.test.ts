@@ -77,6 +77,21 @@ describe('GetCommand', () => {
     it('should default quiet to false', () => {
       expect(GetCommand.flags.quiet.default).toBe(false);
     });
+
+    it('should have --json flag as format alias', () => {
+      expect(GetCommand.flags.json).toBeDefined();
+      expect(GetCommand.flags.json.type).toBe('boolean');
+    });
+
+    it('should have --yaml flag as format alias', () => {
+      expect(GetCommand.flags.yaml).toBeDefined();
+      expect(GetCommand.flags.yaml.type).toBe('boolean');
+    });
+
+    it('should have --table flag as format alias', () => {
+      expect(GetCommand.flags.table).toBeDefined();
+      expect(GetCommand.flags.table.type).toBe('boolean');
+    });
   });
 
   describe('document path validation', () => {

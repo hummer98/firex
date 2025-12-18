@@ -18,6 +18,8 @@ export class ListCommand extends BaseCommand {
   static override examples = [
     '<%= config.bin %> list users',
     '<%= config.bin %> list users --limit=10',
+    '<%= config.bin %> list users --yaml',
+    '<%= config.bin %> list users --table',
     '<%= config.bin %> list users --where="age>=18" --order-by="age:desc"',
     '<%= config.bin %> list posts --where="status==published" --where="author==alice"',
     '<%= config.bin %> list users --watch',
@@ -64,7 +66,7 @@ export class ListCommand extends BaseCommand {
   async run(): Promise<void> {
     const { args, flags } = await this.parse(ListCommand);
     const collectionPath = args.collectionPath;
-    const format = (flags.format || 'json') as OutputFormat;
+    const format = this.resolveFormat(flags);
     const whereConditions = flags.where || [];
     const orderByConditions = flags['order-by'] || [];
     const limit = flags.limit;

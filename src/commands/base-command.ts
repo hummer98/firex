@@ -4,6 +4,7 @@
  */
 
 import { Command, Flags } from '@oclif/core';
+import type { OutputFormat } from '../shared/types';
 import { ConfigService, Config } from '../services/config';
 import { AuthService } from '../services/auth';
 import { ErrorHandler } from '../services/error-handler';
@@ -47,6 +48,21 @@ export abstract class BaseCommand extends Command {
       description: t('flag.format'),
       options: ['json', 'yaml', 'table'],
       default: 'json',
+    }),
+    json: Flags.boolean({
+      description: t('flag.json'),
+      default: false,
+      exclusive: ['yaml', 'table'],
+    }),
+    yaml: Flags.boolean({
+      description: t('flag.yaml'),
+      default: false,
+      exclusive: ['json', 'table'],
+    }),
+    table: Flags.boolean({
+      description: t('flag.table'),
+      default: false,
+      exclusive: ['json', 'yaml'],
     }),
     profile: Flags.string({
       char: 'p',
@@ -184,5 +200,21 @@ export abstract class BaseCommand extends Command {
 
   getLoggingService(): LoggingService {
     return this.loggingService;
+  }
+
+  /**
+   * Resolve output format from flags
+   * Priority: --json/--yaml/--table > --format > default ('json')
+   */
+  protected resolveFormat(flags: {
+    format?: string;
+    json?: boolean;
+    yaml?: boolean;
+    table?: boolean;
+  }): OutputFormat {
+    if (flags.json) return 'json';
+    if (flags.yaml) return 'yaml';
+    if (flags.table) return 'table';
+    return (flags.format || 'json') as OutputFormat;
   }
 }
