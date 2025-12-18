@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2025-12-19
+
+### Added
+- `collections` command for listing root collections and subcollections
+- `--json`, `--yaml`, `--table` flags as aliases for `--format` option
+- `--quiet` option for `get` and `list` commands to suppress headers
+
+### Changed
+- Package renamed to `@hummer98/firex` for npm publish
+
+### Fixed
+- Add `--run` flag to vitest for CI compatibility
+
 ## [0.1.1] - 2025-12-18
 
 ### Added
@@ -62,6 +75,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - API key and OAuth token masking
 - Secure file permission recommendations
 
-[Unreleased]: https://github.com/hummer98/firex/compare/v0.1.1...HEAD
+[Unreleased]: https://github.com/hummer98/firex/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/hummer98/firex/compare/v0.1.1...v0.2.0
 [0.1.1]: https://github.com/hummer98/firex/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/hummer98/firex/releases/tag/v0.1.0
