@@ -2034,9 +2034,9 @@ npm publish --tag beta
   "version": "1.0.0",
   "description": "Firebase Firestore CLI tool for CRUD operations, queries, and batch processing",
   "keywords": ["firestore", "firebase", "cli", "database", "firebase-admin"],
-  "repository": "https://github.com/your-org/firex",
-  "homepage": "https://github.com/your-org/firex#readme",
-  "bugs": "https://github.com/your-org/firex/issues",
+  "repository": "https://github.com/hummer98/firex",
+  "homepage": "https://github.com/hummer98/firex#readme",
+  "bugs": "https://github.com/hummer98/firex/issues",
   "license": "MIT"
 }
 ```

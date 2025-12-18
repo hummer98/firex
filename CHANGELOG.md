@@ -62,6 +62,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - API key and OAuth token masking
 - Secure file permission recommendations
 
-[Unreleased]: https://github.com/your-org/firex/compare/v0.1.1...HEAD
-[0.1.1]: https://github.com/your-org/firex/compare/v0.1.0...v0.1.1
-[0.1.0]: https://github.com/your-org/firex/releases/tag/v0.1.0
+[Unreleased]: https://github.com/hummer98/firex/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/hummer98/firex/compare/v0.1.0...v0.1.1
+[0.1.0]: https://github.com/hummer98/firex/releases/tag/v0.1.0

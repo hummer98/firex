@@ -85,8 +85,8 @@ CHANGELOG.mdのフォーマット:
 
 **注意**: ファイル末尾のリンク参照も更新してください：
 ```markdown
-[Unreleased]: https://github.com/your-org/firex/compare/vX.Y.Z...HEAD
-[X.Y.Z]: https://github.com/your-org/firex/compare/vX.Y.Z-1...vX.Y.Z
+[Unreleased]: https://github.com/hummer98/firex/compare/vX.Y.Z...HEAD
+[X.Y.Z]: https://github.com/hummer98/firex/compare/vX.Y.Z-1...vX.Y.Z
 ```
 
 ### 5. CHANGELOG更新のコミット（npm version前に実行）

@@ -53,12 +53,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/your-org/firex.git"
+    "url": "https://github.com/hummer98/firex.git"
   },
   "bugs": {
-    "url": "https://github.com/your-org/firex/issues"
+    "url": "https://github.com/hummer98/firex/issues"
   },
-  "homepage": "https://github.com/your-org/firex#readme",
+  "homepage": "https://github.com/hummer98/firex#readme",
   "directories": {
     "doc": "docs"
   },
