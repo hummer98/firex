@@ -1,3 +1,7 @@
+English | **[日本語](README-jp.md)**
+
+![firex banner](.github/banner.png)
+
 # firex
 
 Firebase Firestore CLI tool for command-line operations.
