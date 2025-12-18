@@ -224,6 +224,72 @@ export class FirestoreOps {
   }
 
   /**
+   * List all root-level collections in the database
+   */
+  async listRootCollections(): Promise<Result<string[], FirestoreOpsError>> {
+    try {
+      const collections = await this.firestore.listCollections();
+      const collectionNames = collections.map((col) => col.id);
+      return ok(collectionNames);
+    } catch (error) {
+      return err({
+        type: 'FIRESTORE_ERROR',
+        message: `ルートコレクション一覧の取得に失敗しました: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+        originalError: error instanceof Error ? error : new Error(String(error)),
+      });
+    }
+  }
+
+  /**
+   * List all subcollections under a document
+   */
+  async listSubcollections(documentPath: string): Promise<Result<string[], FirestoreOpsError>> {
+    // Validate path
+    const validation = this.validatePath(documentPath);
+    if (validation.isErr()) {
+      return err(validation.error);
+    }
+
+    // Check if it's a document path
+    if (!this.isDocumentPath(documentPath)) {
+      return err({
+        type: 'INVALID_PATH',
+        message: 'ドキュメントパスを指定してください（偶数のセグメント数が必要です）',
+        path: documentPath,
+      });
+    }
+
+    try {
+      const docRef = this.firestore.doc(documentPath);
+
+      // Check if document exists
+      const snapshot = await docRef.get();
+      if (!snapshot.exists) {
+        return err({
+          type: 'NOT_FOUND',
+          message: `ドキュメントが見つかりません: ${documentPath}`,
+          path: documentPath,
+        });
+      }
+
+      // Get subcollections
+      const collections = await docRef.listCollections();
+      const collectionNames = collections.map((col) => col.id);
+      return ok(collectionNames);
+    } catch (error) {
+      return err({
+        type: 'FIRESTORE_ERROR',
+        message: `サブコレクション一覧の取得に失敗しました: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+        originalError: error instanceof Error ? error : new Error(String(error)),
+      });
+    }
+  }
+
+  /**
    * Convert DocumentSnapshot to DocumentWithMeta
    */
   private snapshotToDocumentWithMeta(snapshot: DocumentSnapshot): DocumentWithMeta {

@@ -15,6 +15,7 @@ export interface Messages {
   'cmd.update.description': string;
   'cmd.delete.description': string;
   'cmd.list.description': string;
+  'cmd.collections.description': string;
   'cmd.export.description': string;
   'cmd.import.description': string;
   'cmd.config.description': string;
@@ -22,6 +23,7 @@ export interface Messages {
 
   // Argument descriptions
   'arg.documentPath': string;
+  'arg.documentPathOptional': string;
   'arg.collectionPath': string;
   'arg.data': string;
   'arg.file': string;
@@ -94,6 +96,12 @@ export interface Messages {
   // Validation errors
   'err.invalidCollectionPath': string;
   'err.invalidBatchSize': string;
+
+  // Collections command messages
+  'msg.collectionsFound': string;
+  'msg.noCollectionsFound': string;
+  'msg.noSubcollectionsFound': string;
+  'err.documentNotFoundForSubcollections': string;
 }
 
 /**
@@ -106,6 +114,7 @@ const jaMessages: Messages = {
   'cmd.update.description': 'Firestoreドキュメントを部分更新する (set --merge のエイリアス)',
   'cmd.delete.description': 'Firestoreドキュメントまたはコレクションを削除する',
   'cmd.list.description': 'コレクション内のドキュメント一覧を取得する',
+  'cmd.collections.description': 'コレクション一覧を表示する',
   'cmd.export.description': 'Firestoreコレクションをエクスポートする',
   'cmd.import.description': 'JSONファイルからFirestoreにインポートする',
   'cmd.config.description': '設定を表示する',
@@ -113,6 +122,7 @@ const jaMessages: Messages = {
 
   // Argument descriptions
   'arg.documentPath': 'ドキュメントパス (例: collection/document)',
+  'arg.documentPathOptional': 'サブコレクションを取得するドキュメントパス（省略時はルートコレクション）',
   'arg.collectionPath': 'コレクションパス (例: users, posts)',
   'arg.data': 'JSON形式のドキュメントデータ',
   'arg.file': 'インポートするJSONファイルパス',
@@ -185,6 +195,12 @@ const jaMessages: Messages = {
   // Validation errors
   'err.invalidCollectionPath': 'コレクションパスを指定してください（奇数のセグメント数が必要です）',
   'err.invalidBatchSize': 'バッチサイズは1から500の範囲で指定してください',
+
+  // Collections command messages
+  'msg.collectionsFound': '件のコレクションが見つかりました',
+  'msg.noCollectionsFound': 'コレクションが見つかりません',
+  'msg.noSubcollectionsFound': 'サブコレクションが見つかりません',
+  'err.documentNotFoundForSubcollections': 'ドキュメントが見つかりません。サブコレクションを取得できません',
 };
 
 /**
@@ -197,6 +213,7 @@ const enMessages: Messages = {
   'cmd.update.description': 'Partially update a Firestore document (alias for set --merge)',
   'cmd.delete.description': 'Delete a Firestore document or collection',
   'cmd.list.description': 'List documents in a collection',
+  'cmd.collections.description': 'List collections',
   'cmd.export.description': 'Export a Firestore collection',
   'cmd.import.description': 'Import data from a JSON file to Firestore',
   'cmd.config.description': 'Display configuration',
@@ -204,6 +221,7 @@ const enMessages: Messages = {
 
   // Argument descriptions
   'arg.documentPath': 'Document path (e.g., collection/document)',
+  'arg.documentPathOptional': 'Document path for subcollections (omit for root collections)',
   'arg.collectionPath': 'Collection path (e.g., users, posts)',
   'arg.data': 'Document data in JSON format',
   'arg.file': 'Path to JSON file to import',
@@ -276,6 +294,12 @@ const enMessages: Messages = {
   // Validation errors
   'err.invalidCollectionPath': 'Please specify a collection path (odd number of segments required)',
   'err.invalidBatchSize': 'Batch size must be between 1 and 500',
+
+  // Collections command messages
+  'msg.collectionsFound': 'collection(s) found',
+  'msg.noCollectionsFound': 'No collections found',
+  'msg.noSubcollectionsFound': 'No subcollections found',
+  'err.documentNotFoundForSubcollections': 'Document not found. Cannot retrieve subcollections',
 };
 
 const messagesByLocale: Record<SupportedLocale, Messages> = {

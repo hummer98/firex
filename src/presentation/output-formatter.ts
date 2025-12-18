@@ -12,6 +12,7 @@ import { stringify as stringifyYaml } from 'yaml';
 export interface FormatOptions {
   includeMetadata?: boolean;
   colorize?: boolean;
+  quiet?: boolean;
 }
 
 /**
@@ -274,5 +275,67 @@ export class OutputFormatter {
     }
 
     return result;
+  }
+
+  /**
+   * Format collection names list
+   * @param collections - Array of collection names
+   * @param format - Output format (json, yaml, table)
+   * @param options - Format options (quiet mode for array-only output)
+   */
+  formatCollections(
+    collections: string[],
+    format: OutputFormat,
+    options: FormatOptions = {}
+  ): Result<string, FormatError> {
+    try {
+      const quiet = options.quiet ?? false;
+
+      switch (format) {
+        case 'json': {
+          if (quiet) {
+            return ok(JSON.stringify(collections, null, 2));
+          }
+          return ok(JSON.stringify({ collections, count: collections.length }, null, 2));
+        }
+
+        case 'yaml': {
+          if (quiet) {
+            return ok(stringifyYaml(collections));
+          }
+          return ok(stringifyYaml({ collections, count: collections.length }));
+        }
+
+        case 'table': {
+          if (collections.length === 0) {
+            return ok('(No collections)');
+          }
+
+          const table = new Table({
+            head: ['Collection'],
+          });
+
+          collections.forEach((collection) => {
+            table.push([collection]);
+          });
+
+          return ok(table.toString());
+        }
+
+        default:
+          return err({
+            type: 'FORMAT_ERROR',
+            message: `サポートされていない出力形式です: ${format}`,
+          });
+      }
+    } catch (error) {
+      return err({
+        type: 'FORMAT_ERROR',
+        message: `コレクション一覧のフォーマットに失敗しました: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+        originalError: error instanceof Error ? error : undefined,
+      });
+    }
   }
 }

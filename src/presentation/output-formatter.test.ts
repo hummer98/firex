@@ -273,4 +273,104 @@ describe('OutputFormatter', () => {
       }
     });
   });
+
+  describe('formatCollections', () => {
+    it('should format collections as JSON with count', () => {
+      const collections = ['users', 'posts', 'comments'];
+      const result = formatter.formatCollections(collections, 'json');
+
+      expect(result.isOk()).toBe(true);
+      if (result.isOk()) {
+        const output = result.value;
+        const parsed = JSON.parse(output);
+        expect(parsed.collections).toEqual(['users', 'posts', 'comments']);
+        expect(parsed.count).toBe(3);
+      }
+    });
+
+    it('should format collections as JSON with quiet mode (array only)', () => {
+      const collections = ['users', 'posts'];
+      const result = formatter.formatCollections(collections, 'json', { quiet: true });
+
+      expect(result.isOk()).toBe(true);
+      if (result.isOk()) {
+        const output = result.value;
+        const parsed = JSON.parse(output);
+        expect(parsed).toEqual(['users', 'posts']);
+      }
+    });
+
+    it('should format collections as YAML', () => {
+      const collections = ['users', 'posts'];
+      const result = formatter.formatCollections(collections, 'yaml');
+
+      expect(result.isOk()).toBe(true);
+      if (result.isOk()) {
+        const output = result.value;
+        expect(output).toContain('collections:');
+        expect(output).toContain('- users');
+        expect(output).toContain('- posts');
+        expect(output).toContain('count: 2');
+      }
+    });
+
+    it('should format collections as YAML with quiet mode', () => {
+      const collections = ['users', 'posts'];
+      const result = formatter.formatCollections(collections, 'yaml', { quiet: true });
+
+      expect(result.isOk()).toBe(true);
+      if (result.isOk()) {
+        const output = result.value;
+        expect(output).toContain('- users');
+        expect(output).toContain('- posts');
+        expect(output).not.toContain('count:');
+      }
+    });
+
+    it('should format collections as table', () => {
+      const collections = ['users', 'posts'];
+      const result = formatter.formatCollections(collections, 'table');
+
+      expect(result.isOk()).toBe(true);
+      if (result.isOk()) {
+        const output = result.value;
+        expect(output).toContain('users');
+        expect(output).toContain('posts');
+        expect(output).toContain('Collection');
+      }
+    });
+
+    it('should handle empty collections array for JSON', () => {
+      const result = formatter.formatCollections([], 'json');
+
+      expect(result.isOk()).toBe(true);
+      if (result.isOk()) {
+        const output = result.value;
+        const parsed = JSON.parse(output);
+        expect(parsed.collections).toEqual([]);
+        expect(parsed.count).toBe(0);
+      }
+    });
+
+    it('should handle empty collections array for YAML', () => {
+      const result = formatter.formatCollections([], 'yaml');
+
+      expect(result.isOk()).toBe(true);
+      if (result.isOk()) {
+        const output = result.value;
+        expect(output).toContain('collections: []');
+        expect(output).toContain('count: 0');
+      }
+    });
+
+    it('should handle empty collections array for table', () => {
+      const result = formatter.formatCollections([], 'table');
+
+      expect(result.isOk()).toBe(true);
+      if (result.isOk()) {
+        const output = result.value;
+        expect(output).toContain('(No collections)');
+      }
+    });
+  });
 });

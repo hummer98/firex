@@ -288,4 +288,134 @@ describe('FirestoreOps', () => {
       }
     });
   });
+
+  describe('listRootCollections', () => {
+    let mockCollectionRef1: Partial<CollectionReference>;
+    let mockCollectionRef2: Partial<CollectionReference>;
+
+    beforeEach(() => {
+      mockCollectionRef1 = { id: 'users' };
+      mockCollectionRef2 = { id: 'posts' };
+    });
+
+    it('should list root collections when they exist', async () => {
+      mockFirestore.listCollections = vi.fn().mockResolvedValue([
+        mockCollectionRef1,
+        mockCollectionRef2,
+      ]);
+
+      const result = await firestoreOps.listRootCollections();
+
+      expect(result.isOk()).toBe(true);
+      if (result.isOk()) {
+        expect(result.value).toEqual(['users', 'posts']);
+      }
+    });
+
+    it('should return empty array when no collections exist', async () => {
+      mockFirestore.listCollections = vi.fn().mockResolvedValue([]);
+
+      const result = await firestoreOps.listRootCollections();
+
+      expect(result.isOk()).toBe(true);
+      if (result.isOk()) {
+        expect(result.value).toEqual([]);
+      }
+    });
+
+    it('should handle Firestore errors', async () => {
+      mockFirestore.listCollections = vi.fn().mockRejectedValue(new Error('Network error'));
+
+      const result = await firestoreOps.listRootCollections();
+
+      expect(result.isErr()).toBe(true);
+      if (result.isErr()) {
+        expect(result.error.type).toBe('FIRESTORE_ERROR');
+      }
+    });
+  });
+
+  describe('listSubcollections', () => {
+    let mockSubcollection1: Partial<CollectionReference>;
+    let mockSubcollection2: Partial<CollectionReference>;
+
+    beforeEach(() => {
+      mockSubcollection1 = { id: 'orders' };
+      mockSubcollection2 = { id: 'favorites' };
+    });
+
+    it('should list subcollections when they exist', async () => {
+      mockDocSnapshot.exists = true;
+      mockDocRef.get = vi.fn().mockResolvedValue(mockDocSnapshot);
+      mockDocRef.listCollections = vi.fn().mockResolvedValue([
+        mockSubcollection1,
+        mockSubcollection2,
+      ]);
+
+      const result = await firestoreOps.listSubcollections('users/user1');
+
+      expect(result.isOk()).toBe(true);
+      if (result.isOk()) {
+        expect(result.value).toEqual(['orders', 'favorites']);
+      }
+    });
+
+    it('should return empty array when no subcollections exist', async () => {
+      mockDocSnapshot.exists = true;
+      mockDocRef.get = vi.fn().mockResolvedValue(mockDocSnapshot);
+      mockDocRef.listCollections = vi.fn().mockResolvedValue([]);
+
+      const result = await firestoreOps.listSubcollections('users/user1');
+
+      expect(result.isOk()).toBe(true);
+      if (result.isOk()) {
+        expect(result.value).toEqual([]);
+      }
+    });
+
+    it('should reject invalid path (collection path)', async () => {
+      const result = await firestoreOps.listSubcollections('users');
+
+      expect(result.isErr()).toBe(true);
+      if (result.isErr()) {
+        expect(result.error.type).toBe('INVALID_PATH');
+        expect(result.error.message).toContain('ドキュメントパス');
+      }
+    });
+
+    it('should return NOT_FOUND when document does not exist', async () => {
+      mockDocSnapshot.exists = false;
+      mockDocRef.get = vi.fn().mockResolvedValue(mockDocSnapshot);
+
+      const result = await firestoreOps.listSubcollections('users/nonexistent');
+
+      expect(result.isErr()).toBe(true);
+      if (result.isErr()) {
+        expect(result.error.type).toBe('NOT_FOUND');
+        expect(result.error.path).toBe('users/nonexistent');
+      }
+    });
+
+    it('should handle Firestore errors', async () => {
+      mockDocSnapshot.exists = true;
+      mockDocRef.get = vi.fn().mockResolvedValue(mockDocSnapshot);
+      mockDocRef.listCollections = vi.fn().mockRejectedValue(new Error('Permission denied'));
+
+      const result = await firestoreOps.listSubcollections('users/user1');
+
+      expect(result.isErr()).toBe(true);
+      if (result.isErr()) {
+        expect(result.error.type).toBe('FIRESTORE_ERROR');
+      }
+    });
+
+    it('should reject empty path', async () => {
+      const result = await firestoreOps.listSubcollections('');
+
+      expect(result.isErr()).toBe(true);
+      if (result.isErr()) {
+        expect(result.error.type).toBe('INVALID_PATH');
+      }
+    });
+  });
 });
