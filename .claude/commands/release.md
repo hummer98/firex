@@ -1,11 +1,14 @@
 ---
-description: firex CLIの新バージョンをnpmにリリース
+description: firex CLIの新バージョンをリリース（--publishでnpm公開）
 allowed-tools: Bash(git *), Bash(npm *), Bash(gh *), Read, Edit
 ---
 
 # Release - firex新バージョンリリース
 
-このコマンドは、firex CLIの新バージョンをnpmにリリースするための一連の手順を自動化します。
+このコマンドは、firex CLIの新バージョンをリリースするための一連の手順を自動化します。
+
+**引数**: `$ARGUMENTS`
+- `--publish`: npm publishを実行する（省略時はGitタグ作成まで）
 
 ## 実行手順
 
@@ -85,7 +88,18 @@ CHANGELOG.mdのフォーマット:
 [X.Y.Z]: https://github.com/your-org/firex/compare/vX.Y.Z-1...vX.Y.Z
 ```
 
-### 5. バージョン更新・ビルド・タグ作成
+### 5. CHANGELOG更新のコミット（npm version前に実行）
+
+```bash
+git add CHANGELOG.md
+git commit -m "docs: update CHANGELOG for vX.Y.Z
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+
+Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>"
+```
+
+### 6. バージョン更新・ビルド・タグ作成
 
 npm versionコマンドで一括処理（package.jsonの`version`と`postversion`スクリプトが自動実行）：
 
@@ -101,28 +115,7 @@ npm version patch  # または minor / major
 4. git tag vX.Y.Z
 5. git push && git push --tags（postversion経由）
 
-**注意**: npm versionを実行する前にCHANGELOG.mdの更新をコミットしておくこと
-
-### 6. CHANGELOG更新のコミット（npm version前に実行）
-
-```bash
-git add CHANGELOG.md
-git commit -m "docs: update CHANGELOG for vX.Y.Z
-
-🤖 Generated with [Claude Code](https://claude.com/claude-code)
-
-Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>"
-```
-
-### 7. npmへの公開
-
-```bash
-npm publish
-```
-
-**注意**: 初回公開時やスコープ付きパッケージの場合は `npm publish --access public` が必要な場合があります。
-
-### 8. GitHubリリース作成
+### 7. GitHubリリース作成
 
 リリースノートをCHANGELOGから抽出し、GitHubリリースを作成：
 
@@ -132,12 +125,26 @@ gh release create vX.Y.Z \
   --notes "[CHANGELOGから抽出したリリースノート]"
 ```
 
+### 8. npmへの公開（--publish指定時のみ）
+
+**`--publish` が指定されている場合のみ実行:**
+
+```bash
+npm publish
+```
+
+**注意**: 初回公開時やスコープ付きパッケージの場合は `npm publish --access public` が必要な場合があります。
+
+**`--publish` が指定されていない場合:**
+- このステップをスキップ
+- ユーザーに「npm publishはスキップされました。公開する場合は `/release --publish` を実行してください」と通知
+
 ### 9. 完了報告
 
 ユーザーに以下を報告：
 - リリースバージョン
-- npmパッケージURL: https://www.npmjs.com/package/firex
 - GitHubリリースURL
+- **--publish指定時のみ**: npmパッケージURL: https://www.npmjs.com/package/firex
 - 主な変更内容のサマリー
 
 ## 注意事項
@@ -146,7 +153,7 @@ gh release create vX.Y.Z \
 - 必ずmasterブランチで実行してください
 - リリース作成前にテストが通っていることを確認してください
 - バージョン番号は手動で確認・承認を得てから進めてください
-- npm loginが完了していることを確認してください
+- npm publish時はnpm loginが完了していることを確認してください
 
 ## エラー処理
 
@@ -171,11 +178,14 @@ git reset --hard HEAD~1
 ## クイックリファレンス
 
 ```bash
-# フルフロー（手動確認あり）
+# タグ作成まで（npm publishなし）
 npm test && npm run typecheck
 # CHANGELOG.md を編集
 git add CHANGELOG.md && git commit -m "docs: update CHANGELOG for vX.Y.Z"
 npm version patch  # または minor / major
-npm publish
 gh release create vX.Y.Z --title "firex vX.Y.Z" --notes "..."
+
+# npm公開も含める場合
+# 上記に加えて:
+npm publish
 ```
