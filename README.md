@@ -420,6 +420,140 @@ firex list users --profile staging
 - Avoid logging full document contents in production
 - Review log files before sharing for debugging
 
+## MCP Server Integration
+
+firex can run as an MCP (Model Context Protocol) server, enabling AI assistants like Claude to interact with Firestore directly.
+
+### Setup with Claude Code
+
+```bash
+# Basic setup
+claude mcp add firex -- node /path/to/firex/bin/run.js mcp
+
+# With project ID and credentials
+claude mcp add firex \
+  -e FIRESTORE_PROJECT_ID=your-project-id \
+  -e GOOGLE_APPLICATION_CREDENTIALS=/path/to/service-account.json \
+  -- node /path/to/firex/bin/run.js mcp
+
+# Multiple projects (register with different names)
+claude mcp add firex-prod \
+  -e FIRESTORE_PROJECT_ID=prod-project \
+  -e GOOGLE_APPLICATION_CREDENTIALS=/path/to/prod-key.json \
+  -- node /path/to/firex/bin/run.js mcp
+
+claude mcp add firex-dev \
+  -e FIRESTORE_PROJECT_ID=dev-project \
+  -e GOOGLE_APPLICATION_CREDENTIALS=/path/to/dev-key.json \
+  -- node /path/to/firex/bin/run.js mcp
+```
+
+### Setup with Claude Desktop
+
+Add to your Claude Desktop configuration (`~/.config/claude/claude_desktop_config.json` or `~/Library/Application Support/Claude/claude_desktop_config.json`):
+
+```json
+{
+  "mcpServers": {
+    "firex": {
+      "command": "node",
+      "args": ["/path/to/firex/bin/run.js", "mcp"],
+      "env": {
+        "FIRESTORE_PROJECT_ID": "your-project-id",
+        "GOOGLE_APPLICATION_CREDENTIALS": "/path/to/service-account.json"
+      }
+    }
+  }
+}
+```
+
+### MCP Tools Reference
+
+| Tool | Description |
+|------|-------------|
+| `firestore_get` | Get a document by path |
+| `firestore_list` | Query documents with filters, sorting, pagination |
+| `firestore_set` | Create or update a document |
+| `firestore_update` | Partially update an existing document |
+| `firestore_delete` | Delete a document or collection |
+| `firestore_collections` | List root collections or subcollections |
+| `firestore_export` | Export collection documents as JSON |
+| `firestore_import` | Import documents into a collection |
+
+### Tool Parameters
+
+#### firestore_get
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `path` | string | Yes | Document path (e.g., `users/user123`) |
+
+#### firestore_list
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `path` | string | Yes | Collection path (e.g., `users`) |
+| `where` | array | No | Filter conditions: `[{field, operator, value}]` |
+| `orderBy` | array | No | Sort order: `[{field, direction}]` |
+| `limit` | number | No | Maximum documents to return |
+
+**Supported operators:** `==`, `!=`, `<`, `<=`, `>`, `>=`, `array-contains`, `array-contains-any`, `in`, `not-in`
+
+#### firestore_set
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `path` | string | Yes | Document path (e.g., `users/user123`) |
+| `data` | object | Yes | Document data to write |
+| `merge` | boolean | No | Merge with existing data (default: false) |
+
+#### firestore_update
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `path` | string | Yes | Document path (must exist) |
+| `data` | object | Yes | Fields to update (supports dot notation) |
+
+#### firestore_delete
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `path` | string | Yes | Document or collection path |
+| `recursive` | boolean | No | Delete all documents in collection (default: false) |
+
+#### firestore_collections
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `documentPath` | string | No | Document path for subcollections. Omit for root collections. |
+
+#### firestore_export
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `path` | string | Yes | Collection path to export |
+| `recursive` | boolean | No | Include subcollections (default: false) |
+| `limit` | number | No | Maximum documents to export |
+
+#### firestore_import
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `path` | string | Yes | Collection path to import into |
+| `documents` | array | Yes | Array of `{id?, data}` objects |
+| `merge` | boolean | No | Merge with existing documents (default: false) |
+
+### MCP Usage Examples
+
+```
+# Ask Claude to get a document
+"Get the user document at users/user123"
+
+# Query with filters
+"List all users where status equals active, sorted by createdAt descending, limit 10"
+
+# Create a document
+"Create a new user at users/newuser with name 'John' and email 'john@example.com'"
+
+# Delete a collection
+"Delete all documents in the temp collection"
+
+# Export data
+"Export the orders collection including subcollections"
+```
+
 ## Development
 
 ### Build

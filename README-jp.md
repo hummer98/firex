@@ -420,6 +420,140 @@ firex list users --profile staging
 - 本番環境ではドキュメント全体の内容をログに記録しない
 - デバッグ用に共有する前にログファイルを確認
 
+## MCP サーバー連携
+
+firex は MCP（Model Context Protocol）サーバーとして動作し、Claude などの AI アシスタントが Firestore を直接操作できるようになります。
+
+### Claude Code でのセットアップ
+
+```bash
+# 基本セットアップ
+claude mcp add firex -- node /path/to/firex/bin/run.js mcp
+
+# プロジェクト ID と認証情報を指定
+claude mcp add firex \
+  -e FIRESTORE_PROJECT_ID=your-project-id \
+  -e GOOGLE_APPLICATION_CREDENTIALS=/path/to/service-account.json \
+  -- node /path/to/firex/bin/run.js mcp
+
+# 複数プロジェクト（別名で登録）
+claude mcp add firex-prod \
+  -e FIRESTORE_PROJECT_ID=prod-project \
+  -e GOOGLE_APPLICATION_CREDENTIALS=/path/to/prod-key.json \
+  -- node /path/to/firex/bin/run.js mcp
+
+claude mcp add firex-dev \
+  -e FIRESTORE_PROJECT_ID=dev-project \
+  -e GOOGLE_APPLICATION_CREDENTIALS=/path/to/dev-key.json \
+  -- node /path/to/firex/bin/run.js mcp
+```
+
+### Claude Desktop でのセットアップ
+
+Claude Desktop の設定ファイル（`~/.config/claude/claude_desktop_config.json` または `~/Library/Application Support/Claude/claude_desktop_config.json`）に追加：
+
+```json
+{
+  "mcpServers": {
+    "firex": {
+      "command": "node",
+      "args": ["/path/to/firex/bin/run.js", "mcp"],
+      "env": {
+        "FIRESTORE_PROJECT_ID": "your-project-id",
+        "GOOGLE_APPLICATION_CREDENTIALS": "/path/to/service-account.json"
+      }
+    }
+  }
+}
+```
+
+### MCP ツール一覧
+
+| ツール | 説明 |
+|--------|------|
+| `firestore_get` | パスでドキュメントを取得 |
+| `firestore_list` | フィルタ、ソート、ページネーション付きでドキュメントをクエリ |
+| `firestore_set` | ドキュメントを作成または更新 |
+| `firestore_update` | 既存ドキュメントを部分更新 |
+| `firestore_delete` | ドキュメントまたはコレクションを削除 |
+| `firestore_collections` | ルートコレクションまたはサブコレクションを一覧表示 |
+| `firestore_export` | コレクションのドキュメントを JSON でエクスポート |
+| `firestore_import` | コレクションにドキュメントをインポート |
+
+### ツールパラメータ
+
+#### firestore_get
+| パラメータ | 型 | 必須 | 説明 |
+|------------|------|------|------|
+| `path` | string | Yes | ドキュメントパス（例: `users/user123`） |
+
+#### firestore_list
+| パラメータ | 型 | 必須 | 説明 |
+|------------|------|------|------|
+| `path` | string | Yes | コレクションパス（例: `users`） |
+| `where` | array | No | フィルタ条件: `[{field, operator, value}]` |
+| `orderBy` | array | No | ソート順: `[{field, direction}]` |
+| `limit` | number | No | 返却する最大ドキュメント数 |
+
+**対応演算子:** `==`, `!=`, `<`, `<=`, `>`, `>=`, `array-contains`, `array-contains-any`, `in`, `not-in`
+
+#### firestore_set
+| パラメータ | 型 | 必須 | 説明 |
+|------------|------|------|------|
+| `path` | string | Yes | ドキュメントパス（例: `users/user123`） |
+| `data` | object | Yes | 書き込むドキュメントデータ |
+| `merge` | boolean | No | 既存データとマージ（デフォルト: false） |
+
+#### firestore_update
+| パラメータ | 型 | 必須 | 説明 |
+|------------|------|------|------|
+| `path` | string | Yes | ドキュメントパス（存在必須） |
+| `data` | object | Yes | 更新するフィールド（ドット記法対応） |
+
+#### firestore_delete
+| パラメータ | 型 | 必須 | 説明 |
+|------------|------|------|------|
+| `path` | string | Yes | ドキュメントまたはコレクションパス |
+| `recursive` | boolean | No | コレクション内の全ドキュメントを削除（デフォルト: false） |
+
+#### firestore_collections
+| パラメータ | 型 | 必須 | 説明 |
+|------------|------|------|------|
+| `documentPath` | string | No | サブコレクション取得用のドキュメントパス。省略でルートコレクション。 |
+
+#### firestore_export
+| パラメータ | 型 | 必須 | 説明 |
+|------------|------|------|------|
+| `path` | string | Yes | エクスポートするコレクションパス |
+| `recursive` | boolean | No | サブコレクションを含める（デフォルト: false） |
+| `limit` | number | No | エクスポートする最大ドキュメント数 |
+
+#### firestore_import
+| パラメータ | 型 | 必須 | 説明 |
+|------------|------|------|------|
+| `path` | string | Yes | インポート先のコレクションパス |
+| `documents` | array | Yes | `{id?, data}` オブジェクトの配列 |
+| `merge` | boolean | No | 既存ドキュメントとマージ（デフォルト: false） |
+
+### MCP 使用例
+
+```
+# Claude にドキュメント取得を依頼
+「users/user123 のユーザードキュメントを取得して」
+
+# フィルタ付きクエリ
+「status が active のユーザーを createdAt の降順で10件取得して」
+
+# ドキュメント作成
+「users/newuser に name が 'John'、email が 'john@example.com' のユーザーを作成して」
+
+# コレクション削除
+「temp コレクションの全ドキュメントを削除して」
+
+# データエクスポート
+「orders コレクションをサブコレクション含めてエクスポートして」
+```
+
 ## 開発
 
 ### ビルド
