@@ -158,7 +158,7 @@ npm link
 ユーザーに以下を報告：
 - リリースバージョン
 - GitHubリリースURL
-- **--publish指定時のみ**: npmパッケージURL: https://www.npmjs.com/package/firex
+- **--publish指定時のみ**: npmパッケージURL: https://www.npmjs.com/package/@hummer98/firex
 - **--local指定時のみ**: ローカルインストール完了の旨
 - 主な変更内容のサマリー
 

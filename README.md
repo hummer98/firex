@@ -22,13 +22,13 @@ Firebase Firestore CLI tool for command-line operations.
 
 ```bash
 # Using npx (recommended - no installation required)
-npx firex [command]
+npx @hummer98/firex [command]
 
 # Global installation
-npm install -g firex
+npm install -g @hummer98/firex
 
 # Or with pnpm
-pnpm add -g firex
+pnpm add -g @hummer98/firex
 ```
 
 ## Quick Start

@@ -22,13 +22,13 @@ Firebase Firestore のコマンドライン操作ツール
 
 ```bash
 # npx を使用（推奨 - インストール不要）
-npx firex [command]
+npx @hummer98/firex [command]
 
 # グローバルインストール
-npm install -g firex
+npm install -g @hummer98/firex
 
 # pnpm の場合
-pnpm add -g firex
+pnpm add -g @hummer98/firex
 ```
 
 ## クイックスタート
