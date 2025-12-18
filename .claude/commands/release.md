@@ -9,6 +9,7 @@ allowed-tools: Bash(git *), Bash(npm *), Bash(gh *), Read, Edit
 
 **引数**: `$ARGUMENTS`
 - `--publish`: npm publishを実行する（省略時はGitタグ作成まで）
+- `--local`: ローカルにグローバルインストール（npm link）を実行する
 
 ## 実行手順
 
@@ -139,12 +140,26 @@ npm publish
 - このステップをスキップ
 - ユーザーに「npm publishはスキップされました。公開する場合は `/release --publish` を実行してください」と通知
 
-### 9. 完了報告
+### 9. ローカルインストール（--local指定時のみ）
+
+**`--local` が指定されている場合のみ実行:**
+
+```bash
+npm link
+```
+
+これにより、ローカル環境で `firex` コマンドがグローバルに使用可能になります。
+
+**`--local` が指定されていない場合:**
+- このステップをスキップ
+
+### 10. 完了報告
 
 ユーザーに以下を報告：
 - リリースバージョン
 - GitHubリリースURL
 - **--publish指定時のみ**: npmパッケージURL: https://www.npmjs.com/package/firex
+- **--local指定時のみ**: ローカルインストール完了の旨
 - 主な変更内容のサマリー
 
 ## 注意事項
@@ -186,6 +201,8 @@ npm version patch  # または minor / major
 gh release create vX.Y.Z --title "firex vX.Y.Z" --notes "..."
 
 # npm公開も含める場合
-# 上記に加えて:
 npm publish
+
+# ローカルインストール
+npm link
 ```

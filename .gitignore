@@ -67,5 +67,8 @@ temp/
 emulator-data/
 firestore_export/
 
+# AI development tools runtime logs
+.kiro/runtime/
+
 # NPM package artifacts
 *.tgz
