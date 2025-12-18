@@ -27,7 +27,11 @@ describe('ImportCommand', () => {
 
   describe('command configuration', () => {
     it('should have correct description', () => {
-      expect(ImportCommand.description).toContain('インポート');
+      // Description is i18n-dependent, check for either language
+      expect(
+        ImportCommand.description.includes('インポート') ||
+        ImportCommand.description.toLowerCase().includes('import')
+      ).toBe(true);
     });
 
     it('should have file argument', () => {

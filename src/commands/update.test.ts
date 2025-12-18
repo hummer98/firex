@@ -26,7 +26,11 @@ describe('UpdateCommand', () => {
 
   describe('command configuration', () => {
     it('should have correct description', () => {
-      expect(UpdateCommand.description).toContain('部分更新');
+      // Description is i18n-dependent, check for either language
+      expect(
+        UpdateCommand.description.includes('部分更新') ||
+        UpdateCommand.description.toLowerCase().includes('update')
+      ).toBe(true);
     });
 
     it('should have document-path argument', () => {

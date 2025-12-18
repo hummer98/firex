@@ -26,7 +26,11 @@ describe('ExportCommand', () => {
 
   describe('command configuration', () => {
     it('should have correct description', () => {
-      expect(ExportCommand.description).toContain('エクスポート');
+      // Description is i18n-dependent, check for either language
+      expect(
+        ExportCommand.description.includes('エクスポート') ||
+        ExportCommand.description.toLowerCase().includes('export')
+      ).toBe(true);
     });
 
     it('should have collection argument', () => {

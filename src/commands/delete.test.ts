@@ -29,7 +29,11 @@ describe('DeleteCommand', () => {
 
   describe('command configuration', () => {
     it('should have correct description', () => {
-      expect(DeleteCommand.description).toContain('削除');
+      // Description is i18n-dependent, check for either language
+      expect(
+        DeleteCommand.description.includes('削除') ||
+        DeleteCommand.description.toLowerCase().includes('delete')
+      ).toBe(true);
     });
 
     it('should have path argument', () => {

@@ -40,7 +40,12 @@ describe('ListCommand', () => {
 
   describe('command configuration', () => {
     it('should have correct description', () => {
-      expect(ListCommand.description).toContain('一覧');
+      // Description is i18n-dependent, check for either language
+      expect(
+        ListCommand.description.includes('一覧') ||
+        ListCommand.description.toLowerCase().includes('list') ||
+        ListCommand.description.toLowerCase().includes('document')
+      ).toBe(true);
     });
 
     it('should have collection-path argument', () => {

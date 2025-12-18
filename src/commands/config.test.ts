@@ -19,7 +19,11 @@ describe('ConfigCommand', () => {
 
   describe('command configuration', () => {
     it('should have correct description', () => {
-      expect(ConfigCommand.description).toContain('設定');
+      // Description is i18n-dependent, check for either language
+      expect(
+        ConfigCommand.description.includes('設定') ||
+        ConfigCommand.description.toLowerCase().includes('config')
+      ).toBe(true);
     });
 
     it('should have show flag', () => {
