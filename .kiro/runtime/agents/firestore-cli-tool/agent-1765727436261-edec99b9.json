@@ -1,0 +1,11 @@
+{
+  "agentId": "agent-1765727436261-edec99b9",
+  "specId": "firestore-cli-tool",
+  "phase": "requirements",
+  "pid": 55954,
+  "sessionId": "d03c20da-c5d4-4d30-b9c4-f5c3aa9d979e",
+  "status": "completed",
+  "startedAt": "2025-12-14T15:50:36.261Z",
+  "lastActivityAt": "2025-12-14T15:53:29.577Z",
+  "command": "claude -p --verbose --output-format stream-json /kiro:spec-requirements firestore-cli-tool"
+}

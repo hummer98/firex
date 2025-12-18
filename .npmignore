@@ -1,0 +1,67 @@
+# Source files
+src/
+tsconfig.json
+tsup.config.ts
+vitest.config.ts
+
+# Test files
+**/*.test.ts
+**/*.spec.ts
+__tests__/
+coverage/
+
+# Development files
+.kiro/
+.claude/
+.vscode/
+.idea/
+
+# Git files
+.git/
+.gitignore
+
+# Documentation source
+docs/
+
+# CI/CD
+.github/
+
+# Environment and credentials
+.env
+.env.*
+*.pem
+*-service-account.json
+service-account*.json
+firebase-adminsdk*.json
+credentials*.json
+
+# Build artifacts (not dist/)
+*.log
+*.tgz
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Docker
+docker-compose.yml
+Dockerfile
+.dockerignore
+
+# Firebase
+firebase.json
+.firebase/
+.firebaserc
+firestore.rules
+firestore.indexes.json
+
+# Emulator data
+emulator-data/
+
+# Temporary files
+*.tmp
+*.temp
+.firex-import-progress.json

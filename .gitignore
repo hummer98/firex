@@ -1,0 +1,71 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+*.tsbuildinfo
+
+# Test coverage
+coverage/
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Service account keys (SECURITY - CRITICAL)
+# These patterns protect against accidental credential commits
+*-service-account.json
+*-serviceaccount.json
+*-firebase-adminsdk-*.json
+service-account-*.json
+serviceAccountKey.json
+service_account.json
+service-account.json
+firebase-adminsdk*.json
+credentials.json
+credentials-*.json
+google-credentials*.json
+gcp-*.json
+*.pem
+*.p12
+
+# Export files (may contain sensitive data)
+export-*.json
+backup-*.json
+*.export.json
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs (may contain sensitive debug info)
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+logs/
+firex.log
+
+# Import progress files
+.firex-import-progress.json
+
+# Temporary files
+*.tmp
+.tmp/
+temp/
+
+# Firebase emulator data
+.firebase/
+emulator-data/
+firestore_export/
+
+# NPM package artifacts
+*.tgz

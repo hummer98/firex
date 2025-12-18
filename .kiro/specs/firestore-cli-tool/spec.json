@@ -1,0 +1,38 @@
+{
+  "feature_name": "firestore-cli-tool",
+  "created_at": "2025-12-15T08:39:04Z",
+  "updated_at": "2025-12-16T15:25:55.155Z",
+  "language": "ja",
+  "phase": "implementation-in-progress",
+  "approvals": {
+    "requirements": {
+      "generated": true,
+      "approved": true
+    },
+    "design": {
+      "generated": true,
+      "approved": true
+    },
+    "tasks": {
+      "generated": true,
+      "approved": true
+    }
+  },
+  "ready_for_implementation": true,
+  "documentReview": {
+    "rounds": 2,
+    "status": "pending",
+    "roundDetails": [
+      {
+        "roundNumber": 1,
+        "status": "reply_complete",
+        "fixApplied": true
+      },
+      {
+        "roundNumber": 2,
+        "status": "reply_complete",
+        "fixApplied": true
+      }
+    ]
+  }
+}

@@ -1,0 +1,101 @@
+{
+  "name": "firex",
+  "version": "0.1.1",
+  "description": "Firebase Firestore CLI tool for command-line operations - Read, write, query, and manage Firestore data from your terminal",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "bin": {
+    "firex": "bin/run.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "vitest",
+    "test:coverage": "vitest --coverage",
+    "test:integration": "FIRESTORE_EMULATOR_HOST=localhost:8080 vitest --run src/integration/",
+    "test:e2e": "FIRESTORE_EMULATOR_HOST=localhost:8080 vitest --run src/e2e/",
+    "test:perf": "FIRESTORE_EMULATOR_HOST=localhost:8080 vitest --run src/performance/",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src --ext .ts",
+    "lint:fix": "eslint src --ext .ts --fix",
+    "prepare": "npm run build",
+    "prepublishOnly": "npm run test && npm run build",
+    "version": "npm run build",
+    "postversion": "git push && git push --tags",
+    "release:patch": "npm version patch",
+    "release:minor": "npm version minor",
+    "release:major": "npm version major",
+    "emulator:start": "firebase emulators:start --only firestore",
+    "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s"
+  },
+  "keywords": [
+    "firebase",
+    "firestore",
+    "cli",
+    "database",
+    "command-line",
+    "nosql",
+    "google-cloud",
+    "firebase-admin",
+    "data-management",
+    "crud",
+    "query",
+    "export",
+    "import",
+    "backup",
+    "realtime"
+  ],
+  "author": "",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-org/firex.git"
+  },
+  "bugs": {
+    "url": "https://github.com/your-org/firex/issues"
+  },
+  "homepage": "https://github.com/your-org/firex#readme",
+  "directories": {
+    "doc": "docs"
+  },
+  "files": [
+    "dist",
+    "bin",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md"
+  ],
+  "oclif": {
+    "bin": "firex",
+    "dirname": "firex",
+    "commands": "./dist/commands",
+    "topicSeparator": " "
+  },
+  "dependencies": {
+    "@inquirer/prompts": "^7.10.1",
+    "@oclif/core": "^3.27.0",
+    "cli-table3": "^0.6.5",
+    "cosmiconfig": "^9.0.0",
+    "firebase-admin": "^13.6.0",
+    "js-yaml": "^4.1.1",
+    "neverthrow": "^7.2.0",
+    "oclif": "^4.17.0",
+    "yaml": "^2.8.2"
+  },
+  "devDependencies": {
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "^20.19.27",
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "@typescript-eslint/parser": "^6.21.0",
+    "@vitest/coverage-v8": "^4.0.15",
+    "conventional-changelog-cli": "^5.0.0",
+    "eslint": "^8.57.1",
+    "tsup": "^8.5.1",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.15"
+  }
+}

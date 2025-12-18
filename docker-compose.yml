@@ -1,0 +1,23 @@
+# Docker Compose configuration for Firestore Emulator
+# Used for integration and E2E testing
+
+version: '3.8'
+
+services:
+  firestore-emulator:
+    image: google/cloud-sdk:latest
+    command: >
+      bash -c "
+        gcloud components install cloud-firestore-emulator --quiet &&
+        gcloud beta emulators firestore start --host-port=0.0.0.0:8080
+      "
+    ports:
+      - "8080:8080"
+    environment:
+      - CLOUDSDK_CORE_PROJECT=test-project
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/"]
+      interval: 5s
+      timeout: 10s
+      retries: 5
+      start_period: 30s

@@ -1,0 +1,11 @@
+{
+  "agentId": "agent-1765870074524-cf6c0e2d",
+  "specId": "firestore-cli-tool",
+  "phase": "document-review",
+  "pid": 70591,
+  "sessionId": "87318114-849b-42f2-9481-22d55447516b",
+  "status": "completed",
+  "startedAt": "2025-12-16T07:27:54.524Z",
+  "lastActivityAt": "2025-12-16T07:30:44.577Z",
+  "command": "claude -p --verbose --output-format stream-json /kiro:document-review firestore-cli-tool"
+}
