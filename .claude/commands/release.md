@@ -1,5 +1,5 @@
 ---
-description: firex CLIの新バージョンをリリース（--publishでnpm公開）
+description: firex CLIの新バージョンをリリース
 allowed-tools: Bash(git *), Bash(npm *), Bash(gh *), Read, Edit
 ---
 
@@ -8,7 +8,6 @@ allowed-tools: Bash(git *), Bash(npm *), Bash(gh *), Read, Edit
 このコマンドは、firex CLIの新バージョンをリリースするための一連の手順を自動化します。
 
 **引数**: `$ARGUMENTS`
-- `--publish`: npm publishを実行する（省略時はGitタグ作成まで）
 - `--local`: ローカルにグローバルインストール（npm link）を実行する
 
 ## 実行手順
@@ -126,21 +125,7 @@ gh release create vX.Y.Z \
   --notes "[CHANGELOGから抽出したリリースノート]"
 ```
 
-### 8. npmへの公開（--publish指定時のみ）
-
-**`--publish` が指定されている場合のみ実行:**
-
-```bash
-npm publish
-```
-
-**注意**: 初回公開時やスコープ付きパッケージの場合は `npm publish --access public` が必要な場合があります。
-
-**`--publish` が指定されていない場合:**
-- このステップをスキップ
-- ユーザーに「npm publishはスキップされました。公開する場合は `/release --publish` を実行してください」と通知
-
-### 9. ローカルインストール（--local指定時のみ）
+### 8. ローカルインストール（--local指定時のみ）
 
 **`--local` が指定されている場合のみ実行:**
 
@@ -153,14 +138,17 @@ npm link
 **`--local` が指定されていない場合:**
 - このステップをスキップ
 
-### 10. 完了報告
+### 9. 完了報告
 
 ユーザーに以下を報告：
 - リリースバージョン
 - GitHubリリースURL
-- **--publish指定時のみ**: npmパッケージURL: https://www.npmjs.com/package/@hummer98/firex
 - **--local指定時のみ**: ローカルインストール完了の旨
 - 主な変更内容のサマリー
+- npm公開用コマンド（手動実行用）:
+  ```bash
+  npm publish
+  ```
 
 ## 注意事項
 
@@ -168,7 +156,7 @@ npm link
 - 必ずmasterブランチで実行してください
 - リリース作成前にテストが通っていることを確認してください
 - バージョン番号は手動で確認・承認を得てから進めてください
-- npm publish時はnpm loginが完了していることを確認してください
+- npm publishは手動で実行してください（npm loginが完了していることを確認）
 
 ## エラー処理
 
@@ -177,7 +165,7 @@ npm link
 2. 修正方法を提案
 3. 必要に応じてロールバック手順を案内
 
-### npm publish失敗時のロールバック
+### リリース失敗時のロールバック
 
 ```bash
 # ローカルタグの削除
@@ -193,16 +181,16 @@ git reset --hard HEAD~1
 ## クイックリファレンス
 
 ```bash
-# タグ作成まで（npm publishなし）
+# リリース手順
 npm test && npm run typecheck
 # CHANGELOG.md を編集
 git add CHANGELOG.md && git commit -m "docs: update CHANGELOG for vX.Y.Z"
 npm version patch  # または minor / major
 gh release create vX.Y.Z --title "firex vX.Y.Z" --notes "..."
 
-# npm公開も含める場合
+# npm公開（手動で実行）
 npm publish
 
-# ローカルインストール
+# ローカルインストール（オプション）
 npm link
 ```
