@@ -368,6 +368,10 @@ firex list users --profile staging
 | `FIREX_VERBOSE` | 詳細出力を有効化（true/false） |
 | `FIREX_LOG_FILE` | ログファイルのパス |
 
+> **Note:** firex は以下の [Firebase Admin SDK 標準環境変数](https://firebase.google.com/docs/admin/setup)にも対応しています：
+> - `GOOGLE_CLOUD_PROJECT` - プロジェクト ID（`FIRESTORE_PROJECT_ID` 未設定時に使用）
+> - `FIREBASE_CONFIG` - Firebase 設定（JSON 文字列または JSON ファイルパス、Cloud Functions や App Hosting 環境では自動設定）
+
 ## トラブルシューティング
 
 ### 認証エラー

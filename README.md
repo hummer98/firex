@@ -368,6 +368,10 @@ firex list users --profile staging
 | `FIREX_VERBOSE` | Enable verbose output (true/false) |
 | `FIREX_LOG_FILE` | Path to log file |
 
+> **Note:** firex also respects the following [Firebase Admin SDK standard environment variables](https://firebase.google.com/docs/admin/setup):
+> - `GOOGLE_CLOUD_PROJECT` - Project ID (used when `FIRESTORE_PROJECT_ID` is not set)
+> - `FIREBASE_CONFIG` - Firebase configuration as JSON string or path to JSON file (auto-set in Cloud Functions and App Hosting environments)
+
 ## Troubleshooting
 
 ### Authentication Errors
