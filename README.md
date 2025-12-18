@@ -6,7 +6,23 @@ English | **[日本語](README-jp.md)**
 
 Firebase Firestore CLI tool for command-line operations.
 
-`firex` is a powerful command-line interface tool for managing Firebase Firestore databases. It allows developers to perform CRUD operations, execute queries, and manage data efficiently without relying on the Firebase Console GUI.
+`firex` is a powerful command-line interface tool for managing Firebase Firestore databases. It allows developers to perform CRUD operations, execute queries, and manage data efficiently without relying on the Firebase Console GUI. It also works as an **MCP (Model Context Protocol) server**, enabling AI assistants like Claude to interact with Firestore directly.
+
+## Table of Contents
+
+- [Features](#features)
+- [Installation](#installation)
+- [Quick Start](#quick-start)
+- [Command Reference](#command-reference)
+- [Configuration File](#configuration-file)
+- [Environment Variables](#environment-variables)
+- [Troubleshooting](#troubleshooting)
+- [Security Considerations](#security-considerations)
+- [MCP Server Integration](#mcp-server-integration)
+- [Development](#development)
+- [Requirements](#requirements)
+- [License](#license)
+- [Contributing](#contributing)
 
 ## Features
 
@@ -428,24 +444,24 @@ firex can run as an MCP (Model Context Protocol) server, enabling AI assistants 
 
 ```bash
 # Basic setup
-claude mcp add firex -- node /path/to/firex/bin/run.js mcp
+claude mcp add firex -- npx @hummer98/firex mcp
 
 # With project ID and credentials
 claude mcp add firex \
   -e FIRESTORE_PROJECT_ID=your-project-id \
   -e GOOGLE_APPLICATION_CREDENTIALS=/path/to/service-account.json \
-  -- node /path/to/firex/bin/run.js mcp
+  -- npx @hummer98/firex mcp
 
 # Multiple projects (register with different names)
 claude mcp add firex-prod \
   -e FIRESTORE_PROJECT_ID=prod-project \
   -e GOOGLE_APPLICATION_CREDENTIALS=/path/to/prod-key.json \
-  -- node /path/to/firex/bin/run.js mcp
+  -- npx @hummer98/firex mcp
 
 claude mcp add firex-dev \
   -e FIRESTORE_PROJECT_ID=dev-project \
   -e GOOGLE_APPLICATION_CREDENTIALS=/path/to/dev-key.json \
-  -- node /path/to/firex/bin/run.js mcp
+  -- npx @hummer98/firex mcp
 ```
 
 ### Setup with Claude Desktop
@@ -456,8 +472,8 @@ Add to your Claude Desktop configuration (`~/.config/claude/claude_desktop_confi
 {
   "mcpServers": {
     "firex": {
-      "command": "node",
-      "args": ["/path/to/firex/bin/run.js", "mcp"],
+      "command": "npx",
+      "args": ["@hummer98/firex", "mcp"],
       "env": {
         "FIRESTORE_PROJECT_ID": "your-project-id",
         "GOOGLE_APPLICATION_CREDENTIALS": "/path/to/service-account.json"

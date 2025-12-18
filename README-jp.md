@@ -6,7 +6,23 @@
 
 Firebase Firestore のコマンドライン操作ツール
 
-`firex` は Firebase Firestore データベースを管理するための強力なコマンドラインインターフェースツールです。Firebase Console の GUI に頼らずに、CRUD 操作やクエリの実行、データ管理を効率的に行うことができます。
+`firex` は Firebase Firestore データベースを管理するための強力なコマンドラインインターフェースツールです。Firebase Console の GUI に頼らずに、CRUD 操作やクエリの実行、データ管理を効率的に行うことができます。また、**MCP（Model Context Protocol）サーバー**としても動作し、Claude などの AI アシスタントが Firestore を直接操作できます。
+
+## 目次
+
+- [機能](#機能)
+- [インストール](#インストール)
+- [クイックスタート](#クイックスタート)
+- [コマンドリファレンス](#コマンドリファレンス)
+- [設定ファイル](#設定ファイル)
+- [環境変数](#環境変数)
+- [トラブルシューティング](#トラブルシューティング)
+- [セキュリティに関する注意](#セキュリティに関する注意)
+- [MCP サーバー連携](#mcp-サーバー連携)
+- [開発](#開発)
+- [要件](#要件)
+- [ライセンス](#ライセンス)
+- [コントリビューション](#コントリビューション)
 
 ## 機能
 
@@ -428,24 +444,24 @@ firex は MCP（Model Context Protocol）サーバーとして動作し、Claude
 
 ```bash
 # 基本セットアップ
-claude mcp add firex -- node /path/to/firex/bin/run.js mcp
+claude mcp add firex -- npx @hummer98/firex mcp
 
 # プロジェクト ID と認証情報を指定
 claude mcp add firex \
   -e FIRESTORE_PROJECT_ID=your-project-id \
   -e GOOGLE_APPLICATION_CREDENTIALS=/path/to/service-account.json \
-  -- node /path/to/firex/bin/run.js mcp
+  -- npx @hummer98/firex mcp
 
 # 複数プロジェクト（別名で登録）
 claude mcp add firex-prod \
   -e FIRESTORE_PROJECT_ID=prod-project \
   -e GOOGLE_APPLICATION_CREDENTIALS=/path/to/prod-key.json \
-  -- node /path/to/firex/bin/run.js mcp
+  -- npx @hummer98/firex mcp
 
 claude mcp add firex-dev \
   -e FIRESTORE_PROJECT_ID=dev-project \
   -e GOOGLE_APPLICATION_CREDENTIALS=/path/to/dev-key.json \
-  -- node /path/to/firex/bin/run.js mcp
+  -- npx @hummer98/firex mcp
 ```
 
 ### Claude Desktop でのセットアップ
@@ -456,8 +472,8 @@ Claude Desktop の設定ファイル（`~/.config/claude/claude_desktop_config.j
 {
   "mcpServers": {
     "firex": {
-      "command": "node",
-      "args": ["/path/to/firex/bin/run.js", "mcp"],
+      "command": "npx",
+      "args": ["@hummer98/firex", "mcp"],
       "env": {
         "FIRESTORE_PROJECT_ID": "your-project-id",
         "GOOGLE_APPLICATION_CREDENTIALS": "/path/to/service-account.json"
