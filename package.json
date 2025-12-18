@@ -1,5 +1,5 @@
 {
-  "name": "firex",
+  "name": "@hummer98/firex",
   "version": "0.1.1",
   "description": "Firebase Firestore CLI tool for command-line operations - Read, write, query, and manage Firestore data from your terminal",
   "main": "dist/index.js",
