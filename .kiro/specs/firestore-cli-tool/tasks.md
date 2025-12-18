@@ -6,7 +6,7 @@
 
 ## タスクリスト
 
-- [ ] 1. プロジェクトセットアップと基盤構築
+- [x] 1. プロジェクトセットアップと基盤構築
 - [x] 1.1 (P) プロジェクト初期化とビルド環境構成
   - TypeScriptプロジェクト初期化（tsconfig.json、package.json）
   - tsupビルド設定（CJS/ESM両対応）
@@ -22,7 +22,7 @@
   - 共有型定義ファイル（shared/types.ts）作成
   - _Requirements: 1.1, 1.2, 1.5_
 
-- [ ] 2. Application Layer実装
+- [x] 2. Application Layer実装
 - [x] 2.1 ConfigService実装
   - cosmiconfigによる設定ファイル検索・読み込み機能
   - 環境変数読み取りとCLIフラグマージロジック（優先順位: CLIフラグ > 環境変数 > 設定ファイル）
@@ -53,7 +53,7 @@
   - クレデンシャルマスキング実装
   - _Requirements: 8.2, 8.3_
 
-- [ ] 3. Domain Layer - Firestore操作実装
+- [x] 3. Domain Layer - Firestore操作実装
 - [x] 3.1 FirestoreOps実装
   - ドキュメント取得（getDocument）とメタデータ抽出
   - コレクション一覧取得（listDocuments）
@@ -96,7 +96,7 @@
   - 初期出力制御（showInitialパラメータ）
   - _Requirements: 2.5, 2.6, 5.9, 5.10, 5.11_
 
-- [ ] 4. Presentation Layer - 出力とファイルI/O
+- [x] 4. Presentation Layer - 出力とファイルI/O
 - [x] 4.1 (P) OutputFormatter実装
   - JSON/YAML/Table形式変換
   - メタデータ整形表示
@@ -291,8 +291,8 @@
   - `topicSeparator`: " "
   - _Requirements: 10.1, 10.2, 10.3, 10.4, 10.5, 10.6_
   - **Acceptance Criteria**:
-    - [ ] package.jsonに`oclif`セクションが存在する
-    - [ ] `oclif.commands`が`./dist/commands`を指している
+    - [x] package.jsonに`oclif`セクションが存在する
+    - [x] `oclif.commands`が`./dist/commands`を指している
   - **Implementation**: `package.json`
 
 - [x] 10.2 CLIエントリーポイント実装（src/index.ts）
@@ -301,9 +301,9 @@
   - 既存のconsole.logプレースホルダーを削除
   - _Requirements: 10.1, 10.2, 10.4_
   - **Acceptance Criteria**:
-    - [ ] src/index.tsで`@oclif/core`の`execute`を呼び出している
-    - [ ] `npx firex --help`でコマンド一覧が表示される
-    - [ ] `npx firex --version`でバージョンが表示される
+    - [x] src/index.tsで`@oclif/core`の`execute`を呼び出している
+    - [x] `npx firex --help`でコマンド一覧が表示される
+    - [x] `npx firex --version`でバージョンが表示される
   - **Implementation**: `src/index.ts`
 
 - [x] 10.3 oclif統合動作検証
@@ -314,9 +314,9 @@
   - 全コマンド（get, set, update, delete, list, export, import, config, examples）の認識確認
   - _Requirements: 10.1, 10.2, 10.5_
   - **Acceptance Criteria**:
-    - [ ] すべてのコマンドが`--help`で表示される
-    - [ ] 各コマンドの`--help`が詳細情報を表示する
-    - [ ] 存在しないコマンドで適切なエラーメッセージが表示される
+    - [x] すべてのコマンドが`--help`で表示される
+    - [x] 各コマンドの`--help`が詳細情報を表示する
+    - [x] 存在しないコマンドで適切なエラーメッセージが表示される
   - **Implementation**: E2Eテストまたは手動検証
 
 ## タスク実行ガイドライン
@@ -363,9 +363,9 @@
 
 プロジェクト全体のリリース前に、以下を確認する必要があります：
 
-- [ ] `npm run build` が成功する
-- [ ] `npm test` が全テスト通過する
-- [ ] `node bin/run.js --help` でコマンド一覧が表示される
-- [ ] `node bin/run.js --version` でバージョンが表示される
-- [ ] 各コマンド（get, set, list, delete, export, import, config, examples, update）が `--help` で説明を表示する
-- [ ] Firestore Emulatorに接続して基本操作（get, set, list）が動作する
+- [x] `npm run build` が成功する
+- [x] `npm test` が全テスト通過する
+- [x] `node bin/run.js --help` でコマンド一覧が表示される
+- [x] `node bin/run.js --version` でバージョンが表示される
+- [x] 各コマンド（get, set, list, delete, export, import, config, examples, update）が `--help` で説明を表示する
+- [x] Firestore Emulatorに接続して基本操作（get, set, list）が動作する
