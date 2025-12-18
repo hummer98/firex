@@ -65,6 +65,18 @@ describe('GetCommand', () => {
     it('should have show-initial flag', () => {
       expect(GetCommand.flags['show-initial']).toBeDefined();
     });
+
+    it('should have quiet flag', () => {
+      expect(GetCommand.flags.quiet).toBeDefined();
+    });
+
+    it('should have quiet flag with short alias -q', () => {
+      expect(GetCommand.flags.quiet.char).toBe('q');
+    });
+
+    it('should default quiet to false', () => {
+      expect(GetCommand.flags.quiet.default).toBe(false);
+    });
   });
 
   describe('document path validation', () => {

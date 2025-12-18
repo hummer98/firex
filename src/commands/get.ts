@@ -39,6 +39,11 @@ export class GetCommand extends BaseCommand {
       description: t('flag.showInitial'),
       default: false,
     }),
+    quiet: Flags.boolean({
+      char: 'q',
+      description: t('flag.quiet'),
+      default: false,
+    }),
   };
 
   async run(): Promise<void> {
@@ -47,6 +52,7 @@ export class GetCommand extends BaseCommand {
     const format = (flags.format || 'json') as OutputFormat;
     const watch = flags.watch;
     const showInitial = flags['show-initial'];
+    const quiet = flags.quiet;
 
     // Initialize config
     const initResult = await this.initialize();
@@ -86,7 +92,7 @@ export class GetCommand extends BaseCommand {
       );
     } else {
       // Single fetch mode
-      await this.fetchDocument(firestoreOps, documentPath, format, outputFormatter);
+      await this.fetchDocument(firestoreOps, documentPath, format, outputFormatter, quiet);
     }
   }
 
@@ -97,7 +103,8 @@ export class GetCommand extends BaseCommand {
     firestoreOps: FirestoreOps,
     documentPath: string,
     format: OutputFormat,
-    outputFormatter: OutputFormatter
+    outputFormatter: OutputFormatter,
+    quiet: boolean
   ): Promise<void> {
     const result = await firestoreOps.getDocument(documentPath);
 
@@ -125,11 +132,13 @@ export class GetCommand extends BaseCommand {
 
     console.log(formatResult.value);
 
-    // Also display metadata separately
-    const metadataResult = outputFormatter.formatMetadata(document.metadata);
-    if (metadataResult.isOk()) {
-      console.log('\n--- Metadata ---');
-      console.log(metadataResult.value);
+    // Also display metadata separately (unless quiet mode)
+    if (!quiet) {
+      const metadataResult = outputFormatter.formatMetadata(document.metadata);
+      if (metadataResult.isOk()) {
+        console.log('\n--- Metadata ---');
+        console.log(metadataResult.value);
+      }
     }
   }
 

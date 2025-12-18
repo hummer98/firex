@@ -74,6 +74,10 @@ describe('ListCommand', () => {
       expect(ListCommand.flags.verbose).toBeDefined();
       expect(ListCommand.flags.format).toBeDefined();
     });
+
+    it('should have quiet flag', () => {
+      expect(ListCommand.flags.quiet).toBeDefined();
+    });
   });
 
   describe('where condition parsing', () => {
@@ -200,6 +204,17 @@ describe('ListCommand', () => {
         executionTimeMs: 123,
       };
       expect(queryResult.executionTimeMs).toBe(123);
+    });
+  });
+
+  describe('quiet mode', () => {
+    it('should have quiet flag with short alias -q', () => {
+      expect(ListCommand.flags.quiet).toBeDefined();
+      expect(ListCommand.flags.quiet.char).toBe('q');
+    });
+
+    it('should default quiet to false', () => {
+      expect(ListCommand.flags.quiet.default).toBe(false);
     });
   });
 });

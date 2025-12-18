@@ -47,6 +47,7 @@ export interface Messages {
   'flag.includeSubcollections': string;
   'flag.batchSize': string;
   'flag.show': string;
+  'flag.quiet': string;
 
   // Success messages
   'msg.documentCreated': string;
@@ -134,6 +135,7 @@ const jaMessages: Messages = {
   'flag.includeSubcollections': 'サブコレクションを含める',
   'flag.batchSize': 'バッチサイズ (デフォルト: 500)',
   'flag.show': '現在の設定を表示する',
+  'flag.quiet': 'メタ情報を非表示にして純粋なデータのみ出力',
 
   // Success messages
   'msg.documentCreated': 'ドキュメントを作成しました',
@@ -221,6 +223,7 @@ const enMessages: Messages = {
   'flag.includeSubcollections': 'Include subcollections',
   'flag.batchSize': 'Batch size (default: 500)',
   'flag.show': 'Show current configuration',
+  'flag.quiet': 'Suppress meta information and output only pure data',
 
   // Success messages
   'msg.documentCreated': 'Document created',

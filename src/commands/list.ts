@@ -54,6 +54,11 @@ export class ListCommand extends BaseCommand {
       description: t('flag.showInitial'),
       default: false,
     }),
+    quiet: Flags.boolean({
+      char: 'q',
+      description: t('flag.quiet'),
+      default: false,
+    }),
   };
 
   async run(): Promise<void> {
@@ -65,6 +70,7 @@ export class ListCommand extends BaseCommand {
     const limit = flags.limit;
     const watch = flags.watch;
     const showInitial = flags['show-initial'];
+    const quiet = flags.quiet;
 
     // Initialize config
     const initResult = await this.initialize();
@@ -138,7 +144,8 @@ export class ListCommand extends BaseCommand {
         parsedOrderBy,
         effectiveLimit,
         format,
-        outputFormatter
+        outputFormatter,
+        quiet
       );
     }
   }
@@ -219,7 +226,8 @@ export class ListCommand extends BaseCommand {
     orderBy: OrderBy[],
     limit: number,
     format: OutputFormat,
-    outputFormatter: OutputFormatter
+    outputFormatter: OutputFormatter,
+    quiet: boolean
   ): Promise<void> {
     const queryBuilder = new QueryBuilder(firestore);
 
@@ -239,8 +247,10 @@ export class ListCommand extends BaseCommand {
     const { documents, executionTimeMs } = result.value;
 
     if (documents.length === 0) {
-      console.log('No matching documents found');
-      console.log(`\nExecution time: ${executionTimeMs}ms`);
+      if (!quiet) {
+        console.log('No matching documents found');
+        console.log(`\nExecution time: ${executionTimeMs}ms`);
+      }
       return;
     }
 
@@ -253,8 +263,10 @@ export class ListCommand extends BaseCommand {
     }
 
     console.log(formatResult.value);
-    console.log(`\nFound: ${documents.length} documents`);
-    console.log(`Execution time: ${executionTimeMs}ms`);
+    if (!quiet) {
+      console.log(`\nFound: ${documents.length} documents`);
+      console.log(`Execution time: ${executionTimeMs}ms`);
+    }
   }
 
   /**
