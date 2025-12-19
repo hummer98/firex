@@ -48,9 +48,10 @@ describe('ListCommand', () => {
       ).toBe(true);
     });
 
-    it('should have collection-path argument', () => {
+    it('should have optional collection-path argument', () => {
       expect(ListCommand.args).toBeDefined();
       expect(ListCommand.args.collectionPath).toBeDefined();
+      expect(ListCommand.args.collectionPath.required).toBe(false);
     });
 
     it('should have where flag', () => {
@@ -215,6 +216,29 @@ describe('ListCommand', () => {
 
     it('should default quiet to false', () => {
       expect(ListCommand.flags.quiet.default).toBe(false);
+    });
+  });
+
+  describe('no path (list root collections)', () => {
+    it('should have example for list without path', () => {
+      const examples = ListCommand.examples as string[];
+      const hasNoPathExample = examples.some(
+        (ex) => ex.includes('list') && !ex.includes('list ') || ex.endsWith(' list')
+      );
+      expect(hasNoPathExample).toBe(true);
+    });
+
+    it('should format root collections output', () => {
+      const formatter = new OutputFormatter();
+      const collections = ['users', 'posts', 'orders'];
+      const result = formatter.formatCollections(collections, 'json');
+
+      expect(result.isOk()).toBe(true);
+      if (result.isOk()) {
+        const parsed = JSON.parse(result.value);
+        expect(parsed.collections).toEqual(['users', 'posts', 'orders']);
+        expect(parsed.count).toBe(3);
+      }
     });
   });
 });

@@ -16,6 +16,7 @@ export class ListCommand extends BaseCommand {
   static override description = t('cmd.list.description');
 
   static override examples = [
+    '<%= config.bin %> list',
     '<%= config.bin %> list users',
     '<%= config.bin %> list users --limit=10',
     '<%= config.bin %> list users --yaml',
@@ -28,7 +29,7 @@ export class ListCommand extends BaseCommand {
   static override args = {
     collectionPath: Args.string({
       description: t('arg.collectionPath'),
-      required: true,
+      required: false,
     }),
   };
 
@@ -90,6 +91,13 @@ export class ListCommand extends BaseCommand {
 
     const firestore = authResult.value;
     const firestoreOps = new FirestoreOps(firestore);
+    const outputFormatter = new OutputFormatter();
+
+    // No path: list root collections
+    if (!collectionPath) {
+      await this.listRootCollections(firestoreOps, format, outputFormatter, quiet);
+      return;
+    }
 
     // Validate collection path (must have odd number of segments)
     if (!firestoreOps.isCollectionPath(collectionPath)) {
@@ -122,8 +130,6 @@ export class ListCommand extends BaseCommand {
       this.handleError(parsedOrderBy.message, 'validation');
       return;
     }
-
-    const outputFormatter = new OutputFormatter();
 
     if (watch) {
       // Watch mode
@@ -326,5 +332,48 @@ export class ListCommand extends BaseCommand {
 
     // Keep the process running
     await new Promise(() => {});
+  }
+
+  /**
+   * List root-level collections (alias for `firex collections`)
+   */
+  private async listRootCollections(
+    firestoreOps: FirestoreOps,
+    format: OutputFormat,
+    outputFormatter: OutputFormatter,
+    quiet: boolean
+  ): Promise<void> {
+    const result = await firestoreOps.listRootCollections();
+
+    if (result.isErr()) {
+      this.handleError(result.error.message, 'firestore');
+      return;
+    }
+
+    const collections = result.value;
+
+    if (collections.length === 0) {
+      if (!quiet) {
+        console.log(t('msg.noCollectionsFound'));
+      }
+      const formatResult = outputFormatter.formatCollections(collections, format, { quiet });
+      if (formatResult.isOk()) {
+        console.log(formatResult.value);
+      }
+      return;
+    }
+
+    const formatResult = outputFormatter.formatCollections(collections, format, { quiet });
+
+    if (formatResult.isErr()) {
+      this.handleError(formatResult.error.message, 'unknown');
+      return;
+    }
+
+    console.log(formatResult.value);
+
+    if (!quiet) {
+      console.log(`\n${collections.length} ${t('msg.collectionsFound')}`);
+    }
   }
 }
