@@ -107,6 +107,29 @@ describe('OutputFormatter', () => {
       const result = formatter.formatDocument(complexDoc, 'json');
       expect(result.isOk()).toBe(true);
     });
+
+    it('should format document as TOON', () => {
+      const result = formatter.formatDocument(sampleDocument, 'toon');
+
+      expect(result.isOk()).toBe(true);
+      if (result.isOk()) {
+        const output = result.value;
+        expect(typeof output).toBe('string');
+        expect(output.length).toBeGreaterThan(0);
+      }
+    });
+
+    it('should format document as TOON with metadata', () => {
+      const result = formatter.formatDocument(sampleDocument, 'toon', {
+        includeMetadata: true,
+      });
+
+      expect(result.isOk()).toBe(true);
+      if (result.isOk()) {
+        const output = result.value;
+        expect(typeof output).toBe('string');
+      }
+    });
   });
 
   describe('formatDocuments', () => {
@@ -165,6 +188,43 @@ describe('OutputFormatter', () => {
       expect(result.isOk()).toBe(true);
       if (result.isOk()) {
         expect(result.value).toBe('[]');
+      }
+    });
+
+    it('should format multiple documents as TOON', () => {
+      const docs: DocumentWithMeta[] = [
+        sampleDocument,
+        {
+          data: { name: 'Jane Doe', age: 25 },
+          metadata: { id: 'user124', path: 'users/user124' },
+        },
+      ];
+
+      const result = formatter.formatDocuments(docs, 'toon');
+
+      expect(result.isOk()).toBe(true);
+      if (result.isOk()) {
+        const output = result.value;
+        expect(typeof output).toBe('string');
+        expect(output.length).toBeGreaterThan(0);
+      }
+    });
+
+    it('should produce shorter output than JSON for uniform documents in TOON format', () => {
+      const docs: DocumentWithMeta[] = [
+        { data: { name: 'John', age: 30, city: 'Tokyo' }, metadata: { id: 'u1', path: 'users/u1' } },
+        { data: { name: 'Jane', age: 25, city: 'Osaka' }, metadata: { id: 'u2', path: 'users/u2' } },
+        { data: { name: 'Bob', age: 35, city: 'Kyoto' }, metadata: { id: 'u3', path: 'users/u3' } },
+      ];
+
+      const toonResult = formatter.formatDocuments(docs, 'toon');
+      const jsonResult = formatter.formatDocuments(docs, 'json');
+
+      expect(toonResult.isOk()).toBe(true);
+      expect(jsonResult.isOk()).toBe(true);
+      if (toonResult.isOk() && jsonResult.isOk()) {
+        // TOON should be more compact for uniform arrays
+        expect(toonResult.value.length).toBeLessThan(jsonResult.value.length);
       }
     });
   });
@@ -226,6 +286,22 @@ describe('OutputFormatter', () => {
       if (result.isOk()) {
         const output = result.value;
         expect(output).toContain('added');
+      }
+    });
+
+    it('should format document change as TOON', () => {
+      const change = {
+        type: 'added' as const,
+        document: sampleDocument,
+      };
+
+      const result = formatter.formatChange(change, 'toon');
+
+      expect(result.isOk()).toBe(true);
+      if (result.isOk()) {
+        const output = result.value;
+        expect(typeof output).toBe('string');
+        expect(output.length).toBeGreaterThan(0);
       }
     });
   });
@@ -370,6 +446,29 @@ describe('OutputFormatter', () => {
       if (result.isOk()) {
         const output = result.value;
         expect(output).toContain('(No collections)');
+      }
+    });
+
+    it('should format collections as TOON', () => {
+      const collections = ['users', 'posts', 'comments'];
+      const result = formatter.formatCollections(collections, 'toon');
+
+      expect(result.isOk()).toBe(true);
+      if (result.isOk()) {
+        const output = result.value;
+        expect(typeof output).toBe('string');
+        expect(output.length).toBeGreaterThan(0);
+      }
+    });
+
+    it('should format collections as TOON with quiet mode', () => {
+      const collections = ['users', 'posts'];
+      const result = formatter.formatCollections(collections, 'toon', { quiet: true });
+
+      expect(result.isOk()).toBe(true);
+      if (result.isOk()) {
+        const output = result.value;
+        expect(typeof output).toBe('string');
       }
     });
   });

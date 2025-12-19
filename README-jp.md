@@ -18,6 +18,7 @@ Firebase Firestore のコマンドライン操作ツール
 - [環境変数](#環境変数)
 - [トラブルシューティング](#トラブルシューティング)
 - [セキュリティに関する注意](#セキュリティに関する注意)
+- [TOON 出力形式](#toon-出力形式)
 - [MCP サーバー連携](#mcp-サーバー連携)
 - [開発](#開発)
 - [要件](#要件)
@@ -30,7 +31,7 @@ Firebase Firestore のコマンドライン操作ツール
 - **コレクションクエリ**: フィルタリング、ソート、ページネーションによるドキュメント一覧表示
 - **バッチ操作**: JSON ファイルへのコレクションのインポート・エクスポート
 - **リアルタイム監視**: `--watch` フラグによるドキュメントとコレクションの変更監視
-- **複数の出力形式**: JSON、YAML、テーブル形式をサポート
+- **複数の出力形式**: JSON、YAML、テーブル、TOON形式をサポート
 - **設定プロファイル**: 複数のプロジェクト設定をサポート
 - **型安全**: TypeScript で構築された信頼性
 
@@ -129,7 +130,8 @@ firex get <document-path> [options]
 ```
 
 **オプション:**
-- `--format, -f <format>`: 出力形式（json, yaml, table）。デフォルト: json
+- `--format, -f <format>`: 出力形式（json, yaml, table, toon）。デフォルト: json
+- `--toon`: TOON形式で出力（--format=toon のエイリアス）
 - `--watch, -w`: リアルタイムでドキュメントの変更を監視
 - `--show-initial`: 監視モードで初期データを表示（デフォルト: true）
 - `--project-id <id>`: Firebase プロジェクト ID
@@ -143,6 +145,9 @@ firex get users/user123 --format json
 
 # テーブル形式でドキュメントを読み取る
 firex get users/user123 --format table
+
+# TOON 形式でドキュメントを読み取る（LLM 向けトークン効率化）
+firex get users/user123 --toon
 
 # ドキュメントの変更を監視
 firex get users/user123 --watch
@@ -161,7 +166,8 @@ firex list <collection-path> [options]
 - `--order-by, -o <field>`: ソートするフィールド
 - `--order-dir <direction>`: ソート方向（asc, desc）。デフォルト: asc
 - `--limit, -l <number>`: 返却する最大ドキュメント数。デフォルト: 100
-- `--format, -f <format>`: 出力形式（json, yaml, table）。デフォルト: json
+- `--format, -f <format>`: 出力形式（json, yaml, table, toon）。デフォルト: json
+- `--toon`: TOON形式で出力（--format=toon のエイリアス）
 - `--watch, -w`: リアルタイムでコレクションの変更を監視
 
 **例:**
@@ -177,6 +183,9 @@ firex list products --where "category==electronics" --where "price>100" --order-
 
 # コレクションの変更を監視
 firex list orders --watch
+
+# TOON 形式で一覧表示
+firex list users --toon --limit 10
 ```
 
 ### set - ドキュメント作成/更新
@@ -440,6 +449,49 @@ firex list users --profile staging
 - 本番環境ではドキュメント全体の内容をログに記録しない
 - デバッグ用に共有する前にログファイルを確認
 
+## TOON 出力形式
+
+TOON（Token-Oriented Object Notation）は、LLM 向けに最適化されたコンパクトで人間可読な JSON 互換フォーマットです。JSON と比較して 40-60% のトークン削減が可能で、意味的等価性を維持します。
+
+### なぜ TOON？
+
+- **トークン効率**: AI アシスタント使用時の API コストを削減
+- **人間可読**: 読みやすく理解しやすい
+- **JSON 互換**: JSON データと意味的に等価
+- **均一データに最適**: 同じスキーマを持つドキュメント配列で最大の効果
+
+### 使い方
+
+```bash
+# 単一ドキュメント
+firex get users/user123 --toon
+
+# 複数ドキュメント（約60%のトークン削減を実現）
+firex list users --toon --limit 100
+
+# メタデータ付き
+firex get users/user123 --toon --include-metadata
+
+# コレクション一覧
+firex collections --toon
+```
+
+### 出力例
+
+**JSON（143 バイト）:**
+```json
+[{"name":"John","age":30,"email":"john@example.com"},{"name":"Jane","age":25,"email":"jane@example.com"}]
+```
+
+**TOON（48 バイト、66% 削減）:**
+```
+[2]{name,age,email}:
+John,30,john@example.com
+Jane,25,jane@example.com
+```
+
+TOON 形式の詳細については、[TOON 仕様](https://github.com/toon-format/spec)を参照してください。
+
 ## MCP サーバー連携
 
 firex は MCP（Model Context Protocol）サーバーとして動作し、Claude などの AI アシスタントが Firestore を直接操作できるようになります。
@@ -506,6 +558,7 @@ Claude Desktop の設定ファイル（`~/.config/claude/claude_desktop_config.j
 | パラメータ | 型 | 必須 | 説明 |
 |------------|------|------|------|
 | `path` | string | Yes | ドキュメントパス（例: `users/user123`） |
+| `format` | string | No | 出力形式: `json` または `toon`（デフォルト: `json`） |
 
 #### firestore_list
 | パラメータ | 型 | 必須 | 説明 |
@@ -514,6 +567,7 @@ Claude Desktop の設定ファイル（`~/.config/claude/claude_desktop_config.j
 | `where` | array | No | フィルタ条件: `[{field, operator, value}]` |
 | `orderBy` | array | No | ソート順: `[{field, direction}]` |
 | `limit` | number | No | 返却する最大ドキュメント数 |
+| `format` | string | No | 出力形式: `json` または `toon`（デフォルト: `json`） |
 
 **対応演算子:** `==`, `!=`, `<`, `<=`, `>`, `>=`, `array-contains`, `array-contains-any`, `in`, `not-in`
 
@@ -523,23 +577,27 @@ Claude Desktop の設定ファイル（`~/.config/claude/claude_desktop_config.j
 | `path` | string | Yes | ドキュメントパス（例: `users/user123`） |
 | `data` | object | Yes | 書き込むドキュメントデータ |
 | `merge` | boolean | No | 既存データとマージ（デフォルト: false） |
+| `format` | string | No | 出力形式: `json` または `toon`（デフォルト: `json`） |
 
 #### firestore_update
 | パラメータ | 型 | 必須 | 説明 |
 |------------|------|------|------|
 | `path` | string | Yes | ドキュメントパス（存在必須） |
 | `data` | object | Yes | 更新するフィールド（ドット記法対応） |
+| `format` | string | No | 出力形式: `json` または `toon`（デフォルト: `json`） |
 
 #### firestore_delete
 | パラメータ | 型 | 必須 | 説明 |
 |------------|------|------|------|
 | `path` | string | Yes | ドキュメントまたはコレクションパス |
 | `recursive` | boolean | No | コレクション内の全ドキュメントを削除（デフォルト: false） |
+| `format` | string | No | 出力形式: `json` または `toon`（デフォルト: `json`） |
 
 #### firestore_collections
 | パラメータ | 型 | 必須 | 説明 |
 |------------|------|------|------|
 | `documentPath` | string | No | サブコレクション取得用のドキュメントパス。省略でルートコレクション。 |
+| `format` | string | No | 出力形式: `json` または `toon`（デフォルト: `json`） |
 
 #### firestore_export
 | パラメータ | 型 | 必須 | 説明 |
@@ -547,6 +605,7 @@ Claude Desktop の設定ファイル（`~/.config/claude/claude_desktop_config.j
 | `path` | string | Yes | エクスポートするコレクションパス |
 | `recursive` | boolean | No | サブコレクションを含める（デフォルト: false） |
 | `limit` | number | No | エクスポートする最大ドキュメント数 |
+| `format` | string | No | 出力形式: `json` または `toon`（デフォルト: `json`） |
 
 #### firestore_import
 | パラメータ | 型 | 必須 | 説明 |
@@ -554,6 +613,7 @@ Claude Desktop の設定ファイル（`~/.config/claude/claude_desktop_config.j
 | `path` | string | Yes | インポート先のコレクションパス |
 | `documents` | array | Yes | `{id?, data}` オブジェクトの配列 |
 | `merge` | boolean | No | 既存ドキュメントとマージ（デフォルト: false） |
+| `format` | string | No | 出力形式: `json` または `toon`（デフォルト: `json`） |
 
 ### MCP 使用例
 

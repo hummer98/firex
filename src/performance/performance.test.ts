@@ -14,6 +14,9 @@ import path from 'path';
 import os from 'os';
 import { BatchProcessor } from '../domain/batch-processor';
 import { QueryBuilder } from '../domain/query-builder';
+import { OutputFormatter } from '../presentation/output-formatter';
+import { ToonEncoder } from '../presentation/toon-encoder';
+import type { DocumentWithMeta } from '../shared/types';
 
 // Check if emulator is available
 const EMULATOR_HOST = process.env.FIRESTORE_EMULATOR_HOST || 'localhost:8080';
@@ -368,6 +371,138 @@ describe('Performance Tests', () => {
         console.log(`  File size: ${(stats.size / 1024).toFixed(2)} KB`);
       }
     }, 120000);
+  });
+
+  describe('Output Format Performance', () => {
+    it('should produce smaller output with TOON for uniform arrays', () => {
+      const outputFormatter = new OutputFormatter();
+
+      // Generate uniform test documents (typical Firestore collection query result)
+      const documents: DocumentWithMeta[] = Array.from({ length: 100 }, (_, i) => ({
+        data: {
+          name: `User ${i}`,
+          email: `user${i}@example.com`,
+          age: 20 + (i % 50),
+          city: ['Tokyo', 'Osaka', 'Kyoto', 'Nagoya', 'Fukuoka'][i % 5],
+          active: i % 2 === 0,
+          score: Math.floor(Math.random() * 100),
+        },
+        metadata: {
+          id: `user-${i.toString().padStart(4, '0')}`,
+          path: `users/user-${i.toString().padStart(4, '0')}`,
+        },
+      }));
+
+      // Format as JSON
+      const jsonResult = outputFormatter.formatDocuments(documents, 'json');
+      expect(jsonResult.isOk()).toBe(true);
+      const jsonLength = jsonResult.isOk() ? jsonResult.value.length : 0;
+
+      // Format as TOON
+      const toonResult = outputFormatter.formatDocuments(documents, 'toon');
+      expect(toonResult.isOk()).toBe(true);
+      const toonLength = toonResult.isOk() ? toonResult.value.length : 0;
+
+      // Calculate compression ratio
+      const compressionRatio = ((jsonLength - toonLength) / jsonLength) * 100;
+
+      console.log(`Output Format Size Comparison (100 uniform documents):`);
+      console.log(`  JSON: ${jsonLength} bytes`);
+      console.log(`  TOON: ${toonLength} bytes`);
+      console.log(`  Savings: ${compressionRatio.toFixed(1)}%`);
+
+      // TOON should be at least 20% smaller for uniform arrays
+      expect(toonLength).toBeLessThan(jsonLength * 0.8);
+    });
+
+    it('should measure encoding time for TOON vs JSON', () => {
+      // Generate test data
+      const testData = Array.from({ length: 1000 }, (_, i) => ({
+        id: `doc-${i}`,
+        name: `Document ${i}`,
+        price: Math.random() * 1000,
+        category: `cat-${i % 10}`,
+        tags: [`tag-${i % 5}`, `tag-${(i + 1) % 5}`],
+        metadata: {
+          version: 1,
+          createdAt: new Date().toISOString(),
+        },
+      }));
+
+      // Measure JSON encoding
+      const jsonStart = performance.now();
+      const jsonResult = JSON.stringify(testData);
+      const jsonTime = performance.now() - jsonStart;
+
+      // Measure TOON encoding
+      const toonEncoder = new ToonEncoder();
+      const toonStart = performance.now();
+      const toonResult = toonEncoder.encode(testData);
+      const toonTime = performance.now() - toonStart;
+
+      expect(toonResult.isOk()).toBe(true);
+
+      console.log(`Encoding Time Comparison (1000 objects):`);
+      console.log(`  JSON: ${jsonTime.toFixed(2)}ms`);
+      console.log(`  TOON: ${toonTime.toFixed(2)}ms`);
+      console.log(`  JSON size: ${jsonResult.length} bytes`);
+      if (toonResult.isOk()) {
+        console.log(`  TOON size: ${toonResult.value.length} bytes`);
+        const savings = ((jsonResult.length - toonResult.value.length) / jsonResult.length) * 100;
+        console.log(`  Size savings: ${savings.toFixed(1)}%`);
+      }
+    });
+
+    it('should handle nested structures efficiently', () => {
+      // Generate deeply nested test data
+      const nestedData = Array.from({ length: 50 }, (_, i) => ({
+        id: `user-${i}`,
+        profile: {
+          name: `User ${i}`,
+          contact: {
+            email: `user${i}@example.com`,
+            phone: `+81-90-${i.toString().padStart(8, '0')}`,
+          },
+          address: {
+            street: `Street ${i}`,
+            city: 'Tokyo',
+            country: 'Japan',
+            postalCode: `100-${i.toString().padStart(4, '0')}`,
+          },
+        },
+        settings: {
+          notifications: {
+            email: true,
+            push: false,
+            sms: i % 2 === 0,
+          },
+          privacy: {
+            profileVisible: true,
+            searchable: true,
+          },
+        },
+      }));
+
+      const outputFormatter = new OutputFormatter();
+      const documents: DocumentWithMeta[] = nestedData.map((data, i) => ({
+        data,
+        metadata: { id: `user-${i}`, path: `users/user-${i}` },
+      }));
+
+      const jsonResult = outputFormatter.formatDocuments(documents, 'json');
+      const toonResult = outputFormatter.formatDocuments(documents, 'toon');
+
+      expect(jsonResult.isOk()).toBe(true);
+      expect(toonResult.isOk()).toBe(true);
+
+      if (jsonResult.isOk() && toonResult.isOk()) {
+        console.log(`Nested Structure Size Comparison (50 documents):`);
+        console.log(`  JSON: ${jsonResult.value.length} bytes`);
+        console.log(`  TOON: ${toonResult.value.length} bytes`);
+        const savings = ((jsonResult.value.length - toonResult.value.length) / jsonResult.value.length) * 100;
+        console.log(`  Size savings: ${savings.toFixed(1)}%`);
+      }
+    });
   });
 
   describe('Concurrent Operations', () => {

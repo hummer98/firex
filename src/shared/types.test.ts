@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { ok, err, type DocumentWithMeta, type WhereCondition } from './types';
+import { ok, err, type DocumentWithMeta, type WhereCondition, type OutputFormat } from './types';
 
 describe('Shared Types', () => {
   describe('Result types', () => {
@@ -42,6 +42,21 @@ describe('Shared Types', () => {
       expect(condition.field).toBe('age');
       expect(condition.operator).toBe('>=');
       expect(condition.value).toBe(18);
+    });
+  });
+
+  describe('OutputFormat', () => {
+    it('should include toon as a valid format', () => {
+      const formats: OutputFormat[] = ['json', 'yaml', 'table', 'toon'];
+      expect(formats).toContain('json');
+      expect(formats).toContain('yaml');
+      expect(formats).toContain('table');
+      expect(formats).toContain('toon');
+    });
+
+    it('should allow toon as OutputFormat type', () => {
+      const format: OutputFormat = 'toon';
+      expect(format).toBe('toon');
     });
   });
 });

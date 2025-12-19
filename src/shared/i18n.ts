@@ -53,6 +53,7 @@ export interface Messages {
   'flag.json': string;
   'flag.yaml': string;
   'flag.table': string;
+  'flag.toon': string;
 
   // Success messages
   'msg.documentCreated': string;
@@ -152,6 +153,7 @@ const jaMessages: Messages = {
   'flag.json': 'JSON形式で出力 (--format=json のエイリアス)',
   'flag.yaml': 'YAML形式で出力 (--format=yaml のエイリアス)',
   'flag.table': 'テーブル形式で出力 (--format=table のエイリアス)',
+  'flag.toon': 'TOON形式で出力 (--format=toon のエイリアス)',
 
   // Success messages
   'msg.documentCreated': 'ドキュメントを作成しました',
@@ -251,6 +253,7 @@ const enMessages: Messages = {
   'flag.json': 'Output in JSON format (alias for --format=json)',
   'flag.yaml': 'Output in YAML format (alias for --format=yaml)',
   'flag.table': 'Output in table format (alias for --format=table)',
+  'flag.toon': 'Output in TOON format (alias for --format=toon)',
 
   // Success messages
   'msg.documentCreated': 'Document created',

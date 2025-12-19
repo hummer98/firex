@@ -7,6 +7,7 @@
 import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { Firestore } from 'firebase-admin/firestore';
+import { ToonEncoder } from '../../presentation/toon-encoder.js';
 
 const DocumentSchema = z.object({
   id: z.string().optional().describe('Document ID. If omitted, auto-generated.'),
@@ -17,6 +18,7 @@ const ImportSchema = {
   path: z.string().describe('Collection path to import into'),
   documents: z.array(DocumentSchema).describe('Array of documents to import'),
   merge: z.boolean().optional().describe('If true, merge with existing documents'),
+  format: z.enum(['json', 'toon']).optional().default('json').describe('Output format (json or toon)'),
 };
 
 export function registerImportTool(server: McpServer, firestore: Firestore): void {
@@ -24,7 +26,7 @@ export function registerImportTool(server: McpServer, firestore: Firestore): voi
     'firestore_import',
     'Import documents into a Firestore collection',
     ImportSchema,
-    async ({ path, documents, merge }) => {
+    async ({ path, documents, merge, format }) => {
       try {
         const collectionRef = firestore.collection(path);
         const results = {
@@ -77,27 +79,50 @@ export function registerImportTool(server: McpServer, firestore: Firestore): voi
         // Adjust imported count
         results.imported = Math.min(results.imported, documents.length - results.failed);
 
+        const response = {
+          success: results.failed === 0,
+          collectionPath: path,
+          imported: results.imported,
+          failed: results.failed,
+          total: documents.length,
+          merge,
+          errors: results.errors.length > 0 ? results.errors : undefined,
+          message:
+            results.failed === 0
+              ? `Successfully imported ${results.imported} documents`
+              : `Imported ${results.imported} documents with ${results.failed} failures`,
+        };
+
+        if (format === 'toon') {
+          const toonEncoder = new ToonEncoder();
+          const toonResult = toonEncoder.encode(response);
+          if (toonResult.isErr()) {
+            return {
+              content: [
+                {
+                  type: 'text' as const,
+                  text: `Error: ${toonResult.error.message}`,
+                },
+              ],
+              isError: true,
+            };
+          }
+          return {
+            content: [
+              {
+                type: 'text' as const,
+                text: toonResult.value,
+              },
+            ],
+            isError: results.failed > 0,
+          };
+        }
+
         return {
           content: [
             {
               type: 'text' as const,
-              text: JSON.stringify(
-                {
-                  success: results.failed === 0,
-                  collectionPath: path,
-                  imported: results.imported,
-                  failed: results.failed,
-                  total: documents.length,
-                  merge,
-                  errors: results.errors.length > 0 ? results.errors : undefined,
-                  message:
-                    results.failed === 0
-                      ? `Successfully imported ${results.imported} documents`
-                      : `Imported ${results.imported} documents with ${results.failed} failures`,
-                },
-                null,
-                2
-              ),
+              text: JSON.stringify(response, null, 2),
             },
           ],
           isError: results.failed > 0,

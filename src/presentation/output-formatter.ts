@@ -5,6 +5,7 @@
 import { Result, ok, err, DocumentWithMeta, DocumentChange, OutputFormat, DocumentMetadata } from '../shared/types';
 import Table from 'cli-table3';
 import { stringify as stringifyYaml } from 'yaml';
+import { ToonEncoder } from './toon-encoder';
 
 /**
  * Format options
@@ -28,6 +29,12 @@ export type FormatError = {
  * Service for formatting output in different formats
  */
 export class OutputFormatter {
+  private toonEncoder: ToonEncoder;
+
+  constructor() {
+    this.toonEncoder = new ToonEncoder();
+  }
+
   /**
    * Format a single document
    */
@@ -50,6 +57,9 @@ export class OutputFormatter {
 
         case 'table':
           return this.formatAsTable([data]);
+
+        case 'toon':
+          return this.toonEncoder.encode(data);
 
         default:
           return err({
@@ -96,6 +106,9 @@ export class OutputFormatter {
 
         case 'table':
           return this.formatAsTable(dataArray);
+
+        case 'toon':
+          return this.toonEncoder.encode(dataArray);
 
         default:
           return err({
@@ -150,6 +163,9 @@ export class OutputFormatter {
 
           return ok(table.toString());
         }
+
+        case 'toon':
+          return this.toonEncoder.encode(changeWithType);
 
         default:
           return err({
@@ -320,6 +336,13 @@ export class OutputFormatter {
           });
 
           return ok(table.toString());
+        }
+
+        case 'toon': {
+          if (quiet) {
+            return this.toonEncoder.encode(collections);
+          }
+          return this.toonEncoder.encode({ collections, count: collections.length });
         }
 
         default:

@@ -8,7 +8,7 @@ export { Result, Ok, Err, ok, err } from 'neverthrow';
 /**
  * Output format types
  */
-export type OutputFormat = 'json' | 'yaml' | 'table';
+export type OutputFormat = 'json' | 'yaml' | 'table' | 'toon';
 
 /**
  * Document with metadata

@@ -21,6 +21,10 @@ describe('i18n - collections command messages', () => {
       setLocale('ja');
     });
 
+    it('should have toon flag description', () => {
+      expect(t('flag.toon')).toBe('TOON形式で出力 (--format=toon のエイリアス)');
+    });
+
     it('should have command description', () => {
       expect(t('cmd.collections.description')).toBe('コレクション一覧を表示する');
     });
@@ -49,6 +53,10 @@ describe('i18n - collections command messages', () => {
   describe('English messages', () => {
     beforeEach(() => {
       setLocale('en');
+    });
+
+    it('should have toon flag description', () => {
+      expect(t('flag.toon')).toBe('Output in TOON format (alias for --format=toon)');
     });
 
     it('should have command description', () => {

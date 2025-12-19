@@ -89,10 +89,22 @@ describe('BaseCommand', () => {
       it('should have exclusive constraints between format aliases', () => {
         expect(BaseCommand.baseFlags.json.exclusive).toContain('yaml');
         expect(BaseCommand.baseFlags.json.exclusive).toContain('table');
+        expect(BaseCommand.baseFlags.json.exclusive).toContain('toon');
         expect(BaseCommand.baseFlags.yaml.exclusive).toContain('json');
         expect(BaseCommand.baseFlags.yaml.exclusive).toContain('table');
+        expect(BaseCommand.baseFlags.yaml.exclusive).toContain('toon');
         expect(BaseCommand.baseFlags.table.exclusive).toContain('json');
         expect(BaseCommand.baseFlags.table.exclusive).toContain('yaml');
+        expect(BaseCommand.baseFlags.table.exclusive).toContain('toon');
+        expect(BaseCommand.baseFlags.toon.exclusive).toContain('json');
+        expect(BaseCommand.baseFlags.toon.exclusive).toContain('yaml');
+        expect(BaseCommand.baseFlags.toon.exclusive).toContain('table');
+      });
+
+      it('should define --toon flag as alias for --format=toon', () => {
+        expect(BaseCommand.baseFlags.toon).toBeDefined();
+        expect(BaseCommand.baseFlags.toon.type).toBe('boolean');
+        expect(BaseCommand.baseFlags.toon.default).toBe(false);
       });
     });
   });
@@ -132,6 +144,24 @@ describe('BaseCommand', () => {
       const cmd = new TestCommand([], {} as Config);
       const format = (cmd as any).resolveFormat({ format: 'table', yaml: true });
       expect(format).toBe('yaml');
+    });
+
+    it('should return toon when --toon flag is true', () => {
+      const cmd = new TestCommand([], {} as Config);
+      const format = (cmd as any).resolveFormat({ toon: true });
+      expect(format).toBe('toon');
+    });
+
+    it('should prioritize --toon flag over --format', () => {
+      const cmd = new TestCommand([], {} as Config);
+      const format = (cmd as any).resolveFormat({ format: 'json', toon: true });
+      expect(format).toBe('toon');
+    });
+
+    it('should use --format=toon when specified', () => {
+      const cmd = new TestCommand([], {} as Config);
+      const format = (cmd as any).resolveFormat({ format: 'toon' });
+      expect(format).toBe('toon');
     });
   });
 

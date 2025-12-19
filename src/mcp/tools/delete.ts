@@ -9,6 +9,7 @@ import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { Firestore } from 'firebase-admin/firestore';
 import { FirestoreOps } from '../../domain/firestore-ops.js';
 import { BatchProcessor } from '../../domain/batch-processor.js';
+import { ToonEncoder } from '../../presentation/toon-encoder.js';
 
 const DeleteSchema = {
   path: z.string().describe('Document or collection path'),
@@ -17,14 +18,50 @@ const DeleteSchema = {
     .optional()
     .default(false)
     .describe('If true and path is a collection, delete all documents recursively'),
+  format: z.enum(['json', 'toon']).optional().default('json').describe('Output format (json or toon)'),
 };
+
+function formatResponse(response: Record<string, unknown>, format: string): { content: { type: 'text'; text: string }[]; isError?: boolean } {
+  if (format === 'toon') {
+    const toonEncoder = new ToonEncoder();
+    const toonResult = toonEncoder.encode(response);
+    if (toonResult.isErr()) {
+      return {
+        content: [
+          {
+            type: 'text' as const,
+            text: `Error: ${toonResult.error.message}`,
+          },
+        ],
+        isError: true,
+      };
+    }
+    return {
+      content: [
+        {
+          type: 'text' as const,
+          text: toonResult.value,
+        },
+      ],
+    };
+  }
+
+  return {
+    content: [
+      {
+        type: 'text' as const,
+        text: JSON.stringify(response, null, 2),
+      },
+    ],
+  };
+}
 
 export function registerDeleteTool(server: McpServer, firestore: Firestore): void {
   server.tool(
     'firestore_delete',
     'Delete a document from Firestore. Use recursive=true to delete an entire collection.',
     DeleteSchema,
-    async ({ path, recursive }) => {
+    async ({ path, recursive, format }) => {
       const ops = new FirestoreOps(firestore);
 
       // Check if it's a document or collection path
@@ -46,23 +83,12 @@ export function registerDeleteTool(server: McpServer, firestore: Firestore): voi
           };
         }
 
-        return {
-          content: [
-            {
-              type: 'text' as const,
-              text: JSON.stringify(
-                {
-                  success: true,
-                  path,
-                  type: 'document',
-                  message: `Document deleted successfully at ${path}`,
-                },
-                null,
-                2
-              ),
-            },
-          ],
-        };
+        return formatResponse({
+          success: true,
+          path,
+          type: 'document',
+          message: `Document deleted successfully at ${path}`,
+        }, format);
       }
 
       // Collection path
@@ -97,24 +123,13 @@ export function registerDeleteTool(server: McpServer, firestore: Firestore): voi
         };
       }
 
-      return {
-        content: [
-          {
-            type: 'text' as const,
-            text: JSON.stringify(
-              {
-                success: true,
-                path,
-                type: 'collection',
-                deletedCount: result.value.deletedCount,
-                message: `Collection deleted successfully. ${result.value.deletedCount} documents removed.`,
-              },
-              null,
-              2
-            ),
-          },
-        ],
-      };
+      return formatResponse({
+        success: true,
+        path,
+        type: 'collection',
+        deletedCount: result.value.deletedCount,
+        message: `Collection deleted successfully. ${result.value.deletedCount} documents removed.`,
+      }, format);
     }
   );
 }

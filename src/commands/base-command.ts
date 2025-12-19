@@ -46,23 +46,28 @@ export abstract class BaseCommand extends Command {
     format: Flags.string({
       char: 'f',
       description: t('flag.format'),
-      options: ['json', 'yaml', 'table'],
+      options: ['json', 'yaml', 'table', 'toon'],
       default: 'json',
     }),
     json: Flags.boolean({
       description: t('flag.json'),
       default: false,
-      exclusive: ['yaml', 'table'],
+      exclusive: ['yaml', 'table', 'toon'],
     }),
     yaml: Flags.boolean({
       description: t('flag.yaml'),
       default: false,
-      exclusive: ['json', 'table'],
+      exclusive: ['json', 'table', 'toon'],
     }),
     table: Flags.boolean({
       description: t('flag.table'),
       default: false,
-      exclusive: ['json', 'yaml'],
+      exclusive: ['json', 'yaml', 'toon'],
+    }),
+    toon: Flags.boolean({
+      description: t('flag.toon'),
+      default: false,
+      exclusive: ['json', 'yaml', 'table'],
     }),
     profile: Flags.string({
       char: 'p',
@@ -204,17 +209,19 @@ export abstract class BaseCommand extends Command {
 
   /**
    * Resolve output format from flags
-   * Priority: --json/--yaml/--table > --format > default ('json')
+   * Priority: --json/--yaml/--table/--toon > --format > default ('json')
    */
   protected resolveFormat(flags: {
     format?: string;
     json?: boolean;
     yaml?: boolean;
     table?: boolean;
+    toon?: boolean;
   }): OutputFormat {
     if (flags.json) return 'json';
     if (flags.yaml) return 'yaml';
     if (flags.table) return 'table';
+    if (flags.toon) return 'toon';
     return (flags.format || 'json') as OutputFormat;
   }
 }

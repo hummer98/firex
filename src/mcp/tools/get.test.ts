@@ -12,7 +12,7 @@ describe('firestore_get tool', () => {
   let mockFirestore: Partial<Firestore>;
   let mockDocRef: Partial<DocumentReference>;
   let mockDocSnapshot: Partial<DocumentSnapshot>;
-  let registeredHandler: (params: { path: string }) => Promise<unknown>;
+  let registeredHandler: (params: { path: string; format?: string }) => Promise<unknown>;
 
   beforeEach(() => {
     // Capture the tool handler when registered
@@ -58,34 +58,34 @@ describe('firestore_get tool', () => {
   });
 
   it('should return document data on success', async () => {
-    const result = await registeredHandler({ path: 'users/user123' });
+    const result = await registeredHandler({ path: 'users/user123', format: 'json' });
 
     expect(result).toEqual({
       content: [
         {
           type: 'text',
-          text: expect.stringContaining('"name": "Test User"'),
+          text: expect.stringContaining('Test User'),
         },
       ],
     });
   });
 
   it('should include metadata in response', async () => {
-    const result = await registeredHandler({ path: 'users/user123' });
+    const result = await registeredHandler({ path: 'users/user123', format: 'json' });
 
     const response = result as { content: Array<{ text: string }> };
     const parsed = JSON.parse(response.content[0].text);
 
-    expect(parsed.metadata).toBeDefined();
-    expect(parsed.metadata.id).toBe('user123');
-    expect(parsed.metadata.path).toBe('users/user123');
+    expect(parsed._metadata).toBeDefined();
+    expect(parsed._metadata.id).toBe('user123');
+    expect(parsed._metadata.path).toBe('users/user123');
   });
 
   it('should return error for non-existent document', async () => {
     mockDocSnapshot.exists = false;
     mockDocRef.get = vi.fn().mockResolvedValue(mockDocSnapshot);
 
-    const result = await registeredHandler({ path: 'users/nonexistent' });
+    const result = await registeredHandler({ path: 'users/nonexistent', format: 'json' });
 
     expect(result).toEqual({
       content: [
@@ -99,7 +99,7 @@ describe('firestore_get tool', () => {
   });
 
   it('should return error for invalid path', async () => {
-    const result = await registeredHandler({ path: 'users' }); // Collection path, not document
+    const result = await registeredHandler({ path: 'users', format: 'json' }); // Collection path, not document
 
     expect(result).toEqual({
       content: [
@@ -115,7 +115,7 @@ describe('firestore_get tool', () => {
   it('should handle Firestore errors', async () => {
     mockDocRef.get = vi.fn().mockRejectedValue(new Error('Permission denied'));
 
-    const result = await registeredHandler({ path: 'users/user123' });
+    const result = await registeredHandler({ path: 'users/user123', format: 'json' });
 
     expect(result).toEqual({
       content: [

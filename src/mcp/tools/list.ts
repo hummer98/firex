@@ -8,7 +8,8 @@ import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { Firestore } from 'firebase-admin/firestore';
 import { QueryBuilder } from '../../domain/query-builder.js';
-import type { WhereCondition, OrderBy, FirestoreOperator, OrderDirection } from '../../shared/types.js';
+import type { WhereCondition, OrderBy, FirestoreOperator, OrderDirection, OutputFormat } from '../../shared/types.js';
+import { OutputFormatter } from '../../presentation/output-formatter.js';
 
 const WhereConditionSchema = z.object({
   field: z.string().describe('Field name to filter on'),
@@ -28,6 +29,7 @@ const ListSchema = {
   where: z.array(WhereConditionSchema).optional().describe('Filter conditions'),
   orderBy: z.array(OrderBySchema).optional().describe('Sort order'),
   limit: z.number().optional().describe('Maximum number of documents to return'),
+  format: z.enum(['json', 'toon']).optional().default('json').describe('Output format (json or toon)'),
 };
 
 export function registerListTool(server: McpServer, firestore: Firestore): void {
@@ -35,7 +37,7 @@ export function registerListTool(server: McpServer, firestore: Firestore): void 
     'firestore_list',
     'Query documents from a Firestore collection with optional filters, sorting, and pagination',
     ListSchema,
-    async ({ path, where, orderBy, limit }) => {
+    async ({ path, where, orderBy, limit, format }) => {
       const queryBuilder = new QueryBuilder(firestore);
 
       const whereConditions: WhereCondition[] | undefined = where?.map((w) => ({
@@ -68,28 +70,58 @@ export function registerListTool(server: McpServer, firestore: Firestore): void 
       }
 
       const { documents, executionTimeMs } = result.value;
+      const outputFormatter = new OutputFormatter();
+      const formatResult = outputFormatter.formatDocuments(
+        documents,
+        format as OutputFormat,
+        { includeMetadata: true }
+      );
+
+      if (formatResult.isErr()) {
+        return {
+          content: [
+            {
+              type: 'text' as const,
+              text: `Error: ${formatResult.error.message}`,
+            },
+          ],
+          isError: true,
+        };
+      }
+
+      // For JSON format, wrap with metadata; for TOON, return raw formatted data
+      if (format === 'json') {
+        return {
+          content: [
+            {
+              type: 'text' as const,
+              text: JSON.stringify(
+                {
+                  count: documents.length,
+                  executionTimeMs,
+                  documents: documents.map((doc) => ({
+                    data: doc.data,
+                    metadata: {
+                      id: doc.metadata.id,
+                      path: doc.metadata.path,
+                      createTime: doc.metadata.createTime?.toISOString(),
+                      updateTime: doc.metadata.updateTime?.toISOString(),
+                    },
+                  })),
+                },
+                null,
+                2
+              ),
+            },
+          ],
+        };
+      }
 
       return {
         content: [
           {
             type: 'text' as const,
-            text: JSON.stringify(
-              {
-                count: documents.length,
-                executionTimeMs,
-                documents: documents.map((doc) => ({
-                  data: doc.data,
-                  metadata: {
-                    id: doc.metadata.id,
-                    path: doc.metadata.path,
-                    createTime: doc.metadata.createTime?.toISOString(),
-                    updateTime: doc.metadata.updateTime?.toISOString(),
-                  },
-                })),
-              },
-              null,
-              2
-            ),
+            text: formatResult.value,
           },
         ],
       };

@@ -7,6 +7,7 @@ import { BaseCommand } from './base-command';
 import { FirestoreOps } from '../domain/firestore-ops';
 import { OutputFormatter } from '../presentation/output-formatter';
 import { t } from '../shared/i18n';
+import type { OutputFormat } from '../shared/types';
 
 export class CollectionsCommand extends BaseCommand {
   static override hidden = false;
@@ -86,7 +87,7 @@ export class CollectionsCommand extends BaseCommand {
    */
   private async listRootCollections(
     firestoreOps: FirestoreOps,
-    format: 'json' | 'yaml' | 'table',
+    format: OutputFormat,
     outputFormatter: OutputFormatter,
     quiet: boolean
   ): Promise<void> {
@@ -132,7 +133,7 @@ export class CollectionsCommand extends BaseCommand {
   private async listSubcollections(
     firestoreOps: FirestoreOps,
     documentPath: string,
-    format: 'json' | 'yaml' | 'table',
+    format: OutputFormat,
     outputFormatter: OutputFormatter,
     quiet: boolean
   ): Promise<void> {

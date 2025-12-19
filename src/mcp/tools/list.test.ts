@@ -18,6 +18,7 @@ describe('firestore_list tool', () => {
     where?: Array<{ field: string; operator: string; value: unknown }>;
     orderBy?: Array<{ field: string; direction: string }>;
     limit?: number;
+    format?: string;
   }) => Promise<unknown>;
 
   beforeEach(() => {
@@ -82,7 +83,7 @@ describe('firestore_list tool', () => {
   });
 
   it('should return documents list on success', async () => {
-    const result = await registeredHandler({ path: 'users' });
+    const result = await registeredHandler({ path: 'users', format: 'json' });
 
     const response = result as { content: Array<{ text: string }> };
     const parsed = JSON.parse(response.content[0].text);
@@ -93,7 +94,7 @@ describe('firestore_list tool', () => {
   });
 
   it('should include execution time in response', async () => {
-    const result = await registeredHandler({ path: 'users' });
+    const result = await registeredHandler({ path: 'users', format: 'json' });
 
     const response = result as { content: Array<{ text: string }> };
     const parsed = JSON.parse(response.content[0].text);
@@ -106,6 +107,7 @@ describe('firestore_list tool', () => {
     await registeredHandler({
       path: 'users',
       where: [{ field: 'status', operator: '==', value: 'active' }],
+      format: 'json',
     });
 
     expect(mockQuery.where).toHaveBeenCalledWith('status', '==', 'active');
@@ -115,6 +117,7 @@ describe('firestore_list tool', () => {
     await registeredHandler({
       path: 'users',
       orderBy: [{ field: 'createdAt', direction: 'desc' }],
+      format: 'json',
     });
 
     expect(mockQuery.orderBy).toHaveBeenCalledWith('createdAt', 'desc');
@@ -124,6 +127,7 @@ describe('firestore_list tool', () => {
     await registeredHandler({
       path: 'users',
       limit: 10,
+      format: 'json',
     });
 
     expect(mockQuery.limit).toHaveBeenCalledWith(10);
@@ -141,7 +145,7 @@ describe('firestore_list tool', () => {
 
     mockFirestore.collection = vi.fn().mockReturnValue(errorMockQuery);
 
-    const result = await registeredHandler({ path: 'users' });
+    const result = await registeredHandler({ path: 'users', format: 'json' });
 
     expect(result).toEqual({
       content: [
@@ -158,6 +162,7 @@ describe('firestore_list tool', () => {
     const result = await registeredHandler({
       path: 'users',
       where: [{ field: 'status', operator: 'INVALID' as any, value: 'active' }],
+      format: 'json',
     });
 
     expect(result).toEqual({

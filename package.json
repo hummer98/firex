@@ -79,6 +79,7 @@
     "@inquirer/prompts": "^7.10.1",
     "@modelcontextprotocol/sdk": "^1.25.1",
     "@oclif/core": "^3.27.0",
+    "@toon-format/toon": "^2.1.0",
     "cli-table3": "^0.6.5",
     "cosmiconfig": "^9.0.0",
     "firebase-admin": "^13.6.0",

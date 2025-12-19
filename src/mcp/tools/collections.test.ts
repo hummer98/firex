@@ -12,7 +12,7 @@ describe('firestore_collections tool', () => {
   let mockFirestore: Partial<Firestore>;
   let mockDocRef: Partial<DocumentReference>;
   let mockDocSnapshot: Partial<DocumentSnapshot>;
-  let registeredHandler: (params: { documentPath?: string }) => Promise<unknown>;
+  let registeredHandler: (params: { documentPath?: string; format?: string }) => Promise<unknown>;
 
   beforeEach(() => {
     mockServer = {
@@ -60,7 +60,7 @@ describe('firestore_collections tool', () => {
   });
 
   it('should list root collections when no path provided', async () => {
-    const result = await registeredHandler({});
+    const result = await registeredHandler({ format: 'json' });
 
     const response = result as { content: Array<{ text: string }> };
     const parsed = JSON.parse(response.content[0].text);
@@ -70,7 +70,7 @@ describe('firestore_collections tool', () => {
   });
 
   it('should list subcollections when document path provided', async () => {
-    const result = await registeredHandler({ documentPath: 'users/user123' });
+    const result = await registeredHandler({ documentPath: 'users/user123', format: 'json' });
 
     const response = result as { content: Array<{ text: string }> };
     const parsed = JSON.parse(response.content[0].text);
@@ -84,7 +84,7 @@ describe('firestore_collections tool', () => {
     mockDocSnapshot.exists = false;
     mockDocRef.get = vi.fn().mockResolvedValue(mockDocSnapshot);
 
-    const result = await registeredHandler({ documentPath: 'users/nonexistent' });
+    const result = await registeredHandler({ documentPath: 'users/nonexistent', format: 'json' });
 
     expect(result).toEqual({
       content: [
@@ -100,7 +100,7 @@ describe('firestore_collections tool', () => {
   it('should handle Firestore errors', async () => {
     mockFirestore.listCollections = vi.fn().mockRejectedValue(new Error('List failed'));
 
-    const result = await registeredHandler({});
+    const result = await registeredHandler({ format: 'json' });
 
     expect(result).toEqual({
       content: [

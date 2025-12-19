@@ -8,12 +8,15 @@ import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { Firestore } from 'firebase-admin/firestore';
 import { FirestoreOps } from '../../domain/firestore-ops.js';
+import { OutputFormatter } from '../../presentation/output-formatter.js';
+import type { OutputFormat } from '../../shared/types.js';
 
 const CollectionsSchema = {
   documentPath: z
     .string()
     .optional()
     .describe('Document path to list subcollections from. If omitted, lists root collections.'),
+  format: z.enum(['json', 'toon']).optional().default('json').describe('Output format (json or toon)'),
 };
 
 export function registerCollectionsTool(server: McpServer, firestore: Firestore): void {
@@ -21,8 +24,9 @@ export function registerCollectionsTool(server: McpServer, firestore: Firestore)
     'firestore_collections',
     'List collections in Firestore. Provide a document path to list its subcollections, or omit to list root collections.',
     CollectionsSchema,
-    async ({ documentPath }) => {
+    async ({ documentPath, format }) => {
       const ops = new FirestoreOps(firestore);
+      const outputFormatter = new OutputFormatter();
 
       if (documentPath) {
         // List subcollections under a document
@@ -40,19 +44,48 @@ export function registerCollectionsTool(server: McpServer, firestore: Firestore)
           };
         }
 
+        const formatResult = outputFormatter.formatCollections(
+          result.value,
+          format as OutputFormat
+        );
+
+        if (formatResult.isErr()) {
+          return {
+            content: [
+              {
+                type: 'text' as const,
+                text: `Error: ${formatResult.error.message}`,
+              },
+            ],
+            isError: true,
+          };
+        }
+
+        // For JSON, include parent document info
+        if (format === 'json') {
+          return {
+            content: [
+              {
+                type: 'text' as const,
+                text: JSON.stringify(
+                  {
+                    parentDocument: documentPath,
+                    collections: result.value,
+                    count: result.value.length,
+                  },
+                  null,
+                  2
+                ),
+              },
+            ],
+          };
+        }
+
         return {
           content: [
             {
               type: 'text' as const,
-              text: JSON.stringify(
-                {
-                  parentDocument: documentPath,
-                  collections: result.value,
-                  count: result.value.length,
-                },
-                null,
-                2
-              ),
+              text: formatResult.value,
             },
           ],
         };
@@ -73,18 +106,47 @@ export function registerCollectionsTool(server: McpServer, firestore: Firestore)
         };
       }
 
+      const formatResult = outputFormatter.formatCollections(
+        result.value,
+        format as OutputFormat
+      );
+
+      if (formatResult.isErr()) {
+        return {
+          content: [
+            {
+              type: 'text' as const,
+              text: `Error: ${formatResult.error.message}`,
+            },
+          ],
+          isError: true,
+        };
+      }
+
+      // For JSON, use standard format
+      if (format === 'json') {
+        return {
+          content: [
+            {
+              type: 'text' as const,
+              text: JSON.stringify(
+                {
+                  collections: result.value,
+                  count: result.value.length,
+                },
+                null,
+                2
+              ),
+            },
+          ],
+        };
+      }
+
       return {
         content: [
           {
             type: 'text' as const,
-            text: JSON.stringify(
-              {
-                collections: result.value,
-                count: result.value.length,
-              },
-              null,
-              2
-            ),
+            text: formatResult.value,
           },
         ],
       };

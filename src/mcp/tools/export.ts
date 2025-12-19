@@ -7,11 +7,13 @@
 import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { Firestore, DocumentSnapshot } from 'firebase-admin/firestore';
+import { ToonEncoder } from '../../presentation/toon-encoder.js';
 
 const ExportSchema = {
   path: z.string().describe('Collection path to export'),
   recursive: z.boolean().optional().default(false).describe('If true, include subcollections'),
   limit: z.number().optional().describe('Maximum number of documents to export'),
+  format: z.enum(['json', 'toon']).optional().default('json').describe('Output format (json or toon)'),
 };
 
 interface ExportedDocument {
@@ -53,7 +55,7 @@ export function registerExportTool(server: McpServer, firestore: Firestore): voi
     'firestore_export',
     'Export documents from a Firestore collection as JSON',
     ExportSchema,
-    async ({ path, recursive, limit }) => {
+    async ({ path, recursive, limit, format }) => {
       try {
         let query = firestore.collection(path).orderBy('__name__');
 
@@ -67,20 +69,42 @@ export function registerExportTool(server: McpServer, firestore: Firestore): voi
           snapshot.docs.map((doc) => exportDocument(doc, recursive ?? false))
         );
 
+        const response = {
+          collectionPath: path,
+          count: documents.length,
+          includesSubcollections: recursive ?? false,
+          documents,
+        };
+
+        if (format === 'toon') {
+          const toonEncoder = new ToonEncoder();
+          const toonResult = toonEncoder.encode(response);
+          if (toonResult.isErr()) {
+            return {
+              content: [
+                {
+                  type: 'text' as const,
+                  text: `Error: ${toonResult.error.message}`,
+                },
+              ],
+              isError: true,
+            };
+          }
+          return {
+            content: [
+              {
+                type: 'text' as const,
+                text: toonResult.value,
+              },
+            ],
+          };
+        }
+
         return {
           content: [
             {
               type: 'text' as const,
-              text: JSON.stringify(
-                {
-                  collectionPath: path,
-                  count: documents.length,
-                  includesSubcollections: recursive ?? false,
-                  documents,
-                },
-                null,
-                2
-              ),
+              text: JSON.stringify(response, null, 2),
             },
           ],
         };
