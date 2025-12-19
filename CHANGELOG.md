@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2025-12-20
+
+### Added
+- TOON (Token-Optimized Object Notation) output format support (`--format toon`)
+- Bug fix workflow commands for .kiro specs (`/kiro:bug-*`)
+- Root collection listing when `list` command is executed without path argument
+
+### Changed
+- Banner image text updated to "firex mcp"
+- README: MCP commands updated to npx format with table of contents
+
+### Docs
+- Added Zenn article introducing firex
+- Documented Firebase Admin SDK standard environment variable support
+
 ## [0.3.0] - 2025-12-19
 
 ### Added
@@ -85,7 +100,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - API key and OAuth token masking
 - Secure file permission recommendations
 
-[Unreleased]: https://github.com/hummer98/firex/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/hummer98/firex/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/hummer98/firex/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/hummer98/firex/compare/v0.2.1...v0.3.0
 [0.2.1]: https://github.com/hummer98/firex/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/hummer98/firex/compare/v0.1.1...v0.2.0
