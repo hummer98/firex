@@ -147,7 +147,7 @@ npm link
 - 主な変更内容のサマリー
 - npm公開用コマンド（手動実行用）:
   ```bash
-  npm publish
+  npm publish --access public
   ```
 
 ## 注意事項
@@ -189,7 +189,7 @@ npm version patch  # または minor / major
 gh release create vX.Y.Z --title "firex vX.Y.Z" --notes "..."
 
 # npm公開（手動で実行）
-npm publish
+npm publish --access public
 
 # ローカルインストール（オプション）
 npm link
