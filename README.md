@@ -78,6 +78,11 @@ firebase emulators:start --only firestore
 export FIRESTORE_EMULATOR_HOST=localhost:8080
 ```
 
+**Option D: Workload Identity Federation (CI/CD)**
+
+For GitHub Actions and other CI/CD platforms, use keyless authentication.
+See [CI/CD Integration Guide](docs/cicd.md) for setup instructions.
+
 ### 2. Configuration File (Optional)
 
 Create a `.firex.yaml` file in your project root:

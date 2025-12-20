@@ -78,6 +78,11 @@ firebase emulators:start --only firestore
 export FIRESTORE_EMULATOR_HOST=localhost:8080
 ```
 
+**オプション D: Workload Identity Federation（CI/CD）**
+
+GitHub Actions などの CI/CD プラットフォームでは、キーレス認証を使用できます。
+設定方法は [CI/CD 連携ガイド](docs/cicd-jp.md) を参照してください。
+
 ### 2. 設定ファイル（オプション）
 
 プロジェクトルートに `.firex.yaml` ファイルを作成：
