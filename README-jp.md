@@ -324,6 +324,70 @@ firex config --show
 firex examples
 ```
 
+### doctor - 環境診断
+
+firex CLI の環境と設定を診断します。このコマンドは、firex が正しく動作するために必要なセットアップの各項目をチェックします。
+
+```bash
+firex doctor [options]
+```
+
+**オプション:**
+- `--json`: 診断結果を JSON 形式で出力（CI/CD 連携用）
+- `--verbose, -v`: 各チェックの詳細な実行ログを表示
+
+**診断項目:**
+
+| カテゴリ | チェック項目 | 説明 |
+|----------|-------------|------|
+| 環境 | Node.js バージョン | Node.js 18.0.0 以降がインストールされているか確認 |
+| 環境 | Firebase CLI | Firebase CLI がインストールされているか確認 |
+| 環境 | 認証 | 有効な認証情報（ADC またはサービスアカウント）があるか確認 |
+| Firebase | .firebaserc | Firebase プロジェクト設定があるか確認 |
+| Firebase | Firestore API | Firestore API が有効化されているか確認 |
+| Firebase | Firestore アクセス | Firestore への読み取りアクセスをテスト |
+| 設定 | 設定ファイル | .firex.yaml/.firex.json の構文とスキーマを検証 |
+| ビルド | ビルド状態 | ソースがビルドより新しいか確認（開発時のみ） |
+| エミュレータ | 接続 | FIRESTORE_EMULATOR_HOST 設定時にエミュレータ接続をテスト |
+
+**例:**
+```bash
+# 基本的な診断
+firex doctor
+
+# JSON 形式で出力（CI/CD に便利）
+firex doctor --json
+
+# 詳細ログを表示
+firex doctor --verbose
+```
+
+**出力例:**
+```
+=== firex doctor ===
+
+Node.js: v20.10.0
+Platform: darwin
+
+--- Checks ---
+[OK] Node.js version 20.10.0 meets minimum requirement (18.0.0)
+[OK] Firebase CLI installed (version 13.0.0)
+[OK] Valid authentication found via ADC
+[OK] .firebaserc found, default project: my-project
+[OK] Firestore API is enabled
+[OK] Firestore access confirmed
+[OK] Config file valid: .firex.yaml
+[OK] Build is up to date
+
+--- Summary ---
+環境は正常です
+Total: 8 checks (8 passed, 0 warnings, 0 errors)
+```
+
+**終了コード:**
+- `0`: 全てのチェックが成功、または警告のみ
+- `1`: 1つ以上のエラーが検出された
+
 ## 設定ファイル
 
 firex は以下の順序で設定ファイルを探します：

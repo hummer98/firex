@@ -20,6 +20,7 @@ export interface Messages {
   'cmd.import.description': string;
   'cmd.config.description': string;
   'cmd.examples.description': string;
+  'cmd.doctor.description': string;
 
   // Argument descriptions
   'arg.documentPath': string;
@@ -120,6 +121,7 @@ const jaMessages: Messages = {
   'cmd.import.description': 'JSONファイルからFirestoreにインポートする',
   'cmd.config.description': '設定を表示する',
   'cmd.examples.description': 'よくある使用例を表示する',
+  'cmd.doctor.description': 'firex CLI の実行環境と設定を診断する',
 
   // Argument descriptions
   'arg.documentPath': 'ドキュメントパス (例: collection/document)',
@@ -220,6 +222,7 @@ const enMessages: Messages = {
   'cmd.import.description': 'Import data from a JSON file to Firestore',
   'cmd.config.description': 'Display configuration',
   'cmd.examples.description': 'Show usage examples',
+  'cmd.doctor.description': 'Diagnose firex CLI environment and configuration',
 
   // Argument descriptions
   'arg.documentPath': 'Document path (e.g., collection/document)',

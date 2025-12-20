@@ -6,6 +6,7 @@ export default defineConfig({
     'src/commands/*.ts',
     'src/services/*.ts',
     'src/domain/*.ts',
+    'src/domain/**/*.ts',
     'src/presentation/*.ts',
     'src/shared/*.ts',
     '!src/**/*.test.ts',

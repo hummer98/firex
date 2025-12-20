@@ -324,6 +324,70 @@ Display common usage examples.
 firex examples
 ```
 
+### doctor - Environment Diagnostics
+
+Diagnose firex CLI environment and configuration. This command checks various aspects of your setup to ensure firex can operate correctly.
+
+```bash
+firex doctor [options]
+```
+
+**Options:**
+- `--json`: Output diagnosis results in JSON format (for CI/CD integration)
+- `--verbose, -v`: Show detailed execution logs for each check
+
+**Diagnostic Checks:**
+
+| Category | Check Item | Description |
+|----------|------------|-------------|
+| Environment | Node.js Version | Verifies Node.js 18.0.0 or later is installed |
+| Environment | Firebase CLI | Checks if Firebase CLI is installed |
+| Environment | Authentication | Verifies valid credentials (ADC or Service Account) |
+| Firebase | .firebaserc | Checks for Firebase project configuration |
+| Firebase | Firestore API | Verifies Firestore API is enabled |
+| Firebase | Firestore Access | Tests read access to Firestore |
+| Config | Config File | Validates .firex.yaml/.firex.json syntax and schema |
+| Build | Build Status | Checks if source is newer than build (dev only) |
+| Emulator | Connection | Tests emulator connection when FIRESTORE_EMULATOR_HOST is set |
+
+**Examples:**
+```bash
+# Basic diagnostics
+firex doctor
+
+# Output in JSON format (useful for CI/CD)
+firex doctor --json
+
+# Show detailed logs
+firex doctor --verbose
+```
+
+**Example Output:**
+```
+=== firex doctor ===
+
+Node.js: v20.10.0
+Platform: darwin
+
+--- Checks ---
+[OK] Node.js version 20.10.0 meets minimum requirement (18.0.0)
+[OK] Firebase CLI installed (version 13.0.0)
+[OK] Valid authentication found via ADC
+[OK] .firebaserc found, default project: my-project
+[OK] Firestore API is enabled
+[OK] Firestore access confirmed
+[OK] Config file valid: .firex.yaml
+[OK] Build is up to date
+
+--- Summary ---
+環境は正常です
+Total: 8 checks (8 passed, 0 warnings, 0 errors)
+```
+
+**Exit Codes:**
+- `0`: All checks passed or only warnings present
+- `1`: One or more errors detected
+
 ## Configuration File
 
 firex looks for configuration files in the following order:
