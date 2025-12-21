@@ -6,7 +6,9 @@ import { Args, Flags } from '@oclif/core';
 import { BaseCommand } from './base-command';
 import { FirestoreOps } from '../domain/firestore-ops';
 import { WatchService } from '../domain/watch-service';
-import { OutputFormatter } from '../presentation/output-formatter';
+import { OutputFormatter, TimestampFormatOptions } from '../presentation/output-formatter';
+import { TimezoneService } from '../services/timezone';
+import { OutputOptionsResolver } from '../services/output-options-resolver';
 import { t } from '../shared/i18n';
 import type { OutputFormat, DocumentChange } from '../shared/types';
 
@@ -74,6 +76,29 @@ export class GetCommand extends BaseCommand {
     const firestoreOps = new FirestoreOps(firestore);
     const outputFormatter = new OutputFormatter();
 
+    // Resolve timestamp options from CLI flags and config
+    const timezoneService = new TimezoneService();
+    const resolver = new OutputOptionsResolver(timezoneService);
+    const resolvedOptions = resolver.resolve({
+      cliFlags: {
+        timezone: flags.timezone,
+        dateFormat: flags['date-format'],
+        rawOutput: flags['raw-output'],
+        noColor: flags['no-color'],
+        noDateFormat: flags['no-date-format'],
+      },
+      config: this.loadedConfig?.output ?? {},
+    });
+
+    // Build timestamp options (undefined if rawOutput is true)
+    const timestampOptions: TimestampFormatOptions | undefined = resolvedOptions.rawOutput
+      ? undefined
+      : {
+          dateFormat: resolvedOptions.dateFormat,
+          timezone: resolvedOptions.timezone,
+          noDateFormat: resolvedOptions.noDateFormat,
+        };
+
     // Validate document path (must have even number of segments)
     if (!firestoreOps.isDocumentPath(documentPath)) {
       this.handleError(
@@ -94,7 +119,7 @@ export class GetCommand extends BaseCommand {
       );
     } else {
       // Single fetch mode
-      await this.fetchDocument(firestoreOps, documentPath, format, outputFormatter, quiet);
+      await this.fetchDocument(firestoreOps, documentPath, format, outputFormatter, quiet, timestampOptions);
     }
   }
 
@@ -106,7 +131,8 @@ export class GetCommand extends BaseCommand {
     documentPath: string,
     format: OutputFormat,
     outputFormatter: OutputFormatter,
-    quiet: boolean
+    quiet: boolean,
+    timestampOptions?: TimestampFormatOptions
   ): Promise<void> {
     const result = await firestoreOps.getDocument(documentPath);
 
@@ -122,10 +148,13 @@ export class GetCommand extends BaseCommand {
 
     const document = result.value;
 
-    // Format and output document
-    const formatResult = outputFormatter.formatDocument(document, format, {
-      includeMetadata: true,
-    });
+    // Format and output document with timestamp options
+    const formatResult = outputFormatter.formatDocument(
+      document,
+      format,
+      { includeMetadata: true },
+      timestampOptions
+    );
 
     if (formatResult.isErr()) {
       this.handleError(formatResult.error.message, 'unknown');

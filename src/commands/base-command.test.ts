@@ -107,6 +107,36 @@ describe('BaseCommand', () => {
         expect(BaseCommand.baseFlags.toon.default).toBe(false);
       });
     });
+
+    describe('output formatting flags', () => {
+      it('should define --timezone flag', () => {
+        expect(BaseCommand.baseFlags.timezone).toBeDefined();
+        expect(BaseCommand.baseFlags.timezone.type).toBe('option');
+      });
+
+      it('should define --date-format flag', () => {
+        expect(BaseCommand.baseFlags['date-format']).toBeDefined();
+        expect(BaseCommand.baseFlags['date-format'].type).toBe('option');
+      });
+
+      it('should define --raw-output flag', () => {
+        expect(BaseCommand.baseFlags['raw-output']).toBeDefined();
+        expect(BaseCommand.baseFlags['raw-output'].type).toBe('boolean');
+        expect(BaseCommand.baseFlags['raw-output'].default).toBe(false);
+      });
+
+      it('should define --no-color flag', () => {
+        expect(BaseCommand.baseFlags['no-color']).toBeDefined();
+        expect(BaseCommand.baseFlags['no-color'].type).toBe('boolean');
+        expect(BaseCommand.baseFlags['no-color'].default).toBe(false);
+      });
+
+      it('should define --no-date-format flag', () => {
+        expect(BaseCommand.baseFlags['no-date-format']).toBeDefined();
+        expect(BaseCommand.baseFlags['no-date-format'].type).toBe('boolean');
+        expect(BaseCommand.baseFlags['no-date-format'].default).toBe(false);
+      });
+    });
   });
 
   describe('resolveFormat', () => {

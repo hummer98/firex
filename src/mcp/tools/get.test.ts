@@ -127,4 +127,50 @@ describe('firestore_get tool', () => {
       isError: true,
     });
   });
+
+  describe('timestamp formatting options', () => {
+    beforeEach(() => {
+      // Add a timestamp field to the mock document
+      mockDocSnapshot.data = vi.fn().mockReturnValue({
+        name: 'Test User',
+        createdAt: {
+          _seconds: 1705329000, // 2024-01-15T14:30:00Z
+          _nanoseconds: 0,
+          toDate: () => new Date(1705329000 * 1000),
+        },
+      });
+      mockDocRef.get = vi.fn().mockResolvedValue(mockDocSnapshot);
+    });
+
+    it('should accept timezone parameter in schema', async () => {
+      // The schema should accept timezone parameter
+      const result = await registeredHandler({
+        path: 'users/user123',
+        format: 'json',
+        timezone: 'Asia/Tokyo',
+      } as any);
+
+      expect(result).not.toHaveProperty('isError');
+    });
+
+    it('should accept dateFormat parameter in schema', async () => {
+      const result = await registeredHandler({
+        path: 'users/user123',
+        format: 'json',
+        dateFormat: 'yyyy-MM-dd',
+      } as any);
+
+      expect(result).not.toHaveProperty('isError');
+    });
+
+    it('should accept rawOutput parameter in schema', async () => {
+      const result = await registeredHandler({
+        path: 'users/user123',
+        format: 'json',
+        rawOutput: true,
+      } as any);
+
+      expect(result).not.toHaveProperty('isError');
+    });
+  });
 });

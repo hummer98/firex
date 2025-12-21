@@ -7,6 +7,16 @@ import { parse as parseYAML } from 'yaml';
 import { Result, ok, err } from '../shared/types';
 
 /**
+ * Output configuration options
+ */
+export interface OutputConfig {
+  dateFormat?: string;
+  timezone?: string;
+  color?: boolean;
+  rawOutput?: boolean;
+}
+
+/**
  * Application configuration
  */
 export interface Config {
@@ -18,6 +28,7 @@ export interface Config {
   watchShowInitial: boolean;
   verbose?: boolean;
   logFile?: string;
+  output?: OutputConfig;
 }
 
 /**
@@ -112,6 +123,13 @@ export class ConfigService {
         ...envConfig,
         ...options.cliFlags,
       };
+
+      // 4. Deep merge output configuration
+      config.output = this.mergeOutputConfig(
+        fileConfig.value.output,
+        envConfig.output,
+        options.cliFlags?.output
+      );
 
       return ok(config);
     } catch (error) {
@@ -258,7 +276,71 @@ export class ConfigService {
       config.logFile = process.env.FIREX_LOG_FILE;
     }
 
+    // Load output configuration from environment
+    const outputConfig = this.loadOutputFromEnv();
+    if (Object.keys(outputConfig).length > 0) {
+      config.output = outputConfig;
+    }
+
     return config;
+  }
+
+  /**
+   * Load output configuration from environment variables
+   */
+  private loadOutputFromEnv(): OutputConfig {
+    const output: OutputConfig = {};
+
+    if (process.env.FIREX_TIMEZONE) {
+      output.timezone = process.env.FIREX_TIMEZONE;
+    }
+
+    if (process.env.FIREX_DATE_FORMAT) {
+      output.dateFormat = process.env.FIREX_DATE_FORMAT;
+    }
+
+    if (process.env.FIREX_RAW_OUTPUT) {
+      output.rawOutput =
+        process.env.FIREX_RAW_OUTPUT === 'true' ||
+        process.env.FIREX_RAW_OUTPUT === '1';
+    }
+
+    // Handle FIREX_NO_COLOR
+    if (process.env.FIREX_NO_COLOR) {
+      const noColor =
+        process.env.FIREX_NO_COLOR === 'true' ||
+        process.env.FIREX_NO_COLOR === '1';
+      if (noColor) {
+        output.color = false;
+      }
+    }
+
+    // Handle NO_COLOR (standard convention: existence triggers, value doesn't matter)
+    if (process.env.NO_COLOR !== undefined) {
+      output.color = false;
+    }
+
+    return output;
+  }
+
+  /**
+   * Merge output configurations with priority: cli > env > file
+   */
+  private mergeOutputConfig(
+    fileOutput?: OutputConfig,
+    envOutput?: OutputConfig,
+    cliOutput?: OutputConfig
+  ): OutputConfig | undefined {
+    // If no output config from any source, return undefined
+    if (!fileOutput && !envOutput && !cliOutput) {
+      return undefined;
+    }
+
+    return {
+      ...fileOutput,
+      ...envOutput,
+      ...cliOutput,
+    };
   }
 
   /**

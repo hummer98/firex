@@ -6,6 +6,8 @@ import { Result, ok, err, DocumentWithMeta, DocumentChange, OutputFormat, Docume
 import Table from 'cli-table3';
 import { stringify as stringifyYaml } from 'yaml';
 import { ToonEncoder } from './toon-encoder';
+import { DateFnsFormatter } from './date-formatter';
+import { TimestampProcessor } from './timestamp-processor';
 
 /**
  * Format options
@@ -26,13 +28,25 @@ export type FormatError = {
 };
 
 /**
+ * Timestamp format options
+ */
+export interface TimestampFormatOptions {
+  dateFormat: string;
+  timezone: string;
+  noDateFormat: boolean;
+}
+
+/**
  * Service for formatting output in different formats
  */
 export class OutputFormatter {
   private toonEncoder: ToonEncoder;
+  private timestampProcessor: TimestampProcessor;
 
   constructor() {
     this.toonEncoder = new ToonEncoder();
+    const dateFormatter = new DateFnsFormatter();
+    this.timestampProcessor = new TimestampProcessor(dateFormatter);
   }
 
   /**
@@ -41,12 +55,25 @@ export class OutputFormatter {
   formatDocument(
     document: DocumentWithMeta,
     format: OutputFormat,
-    options: FormatOptions = {}
+    options: FormatOptions = {},
+    timestampOptions?: TimestampFormatOptions
   ): Result<string, FormatError> {
     try {
-      const data = options.includeMetadata
+      let data = options.includeMetadata
         ? { ...document.data, _metadata: document.metadata }
         : document.data;
+
+      // Process timestamps if options are provided
+      if (timestampOptions) {
+        const processResult = this.timestampProcessor.processData(data, {
+          dateFormat: timestampOptions.dateFormat,
+          timezone: timestampOptions.timezone,
+          noDateFormat: timestampOptions.noDateFormat,
+        });
+        if (processResult.isOk()) {
+          data = processResult.value;
+        }
+      }
 
       switch (format) {
         case 'json':
@@ -84,18 +111,31 @@ export class OutputFormatter {
   formatDocuments(
     documents: DocumentWithMeta[],
     format: OutputFormat,
-    options: FormatOptions = {}
+    options: FormatOptions = {},
+    timestampOptions?: TimestampFormatOptions
   ): Result<string, FormatError> {
     try {
       if (documents.length === 0) {
         return ok('[]');
       }
 
-      const dataArray = documents.map((doc) =>
+      let dataArray = documents.map((doc) =>
         options.includeMetadata
           ? { ...doc.data, _metadata: doc.metadata }
           : doc.data
       );
+
+      // Process timestamps if options are provided
+      if (timestampOptions) {
+        dataArray = dataArray.map((data) => {
+          const processResult = this.timestampProcessor.processData(data, {
+            dateFormat: timestampOptions.dateFormat,
+            timezone: timestampOptions.timezone,
+            noDateFormat: timestampOptions.noDateFormat,
+          });
+          return processResult.isOk() ? processResult.value : data;
+        });
+      }
 
       switch (format) {
         case 'json':

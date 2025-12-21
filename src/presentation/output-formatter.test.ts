@@ -3,8 +3,9 @@
  */
 
 import { describe, it, expect, beforeEach } from 'vitest';
-import { OutputFormatter } from './output-formatter';
+import { OutputFormatter, TimestampFormatOptions } from './output-formatter';
 import type { DocumentWithMeta } from '../shared/types';
+import { FirestoreTimestampLike } from './date-formatter';
 
 describe('OutputFormatter', () => {
   let formatter: OutputFormatter;
@@ -469,6 +470,251 @@ describe('OutputFormatter', () => {
       if (result.isOk()) {
         const output = result.value;
         expect(typeof output).toBe('string');
+      }
+    });
+  });
+
+  describe('Timestamp formatting', () => {
+    // Helper to create a Timestamp-like object
+    function createTimestamp(date: Date): FirestoreTimestampLike {
+      const seconds = Math.floor(date.getTime() / 1000);
+      const nanoseconds = (date.getTime() % 1000) * 1000000;
+      return {
+        _seconds: seconds,
+        _nanoseconds: nanoseconds,
+        toDate: () => date,
+      };
+    }
+
+    const timestampOptions: TimestampFormatOptions = {
+      dateFormat: "yyyy-MM-dd'T'HH:mm:ssXXX",
+      timezone: 'UTC',
+      noDateFormat: false,
+    };
+
+    it('should convert Timestamp fields in document data', () => {
+      const date = new Date(Date.UTC(2024, 0, 15, 14, 30, 0));
+      const docWithTimestamp: DocumentWithMeta = {
+        data: {
+          name: 'Test',
+          createdAt: createTimestamp(date),
+        },
+        metadata: {
+          id: 'doc1',
+          path: 'docs/doc1',
+        },
+      };
+
+      const result = formatter.formatDocument(
+        docWithTimestamp,
+        'json',
+        {},
+        timestampOptions
+      );
+
+      expect(result.isOk()).toBe(true);
+      if (result.isOk()) {
+        expect(result.value).toContain('2024-01-15T14:30:00Z');
+        expect(result.value).not.toContain('_seconds');
+      }
+    });
+
+    it('should convert nested Timestamp fields', () => {
+      const date = new Date(Date.UTC(2024, 0, 15, 14, 30, 0));
+      const docWithNestedTimestamp: DocumentWithMeta = {
+        data: {
+          user: {
+            profile: {
+              updatedAt: createTimestamp(date),
+            },
+          },
+        },
+        metadata: {
+          id: 'doc1',
+          path: 'docs/doc1',
+        },
+      };
+
+      const result = formatter.formatDocument(
+        docWithNestedTimestamp,
+        'json',
+        {},
+        timestampOptions
+      );
+
+      expect(result.isOk()).toBe(true);
+      if (result.isOk()) {
+        expect(result.value).toContain('2024-01-15T14:30:00Z');
+      }
+    });
+
+    it('should convert Timestamps in arrays', () => {
+      const date1 = new Date(Date.UTC(2024, 0, 15, 14, 30, 0));
+      const date2 = new Date(Date.UTC(2024, 0, 16, 10, 0, 0));
+      const docWithArrayTimestamps: DocumentWithMeta = {
+        data: {
+          events: [createTimestamp(date1), createTimestamp(date2)],
+        },
+        metadata: {
+          id: 'doc1',
+          path: 'docs/doc1',
+        },
+      };
+
+      const result = formatter.formatDocument(
+        docWithArrayTimestamps,
+        'json',
+        {},
+        timestampOptions
+      );
+
+      expect(result.isOk()).toBe(true);
+      if (result.isOk()) {
+        expect(result.value).toContain('2024-01-15T14:30:00Z');
+        expect(result.value).toContain('2024-01-16T10:00:00Z');
+      }
+    });
+
+    it('should skip Timestamp conversion when noDateFormat is true', () => {
+      const date = new Date(Date.UTC(2024, 0, 15, 14, 30, 0));
+      const docWithTimestamp: DocumentWithMeta = {
+        data: {
+          createdAt: createTimestamp(date),
+        },
+        metadata: {
+          id: 'doc1',
+          path: 'docs/doc1',
+        },
+      };
+
+      const result = formatter.formatDocument(
+        docWithTimestamp,
+        'json',
+        {},
+        { ...timestampOptions, noDateFormat: true }
+      );
+
+      expect(result.isOk()).toBe(true);
+      if (result.isOk()) {
+        expect(result.value).toContain('_seconds');
+        expect(result.value).toContain('_nanoseconds');
+      }
+    });
+
+    it('should convert Timestamps with specified timezone', () => {
+      const date = new Date(Date.UTC(2024, 0, 15, 5, 30, 0)); // 14:30 JST
+      const docWithTimestamp: DocumentWithMeta = {
+        data: {
+          createdAt: createTimestamp(date),
+        },
+        metadata: {
+          id: 'doc1',
+          path: 'docs/doc1',
+        },
+      };
+
+      const result = formatter.formatDocument(
+        docWithTimestamp,
+        'json',
+        {},
+        { ...timestampOptions, timezone: 'Asia/Tokyo' }
+      );
+
+      expect(result.isOk()).toBe(true);
+      if (result.isOk()) {
+        expect(result.value).toContain('2024-01-15T14:30:00+09:00');
+      }
+    });
+
+    it('should convert Timestamps in formatDocuments', () => {
+      const date = new Date(Date.UTC(2024, 0, 15, 14, 30, 0));
+      const docs: DocumentWithMeta[] = [
+        {
+          data: { createdAt: createTimestamp(date) },
+          metadata: { id: 'doc1', path: 'docs/doc1' },
+        },
+      ];
+
+      const result = formatter.formatDocuments(docs, 'json', {}, timestampOptions);
+
+      expect(result.isOk()).toBe(true);
+      if (result.isOk()) {
+        expect(result.value).toContain('2024-01-15T14:30:00Z');
+      }
+    });
+
+    it('should work with YAML format', () => {
+      const date = new Date(Date.UTC(2024, 0, 15, 14, 30, 0));
+      const docWithTimestamp: DocumentWithMeta = {
+        data: {
+          createdAt: createTimestamp(date),
+        },
+        metadata: {
+          id: 'doc1',
+          path: 'docs/doc1',
+        },
+      };
+
+      const result = formatter.formatDocument(
+        docWithTimestamp,
+        'yaml',
+        {},
+        timestampOptions
+      );
+
+      expect(result.isOk()).toBe(true);
+      if (result.isOk()) {
+        expect(result.value).toContain('2024-01-15T14:30:00Z');
+      }
+    });
+
+    it('should work with table format', () => {
+      const date = new Date(Date.UTC(2024, 0, 15, 14, 30, 0));
+      const docWithTimestamp: DocumentWithMeta = {
+        data: {
+          createdAt: createTimestamp(date),
+        },
+        metadata: {
+          id: 'doc1',
+          path: 'docs/doc1',
+        },
+      };
+
+      const result = formatter.formatDocument(
+        docWithTimestamp,
+        'table',
+        {},
+        timestampOptions
+      );
+
+      expect(result.isOk()).toBe(true);
+      if (result.isOk()) {
+        expect(result.value).toContain('2024-01-15T14:30:00Z');
+      }
+    });
+
+    it('should work with toon format', () => {
+      const date = new Date(Date.UTC(2024, 0, 15, 14, 30, 0));
+      const docWithTimestamp: DocumentWithMeta = {
+        data: {
+          createdAt: createTimestamp(date),
+        },
+        metadata: {
+          id: 'doc1',
+          path: 'docs/doc1',
+        },
+      };
+
+      const result = formatter.formatDocument(
+        docWithTimestamp,
+        'toon',
+        {},
+        timestampOptions
+      );
+
+      expect(result.isOk()).toBe(true);
+      if (result.isOk()) {
+        expect(result.value).toContain('2024-01-15T14:30:00Z');
       }
     });
   });

@@ -165,5 +165,145 @@ describe('ConfigService', () => {
         expect(result.value.emulatorHost).toBe('localhost:8080');
       }
     });
+
+    it('should map FIREX_TIMEZONE to output.timezone', async () => {
+      process.env.FIREX_TIMEZONE = 'Asia/Tokyo';
+
+      const result = await configService.loadConfig({ searchFrom: tmpDir });
+
+      expect(result.isOk()).toBe(true);
+      if (result.isOk()) {
+        expect(result.value.output?.timezone).toBe('Asia/Tokyo');
+      }
+    });
+
+    it('should map FIREX_DATE_FORMAT to output.dateFormat', async () => {
+      process.env.FIREX_DATE_FORMAT = 'yyyy/MM/dd';
+
+      const result = await configService.loadConfig({ searchFrom: tmpDir });
+
+      expect(result.isOk()).toBe(true);
+      if (result.isOk()) {
+        expect(result.value.output?.dateFormat).toBe('yyyy/MM/dd');
+      }
+    });
+
+    it('should map FIREX_RAW_OUTPUT=true to output.rawOutput', async () => {
+      process.env.FIREX_RAW_OUTPUT = 'true';
+
+      const result = await configService.loadConfig({ searchFrom: tmpDir });
+
+      expect(result.isOk()).toBe(true);
+      if (result.isOk()) {
+        expect(result.value.output?.rawOutput).toBe(true);
+      }
+    });
+
+    it('should map FIREX_RAW_OUTPUT=1 to output.rawOutput', async () => {
+      process.env.FIREX_RAW_OUTPUT = '1';
+
+      const result = await configService.loadConfig({ searchFrom: tmpDir });
+
+      expect(result.isOk()).toBe(true);
+      if (result.isOk()) {
+        expect(result.value.output?.rawOutput).toBe(true);
+      }
+    });
+
+    it('should map FIREX_NO_COLOR=true to output.color=false', async () => {
+      process.env.FIREX_NO_COLOR = 'true';
+
+      const result = await configService.loadConfig({ searchFrom: tmpDir });
+
+      expect(result.isOk()).toBe(true);
+      if (result.isOk()) {
+        expect(result.value.output?.color).toBe(false);
+      }
+    });
+
+    it('should map NO_COLOR (any value) to output.color=false', async () => {
+      process.env.NO_COLOR = '1';
+
+      const result = await configService.loadConfig({ searchFrom: tmpDir });
+
+      expect(result.isOk()).toBe(true);
+      if (result.isOk()) {
+        expect(result.value.output?.color).toBe(false);
+      }
+    });
+
+    it('should map NO_COLOR (empty string) to output.color=false', async () => {
+      // NO_COLOR should trigger on existence, not value
+      process.env.NO_COLOR = '';
+
+      const result = await configService.loadConfig({ searchFrom: tmpDir });
+
+      expect(result.isOk()).toBe(true);
+      if (result.isOk()) {
+        expect(result.value.output?.color).toBe(false);
+      }
+    });
+  });
+
+  describe('output configuration', () => {
+    it('should load output section from config file', async () => {
+      const configPath = path.join(tmpDir, '.firex.yaml');
+      await fs.writeFile(
+        configPath,
+        `projectId: test-project
+output:
+  dateFormat: "yyyy-MM-dd'T'HH:mm:ss"
+  timezone: Europe/London
+  color: false
+  rawOutput: true
+`
+      );
+
+      const result = await configService.loadConfig({ searchFrom: tmpDir });
+
+      expect(result.isOk()).toBe(true);
+      if (result.isOk()) {
+        expect(result.value.output?.dateFormat).toBe("yyyy-MM-dd'T'HH:mm:ss");
+        expect(result.value.output?.timezone).toBe('Europe/London');
+        expect(result.value.output?.color).toBe(false);
+        expect(result.value.output?.rawOutput).toBe(true);
+      }
+    });
+
+    it('should use default output values when output section is missing', async () => {
+      const configPath = path.join(tmpDir, '.firex.yaml');
+      await fs.writeFile(configPath, 'projectId: test-project\n');
+
+      const result = await configService.loadConfig({ searchFrom: tmpDir });
+
+      expect(result.isOk()).toBe(true);
+      if (result.isOk()) {
+        // Should use defaults
+        expect(result.value.output).toBeUndefined();
+      }
+    });
+
+    it('should merge environment output settings with file config', async () => {
+      const configPath = path.join(tmpDir, '.firex.yaml');
+      await fs.writeFile(
+        configPath,
+        `output:
+  dateFormat: "yyyy-MM-dd"
+  timezone: America/New_York
+`
+      );
+
+      process.env.FIREX_TIMEZONE = 'Asia/Tokyo';
+
+      const result = await configService.loadConfig({ searchFrom: tmpDir });
+
+      expect(result.isOk()).toBe(true);
+      if (result.isOk()) {
+        // Environment should override file
+        expect(result.value.output?.timezone).toBe('Asia/Tokyo');
+        // File value should remain
+        expect(result.value.output?.dateFormat).toBe('yyyy-MM-dd');
+      }
+    });
   });
 });

@@ -7,7 +7,9 @@ import { BaseCommand } from './base-command';
 import { FirestoreOps } from '../domain/firestore-ops';
 import { QueryBuilder, QueryOptions } from '../domain/query-builder';
 import { WatchService } from '../domain/watch-service';
-import { OutputFormatter } from '../presentation/output-formatter';
+import { OutputFormatter, TimestampFormatOptions } from '../presentation/output-formatter';
+import { TimezoneService } from '../services/timezone';
+import { OutputOptionsResolver } from '../services/output-options-resolver';
 import { t } from '../shared/i18n';
 import type { OutputFormat, WhereCondition, OrderBy, DocumentChange, FirestoreOperator } from '../shared/types';
 
@@ -93,6 +95,29 @@ export class ListCommand extends BaseCommand {
     const firestoreOps = new FirestoreOps(firestore);
     const outputFormatter = new OutputFormatter();
 
+    // Resolve timestamp options from CLI flags and config
+    const timezoneService = new TimezoneService();
+    const resolver = new OutputOptionsResolver(timezoneService);
+    const resolvedOptions = resolver.resolve({
+      cliFlags: {
+        timezone: flags.timezone,
+        dateFormat: flags['date-format'],
+        rawOutput: flags['raw-output'],
+        noColor: flags['no-color'],
+        noDateFormat: flags['no-date-format'],
+      },
+      config: this.loadedConfig?.output ?? {},
+    });
+
+    // Build timestamp options (undefined if rawOutput is true)
+    const timestampOptions: TimestampFormatOptions | undefined = resolvedOptions.rawOutput
+      ? undefined
+      : {
+          dateFormat: resolvedOptions.dateFormat,
+          timezone: resolvedOptions.timezone,
+          noDateFormat: resolvedOptions.noDateFormat,
+        };
+
     // No path: list root collections
     if (!collectionPath) {
       await this.listRootCollections(firestoreOps, format, outputFormatter, quiet);
@@ -153,7 +178,8 @@ export class ListCommand extends BaseCommand {
         effectiveLimit,
         format,
         outputFormatter,
-        quiet
+        quiet,
+        timestampOptions
       );
     }
   }
@@ -235,7 +261,8 @@ export class ListCommand extends BaseCommand {
     limit: number,
     format: OutputFormat,
     outputFormatter: OutputFormatter,
-    quiet: boolean
+    quiet: boolean,
+    timestampOptions?: TimestampFormatOptions
   ): Promise<void> {
     const queryBuilder = new QueryBuilder(firestore);
 
@@ -262,8 +289,13 @@ export class ListCommand extends BaseCommand {
       return;
     }
 
-    // Format and display documents
-    const formatResult = outputFormatter.formatDocuments(documents, format);
+    // Format and display documents with timestamp options
+    const formatResult = outputFormatter.formatDocuments(
+      documents,
+      format,
+      {},
+      timestampOptions
+    );
 
     if (formatResult.isErr()) {
       this.handleError(formatResult.error.message, 'unknown');

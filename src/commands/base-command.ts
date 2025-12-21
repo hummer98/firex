@@ -73,6 +73,26 @@ export abstract class BaseCommand extends Command {
       char: 'p',
       description: t('flag.profile'),
     }),
+    timezone: Flags.string({
+      description: t('flag.timezone'),
+      env: 'FIREX_TIMEZONE',
+    }),
+    'date-format': Flags.string({
+      description: t('flag.dateFormat'),
+      env: 'FIREX_DATE_FORMAT',
+    }),
+    'raw-output': Flags.boolean({
+      description: t('flag.rawOutput'),
+      default: false,
+    }),
+    'no-color': Flags.boolean({
+      description: t('flag.noColor'),
+      default: false,
+    }),
+    'no-date-format': Flags.boolean({
+      description: t('flag.noDateFormat'),
+      default: false,
+    }),
   };
 
   // Service instances

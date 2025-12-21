@@ -9,7 +9,9 @@ import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { Firestore } from 'firebase-admin/firestore';
 import { QueryBuilder } from '../../domain/query-builder.js';
 import type { WhereCondition, OrderBy, FirestoreOperator, OrderDirection, OutputFormat } from '../../shared/types.js';
-import { OutputFormatter } from '../../presentation/output-formatter.js';
+import { OutputFormatter, TimestampFormatOptions } from '../../presentation/output-formatter.js';
+import { DEFAULT_DATE_FORMAT } from '../../presentation/date-formatter.js';
+import { TimezoneService } from '../../services/timezone.js';
 
 const WhereConditionSchema = z.object({
   field: z.string().describe('Field name to filter on'),
@@ -30,6 +32,9 @@ const ListSchema = {
   orderBy: z.array(OrderBySchema).optional().describe('Sort order'),
   limit: z.number().optional().describe('Maximum number of documents to return'),
   format: z.enum(['json', 'toon']).optional().default('json').describe('Output format (json or toon)'),
+  timezone: z.string().optional().describe('Timezone (IANA format, e.g., Asia/Tokyo)'),
+  dateFormat: z.string().optional().describe('Date format pattern (e.g., yyyy-MM-dd)'),
+  rawOutput: z.boolean().optional().default(false).describe('Disable all formatting'),
 };
 
 export function registerListTool(server: McpServer, firestore: Firestore): void {
@@ -37,7 +42,7 @@ export function registerListTool(server: McpServer, firestore: Firestore): void 
     'firestore_list',
     'Query documents from a Firestore collection with optional filters, sorting, and pagination',
     ListSchema,
-    async ({ path, where, orderBy, limit, format }) => {
+    async ({ path, where, orderBy, limit, format, timezone, dateFormat, rawOutput }) => {
       const queryBuilder = new QueryBuilder(firestore);
 
       const whereConditions: WhereCondition[] | undefined = where?.map((w) => ({
@@ -69,12 +74,32 @@ export function registerListTool(server: McpServer, firestore: Firestore): void 
         };
       }
 
+      // Resolve timezone
+      const timezoneService = new TimezoneService();
+      let resolvedTimezone = timezone;
+      if (!resolvedTimezone) {
+        resolvedTimezone = timezoneService.getSystemTimezone();
+      } else {
+        const resolution = timezoneService.resolveTimezone(resolvedTimezone);
+        resolvedTimezone = resolution.timezone;
+      }
+
+      // Build timestamp options
+      const timestampOptions: TimestampFormatOptions | undefined = rawOutput
+        ? undefined
+        : {
+            dateFormat: dateFormat ?? DEFAULT_DATE_FORMAT,
+            timezone: resolvedTimezone,
+            noDateFormat: false,
+          };
+
       const { documents, executionTimeMs } = result.value;
       const outputFormatter = new OutputFormatter();
       const formatResult = outputFormatter.formatDocuments(
         documents,
         format as OutputFormat,
-        { includeMetadata: true }
+        { includeMetadata: true },
+        timestampOptions
       );
 
       if (formatResult.isErr()) {

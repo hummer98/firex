@@ -8,12 +8,17 @@ import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { Firestore } from 'firebase-admin/firestore';
 import { FirestoreOps } from '../../domain/firestore-ops.js';
-import { OutputFormatter } from '../../presentation/output-formatter.js';
+import { OutputFormatter, TimestampFormatOptions } from '../../presentation/output-formatter.js';
 import type { OutputFormat } from '../../shared/types.js';
+import { DEFAULT_DATE_FORMAT } from '../../presentation/date-formatter.js';
+import { TimezoneService } from '../../services/timezone.js';
 
 const GetSchema = {
   path: z.string().describe('Document path (e.g., users/user123)'),
   format: z.enum(['json', 'toon']).optional().default('json').describe('Output format (json or toon)'),
+  timezone: z.string().optional().describe('Timezone (IANA format, e.g., Asia/Tokyo)'),
+  dateFormat: z.string().optional().describe('Date format pattern (e.g., yyyy-MM-dd)'),
+  rawOutput: z.boolean().optional().default(false).describe('Disable all formatting'),
 };
 
 export function registerGetTool(server: McpServer, firestore: Firestore): void {
@@ -21,7 +26,7 @@ export function registerGetTool(server: McpServer, firestore: Firestore): void {
     'firestore_get',
     'Get a document from Firestore by its path',
     GetSchema,
-    async ({ path, format }) => {
+    async ({ path, format, timezone, dateFormat, rawOutput }) => {
       const ops = new FirestoreOps(firestore);
       const result = await ops.getDocument(path);
 
@@ -37,12 +42,32 @@ export function registerGetTool(server: McpServer, firestore: Firestore): void {
         };
       }
 
+      // Resolve timezone
+      const timezoneService = new TimezoneService();
+      let resolvedTimezone = timezone;
+      if (!resolvedTimezone) {
+        resolvedTimezone = timezoneService.getSystemTimezone();
+      } else {
+        const resolution = timezoneService.resolveTimezone(resolvedTimezone);
+        resolvedTimezone = resolution.timezone;
+      }
+
+      // Build timestamp options
+      const timestampOptions: TimestampFormatOptions | undefined = rawOutput
+        ? undefined
+        : {
+            dateFormat: dateFormat ?? DEFAULT_DATE_FORMAT,
+            timezone: resolvedTimezone,
+            noDateFormat: false,
+          };
+
       const doc = result.value;
       const outputFormatter = new OutputFormatter();
       const formatResult = outputFormatter.formatDocument(
         doc,
         format as OutputFormat,
-        { includeMetadata: true }
+        { includeMetadata: true },
+        timestampOptions
       );
 
       if (formatResult.isErr()) {

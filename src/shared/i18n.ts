@@ -55,6 +55,11 @@ export interface Messages {
   'flag.yaml': string;
   'flag.table': string;
   'flag.toon': string;
+  'flag.timezone': string;
+  'flag.dateFormat': string;
+  'flag.rawOutput': string;
+  'flag.noColor': string;
+  'flag.noDateFormat': string;
 
   // Success messages
   'msg.documentCreated': string;
@@ -156,6 +161,11 @@ const jaMessages: Messages = {
   'flag.yaml': 'YAML形式で出力 (--format=yaml のエイリアス)',
   'flag.table': 'テーブル形式で出力 (--format=table のエイリアス)',
   'flag.toon': 'TOON形式で出力 (--format=toon のエイリアス)',
+  'flag.timezone': '出力タイムゾーン (IANA形式、例: Asia/Tokyo)',
+  'flag.dateFormat': '日時フォーマットパターン (例: yyyy-MM-dd)',
+  'flag.rawOutput': '全整形処理を無効化',
+  'flag.noColor': 'ANSIカラーコードを無効化',
+  'flag.noDateFormat': '日付フォーマット変換のみを無効化',
 
   // Success messages
   'msg.documentCreated': 'ドキュメントを作成しました',
@@ -257,6 +267,11 @@ const enMessages: Messages = {
   'flag.yaml': 'Output in YAML format (alias for --format=yaml)',
   'flag.table': 'Output in table format (alias for --format=table)',
   'flag.toon': 'Output in TOON format (alias for --format=toon)',
+  'flag.timezone': 'Output timezone (IANA format, e.g., Asia/Tokyo)',
+  'flag.dateFormat': 'Date format pattern (e.g., yyyy-MM-dd)',
+  'flag.rawOutput': 'Disable all formatting',
+  'flag.noColor': 'Disable ANSI color codes',
+  'flag.noDateFormat': 'Disable date format conversion only',
 
   // Success messages
   'msg.documentCreated': 'Document created',
