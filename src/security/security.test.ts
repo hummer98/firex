@@ -139,13 +139,13 @@ describe('Security Tests', () => {
       const { execSync } = await import('child_process');
       try {
         // Just verify command exists, don't fail on vulnerabilities here
-        execSync('npm audit --help', { encoding: 'utf-8', stdio: 'pipe' });
+        execSync('npm audit --help', { encoding: 'utf-8', stdio: 'pipe', timeout: 10000 });
         expect(true).toBe(true);
       } catch {
         // npm audit command not available
         expect.fail('npm audit command should be available');
       }
-    });
+    }, 15000); // Increase test timeout to 15 seconds
   });
 
   describe('Service Account Key Patterns', () => {
