@@ -32,6 +32,7 @@ Firebase Firestore のコマンドライン操作ツール
 - **バッチ操作**: JSON ファイルへのコレクションのインポート・エクスポート
 - **リアルタイム監視**: `--watch` フラグによるドキュメントとコレクションの変更監視
 - **複数の出力形式**: JSON、YAML、テーブル、TOON形式をサポート
+- **タイムスタンプフォーマット**: 柔軟なタイムスタンプ表示（ISO形式）とタイムゾーン対応（TZ環境変数を尊重）
 - **設定プロファイル**: 複数のプロジェクト設定をサポート
 - **型安全**: TypeScript で構築された信頼性
 
@@ -139,6 +140,8 @@ firex get <document-path> [options]
 - `--toon`: TOON形式で出力（--format=toon のエイリアス）
 - `--watch, -w`: リアルタイムでドキュメントの変更を監視
 - `--show-initial`: 監視モードで初期データを表示（デフォルト: true）
+- `--timestamp-format <format>`: タイムスタンプの表示形式（iso, none）。デフォルト: iso
+- `--timezone <zone>`: タイムスタンプ表示のタイムゾーン（local, utc, または Asia/Tokyo のような IANA タイムゾーン）
 - `--project-id <id>`: Firebase プロジェクト ID
 - `--credential-path <path>`: サービスアカウントキーファイルのパス
 - `--verbose, -v`: 詳細出力を有効化
@@ -156,6 +159,12 @@ firex get users/user123 --toon
 
 # ドキュメントの変更を監視
 firex get users/user123 --watch
+
+# ISO 形式で東京タイムゾーンのタイムスタンプを表示
+firex get users/user123 --timestamp-format iso --timezone Asia/Tokyo
+
+# タイムスタンプフォーマットを無効化（Firestore Timestamp をそのまま表示）
+firex get users/user123 --timestamp-format none
 ```
 
 ### list - ドキュメント一覧/クエリ
@@ -173,6 +182,8 @@ firex list <collection-path> [options]
 - `--limit, -l <number>`: 返却する最大ドキュメント数。デフォルト: 100
 - `--format, -f <format>`: 出力形式（json, yaml, table, toon）。デフォルト: json
 - `--toon`: TOON形式で出力（--format=toon のエイリアス）
+- `--timestamp-format <format>`: タイムスタンプの表示形式（iso, none）。デフォルト: iso
+- `--timezone <zone>`: タイムスタンプ表示のタイムゾーン（local, utc, または Asia/Tokyo のような IANA タイムゾーン）
 - `--watch, -w`: リアルタイムでコレクションの変更を監視
 
 **例:**
@@ -191,6 +202,9 @@ firex list orders --watch
 
 # TOON 形式で一覧表示
 firex list users --toon --limit 10
+
+# ISO 形式のタイムスタンプで一覧表示
+firex list users --timestamp-format iso --timezone utc
 ```
 
 ### set - ドキュメント作成/更新
@@ -398,6 +412,18 @@ firex は以下の順序で設定ファイルを探します：
 4. 親ディレクトリ（プロジェクトルートまで）
 5. ホームディレクトリ（`~/.firex.yaml`）
 
+### ユーザー設定（~/.firexrc）
+
+タイムスタンプ形式などのユーザー固有の設定は、`~/.firexrc` ファイルで指定できます：
+
+```yaml
+# ~/.firexrc
+timestampFormat: iso     # iso, none
+timezone: Asia/Tokyo     # local, utc, または IANA タイムゾーン（TZ環境変数を尊重）
+```
+
+**優先順位**: CLI オプション > ~/.firexrc > デフォルト値
+
 ### 設定オプション
 
 ```yaml
@@ -445,6 +471,11 @@ firex list users --profile staging
 | `FIREX_WATCH_SHOW_INITIAL` | 監視モードで初期データを表示（true/false） |
 | `FIREX_VERBOSE` | 詳細出力を有効化（true/false） |
 | `FIREX_LOG_FILE` | ログファイルのパス |
+| `FIREX_TIMESTAMP_FORMAT` | デフォルトのタイムスタンプ形式（iso, none） |
+| `FIREX_TIMEZONE` | デフォルトのタイムゾーン（local, utc, または IANA タイムゾーン） |
+| `TZ` | 標準UNIX タイムゾーン（`FIREX_TIMEZONE` 未設定時に使用） |
+
+**タイムゾーン優先順位**: CLI オプション > `FIREX_TIMEZONE` > `TZ` > システム検出
 
 > **Note:** firex は以下の [Firebase Admin SDK 標準環境変数](https://firebase.google.com/docs/admin/setup)にも対応しています：
 > - `GOOGLE_CLOUD_PROJECT` - プロジェクト ID（`FIRESTORE_PROJECT_ID` 未設定時に使用）

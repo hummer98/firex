@@ -291,8 +291,11 @@ export class ConfigService {
   private loadOutputFromEnv(): OutputConfig {
     const output: OutputConfig = {};
 
+    // Timezone priority: FIREX_TIMEZONE > TZ
     if (process.env.FIREX_TIMEZONE) {
       output.timezone = process.env.FIREX_TIMEZONE;
+    } else if (process.env.TZ) {
+      output.timezone = process.env.TZ;
     }
 
     if (process.env.FIREX_DATE_FORMAT) {

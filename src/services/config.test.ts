@@ -177,6 +177,29 @@ describe('ConfigService', () => {
       }
     });
 
+    it('should map TZ to output.timezone when FIREX_TIMEZONE is not set', async () => {
+      process.env.TZ = 'America/New_York';
+
+      const result = await configService.loadConfig({ searchFrom: tmpDir });
+
+      expect(result.isOk()).toBe(true);
+      if (result.isOk()) {
+        expect(result.value.output?.timezone).toBe('America/New_York');
+      }
+    });
+
+    it('should prioritize FIREX_TIMEZONE over TZ', async () => {
+      process.env.FIREX_TIMEZONE = 'Asia/Tokyo';
+      process.env.TZ = 'America/New_York';
+
+      const result = await configService.loadConfig({ searchFrom: tmpDir });
+
+      expect(result.isOk()).toBe(true);
+      if (result.isOk()) {
+        expect(result.value.output?.timezone).toBe('Asia/Tokyo');
+      }
+    });
+
     it('should map FIREX_DATE_FORMAT to output.dateFormat', async () => {
       process.env.FIREX_DATE_FORMAT = 'yyyy/MM/dd';
 

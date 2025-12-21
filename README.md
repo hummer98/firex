@@ -32,6 +32,7 @@ Firebase Firestore CLI tool for command-line operations.
 - **Batch Operations**: Import and export collections to/from JSON files
 - **Real-time Monitoring**: Watch documents and collections for changes with `--watch` flag
 - **Multiple Output Formats**: JSON, YAML, table, and TOON format support
+- **Timestamp Formatting**: Flexible timestamp display (ISO format) with timezone support (respects TZ env var)
 - **Configuration Profiles**: Support for multiple project configurations
 - **Type-safe**: Built with TypeScript for reliability
 
@@ -139,6 +140,8 @@ firex get <document-path> [options]
 - `--toon`: Output in TOON format (alias for --format=toon)
 - `--watch, -w`: Watch document for real-time changes
 - `--show-initial`: Show initial data in watch mode (default: true)
+- `--timestamp-format <format>`: Timestamp display format (iso, none). Default: iso
+- `--timezone <zone>`: Timezone for timestamp display (local, utc, or IANA timezone like Asia/Tokyo)
 - `--project-id <id>`: Firebase project ID
 - `--credential-path <path>`: Path to service account key file
 - `--verbose, -v`: Enable verbose output
@@ -156,6 +159,12 @@ firex get users/user123 --toon
 
 # Watch document for changes
 firex get users/user123 --watch
+
+# Display timestamps in ISO format with Tokyo timezone
+firex get users/user123 --timestamp-format iso --timezone Asia/Tokyo
+
+# Disable timestamp formatting (show raw Firestore Timestamp)
+firex get users/user123 --timestamp-format none
 ```
 
 ### list - List/Query Documents
@@ -173,6 +182,8 @@ firex list <collection-path> [options]
 - `--limit, -l <number>`: Maximum documents to return. Default: 100
 - `--format, -f <format>`: Output format (json, yaml, table, toon). Default: json
 - `--toon`: Output in TOON format (alias for --format=toon)
+- `--timestamp-format <format>`: Timestamp display format (iso, none). Default: iso
+- `--timezone <zone>`: Timezone for timestamp display (local, utc, or IANA timezone like Asia/Tokyo)
 - `--watch, -w`: Watch collection for real-time changes
 
 **Examples:**
@@ -191,6 +202,9 @@ firex list orders --watch
 
 # List in TOON format
 firex list users --toon --limit 10
+
+# List with ISO timestamps
+firex list users --timestamp-format iso --timezone utc
 ```
 
 ### set - Create/Update Document
@@ -398,6 +412,18 @@ firex looks for configuration files in the following order:
 4. Parent directories (up to project root)
 5. Home directory (`~/.firex.yaml`)
 
+### User Preferences (~/.firexrc)
+
+For user-specific preferences like timestamp format, create a `~/.firexrc` file:
+
+```yaml
+# ~/.firexrc
+timestampFormat: iso     # iso, none
+timezone: Asia/Tokyo     # local, utc, or IANA timezone (respects TZ env var)
+```
+
+**Priority order**: CLI options > ~/.firexrc > default values
+
 ### Configuration Options
 
 ```yaml
@@ -445,6 +471,11 @@ firex list users --profile staging
 | `FIREX_WATCH_SHOW_INITIAL` | Show initial data in watch mode (true/false) |
 | `FIREX_VERBOSE` | Enable verbose output (true/false) |
 | `FIREX_LOG_FILE` | Path to log file |
+| `FIREX_TIMESTAMP_FORMAT` | Default timestamp format (iso, none) |
+| `FIREX_TIMEZONE` | Default timezone (local, utc, or IANA timezone) |
+| `TZ` | Standard UNIX timezone (used when `FIREX_TIMEZONE` is not set) |
+
+**Timezone Priority**: CLI option > `FIREX_TIMEZONE` > `TZ` > System detection
 
 > **Note:** firex also respects the following [Firebase Admin SDK standard environment variables](https://firebase.google.com/docs/admin/setup):
 > - `GOOGLE_CLOUD_PROJECT` - Project ID (used when `FIRESTORE_PROJECT_ID` is not set)
