@@ -16,6 +16,7 @@ Firebase Firestore CLI tool for command-line operations.
 - [Command Reference](#command-reference)
 - [Configuration File](#configuration-file)
 - [Environment Variables](#environment-variables)
+- [Timestamp Formatting](#timestamp-formatting)
 - [Troubleshooting](#troubleshooting)
 - [Security Considerations](#security-considerations)
 - [TOON Output Format](#toon-output-format)
@@ -480,6 +481,164 @@ firex list users --profile staging
 > **Note:** firex also respects the following [Firebase Admin SDK standard environment variables](https://firebase.google.com/docs/admin/setup):
 > - `GOOGLE_CLOUD_PROJECT` - Project ID (used when `FIRESTORE_PROJECT_ID` is not set)
 > - `FIREBASE_CONFIG` - Firebase configuration as JSON string or path to JSON file (auto-set in Cloud Functions and App Hosting environments)
+
+## Timestamp Formatting
+
+firex automatically converts Firestore Timestamp fields to human-readable formats. This section explains how the timestamp options affect output.
+
+### Options Overview
+
+| Option | CLI Flag | Description |
+|--------|----------|-------------|
+| **timezone** | `--timezone <zone>` | Timezone for display (default: system timezone) |
+| **dateFormat** | `--date-format <pattern>` | date-fns format pattern (default: ISO 8601) |
+| **rawOutput** | `--raw-output` | Disable all formatting, output raw Firestore data |
+| **noDateFormat** | `--no-date-format` | Keep timestamps as raw objects |
+
+### Priority Order
+
+Options are resolved in this priority (highest to lowest):
+
+1. **CLI flags** (`--timezone`, `--date-format`, etc.)
+2. **Config file** (`~/.firexrc` or `.firex.yaml`)
+3. **Environment variables** (`FIREX_TIMEZONE`, `TZ`)
+4. **Default values** (system timezone, ISO 8601 format)
+
+### Output Examples
+
+Given a Firestore document with a timestamp field:
+```javascript
+// Firestore data (raw)
+{
+  name: "John",
+  createdAt: Timestamp { _seconds: 1705312200, _nanoseconds: 0 }
+  // Equivalent to: 2024-01-15T14:30:00+09:00 (JST) / 2024-01-15T05:30:00Z (UTC)
+}
+```
+
+#### Default Output (ISO 8601 with system timezone)
+
+```bash
+firex get users/user123
+```
+```json
+{
+  "name": "John",
+  "createdAt": "2024-01-15T14:30:00+09:00"
+}
+```
+Timestamps are converted to ISO 8601 format in your system timezone.
+
+#### With Specific Timezone
+
+```bash
+firex get users/user123 --timezone UTC
+```
+```json
+{
+  "name": "John",
+  "createdAt": "2024-01-15T05:30:00Z"
+}
+```
+
+```bash
+firex get users/user123 --timezone America/New_York
+```
+```json
+{
+  "name": "John",
+  "createdAt": "2024-01-15T00:30:00-05:00"
+}
+```
+
+#### With Custom Date Format
+
+```bash
+firex get users/user123 --date-format "yyyy/MM/dd HH:mm:ss"
+```
+```json
+{
+  "name": "John",
+  "createdAt": "2024/01/15 14:30:00"
+}
+```
+
+```bash
+firex get users/user123 --date-format "yyyy-MM-dd" --timezone UTC
+```
+```json
+{
+  "name": "John",
+  "createdAt": "2024-01-15"
+}
+```
+
+#### Raw Output (No Formatting)
+
+```bash
+firex get users/user123 --raw-output
+```
+```json
+{
+  "name": "John",
+  "createdAt": {
+    "_seconds": 1705312200,
+    "_nanoseconds": 0
+  }
+}
+```
+All formatting is disabled. Timestamps remain as Firestore's internal representation.
+
+#### Disable Only Timestamp Formatting
+
+```bash
+firex get users/user123 --no-date-format
+```
+```json
+{
+  "name": "John",
+  "createdAt": {
+    "_seconds": 1705312200,
+    "_nanoseconds": 0
+  }
+}
+```
+Timestamps are kept raw, but other formatting (colors, etc.) is applied.
+
+### Nested Timestamps
+
+Timestamps in nested objects and arrays are also converted:
+
+```bash
+firex get orders/order123 --timezone UTC
+```
+```json
+{
+  "user": {
+    "name": "John",
+    "profile": {
+      "createdAt": "2024-01-15T05:30:00Z"
+    }
+  },
+  "events": [
+    { "timestamp": "2024-01-15T14:30:00Z", "name": "Event 1" },
+    { "timestamp": "2024-01-16T10:00:00Z", "name": "Event 2" }
+  ]
+}
+```
+
+### Common Date Format Patterns
+
+| Pattern | Example Output |
+|---------|----------------|
+| `yyyy-MM-dd'T'HH:mm:ssXXX` | `2024-01-15T14:30:00+09:00` (default) |
+| `yyyy-MM-dd` | `2024-01-15` |
+| `yyyy/MM/dd HH:mm:ss` | `2024/01/15 14:30:00` |
+| `dd/MM/yyyy` | `15/01/2024` |
+| `HH:mm:ss` | `14:30:00` |
+| `yyyy-MM-dd'T'HH:mm:ss.SSSXXX` | `2024-01-15T14:30:00.000+09:00` |
+
+See [date-fns format documentation](https://date-fns.org/docs/format) for all available patterns.
 
 ## Troubleshooting
 

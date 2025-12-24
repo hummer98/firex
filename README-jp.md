@@ -16,6 +16,7 @@ Firebase Firestore のコマンドライン操作ツール
 - [コマンドリファレンス](#コマンドリファレンス)
 - [設定ファイル](#設定ファイル)
 - [環境変数](#環境変数)
+- [タイムスタンプフォーマット](#タイムスタンプフォーマット)
 - [トラブルシューティング](#トラブルシューティング)
 - [セキュリティに関する注意](#セキュリティに関する注意)
 - [TOON 出力形式](#toon-出力形式)
@@ -480,6 +481,164 @@ firex list users --profile staging
 > **Note:** firex は以下の [Firebase Admin SDK 標準環境変数](https://firebase.google.com/docs/admin/setup)にも対応しています：
 > - `GOOGLE_CLOUD_PROJECT` - プロジェクト ID（`FIRESTORE_PROJECT_ID` 未設定時に使用）
 > - `FIREBASE_CONFIG` - Firebase 設定（JSON 文字列または JSON ファイルパス、Cloud Functions や App Hosting 環境では自動設定）
+
+## タイムスタンプフォーマット
+
+firex は Firestore の Timestamp フィールドを自動的に人間が読みやすい形式に変換します。このセクションでは、タイムスタンプオプションが出力にどのように影響するかを説明します。
+
+### オプション一覧
+
+| オプション | CLI フラグ | 説明 |
+|-----------|----------|------|
+| **timezone** | `--timezone <zone>` | 表示用タイムゾーン（デフォルト: システムタイムゾーン） |
+| **dateFormat** | `--date-format <pattern>` | date-fns フォーマットパターン（デフォルト: ISO 8601） |
+| **rawOutput** | `--raw-output` | すべてのフォーマットを無効化、生の Firestore データを出力 |
+| **noDateFormat** | `--no-date-format` | タイムスタンプを生のオブジェクトのまま保持 |
+
+### 優先順位
+
+オプションは以下の優先順位で解決されます（高い順）：
+
+1. **CLI フラグ** (`--timezone`, `--date-format` など)
+2. **設定ファイル** (`~/.firexrc` または `.firex.yaml`)
+3. **環境変数** (`FIREX_TIMEZONE`, `TZ`)
+4. **デフォルト値** (システムタイムゾーン, ISO 8601 形式)
+
+### 出力例
+
+タイムスタンプフィールドを持つ Firestore ドキュメントの場合：
+```javascript
+// Firestore データ（生）
+{
+  name: "John",
+  createdAt: Timestamp { _seconds: 1705312200, _nanoseconds: 0 }
+  // 相当する時刻: 2024-01-15T14:30:00+09:00 (JST) / 2024-01-15T05:30:00Z (UTC)
+}
+```
+
+#### デフォルト出力（ISO 8601、システムタイムゾーン）
+
+```bash
+firex get users/user123
+```
+```json
+{
+  "name": "John",
+  "createdAt": "2024-01-15T14:30:00+09:00"
+}
+```
+タイムスタンプはシステムタイムゾーンの ISO 8601 形式に変換されます。
+
+#### タイムゾーン指定
+
+```bash
+firex get users/user123 --timezone UTC
+```
+```json
+{
+  "name": "John",
+  "createdAt": "2024-01-15T05:30:00Z"
+}
+```
+
+```bash
+firex get users/user123 --timezone America/New_York
+```
+```json
+{
+  "name": "John",
+  "createdAt": "2024-01-15T00:30:00-05:00"
+}
+```
+
+#### カスタム日付フォーマット
+
+```bash
+firex get users/user123 --date-format "yyyy/MM/dd HH:mm:ss"
+```
+```json
+{
+  "name": "John",
+  "createdAt": "2024/01/15 14:30:00"
+}
+```
+
+```bash
+firex get users/user123 --date-format "yyyy-MM-dd" --timezone UTC
+```
+```json
+{
+  "name": "John",
+  "createdAt": "2024-01-15"
+}
+```
+
+#### 生出力（フォーマットなし）
+
+```bash
+firex get users/user123 --raw-output
+```
+```json
+{
+  "name": "John",
+  "createdAt": {
+    "_seconds": 1705312200,
+    "_nanoseconds": 0
+  }
+}
+```
+すべてのフォーマットが無効化されます。タイムスタンプは Firestore の内部表現のまま出力されます。
+
+#### タイムスタンプフォーマットのみ無効化
+
+```bash
+firex get users/user123 --no-date-format
+```
+```json
+{
+  "name": "John",
+  "createdAt": {
+    "_seconds": 1705312200,
+    "_nanoseconds": 0
+  }
+}
+```
+タイムスタンプは生のまま保持されますが、他のフォーマット（色など）は適用されます。
+
+### ネストしたタイムスタンプ
+
+ネストしたオブジェクトや配列内のタイムスタンプも変換されます：
+
+```bash
+firex get orders/order123 --timezone UTC
+```
+```json
+{
+  "user": {
+    "name": "John",
+    "profile": {
+      "createdAt": "2024-01-15T05:30:00Z"
+    }
+  },
+  "events": [
+    { "timestamp": "2024-01-15T14:30:00Z", "name": "Event 1" },
+    { "timestamp": "2024-01-16T10:00:00Z", "name": "Event 2" }
+  ]
+}
+```
+
+### よく使う日付フォーマットパターン
+
+| パターン | 出力例 |
+|---------|-------|
+| `yyyy-MM-dd'T'HH:mm:ssXXX` | `2024-01-15T14:30:00+09:00`（デフォルト） |
+| `yyyy-MM-dd` | `2024-01-15` |
+| `yyyy/MM/dd HH:mm:ss` | `2024/01/15 14:30:00` |
+| `dd/MM/yyyy` | `15/01/2024` |
+| `HH:mm:ss` | `14:30:00` |
+| `yyyy-MM-dd'T'HH:mm:ss.SSSXXX` | `2024-01-15T14:30:00.000+09:00` |
+
+利用可能なすべてのパターンは [date-fns format ドキュメント](https://date-fns.org/docs/format)を参照してください。
 
 ## トラブルシューティング
 
