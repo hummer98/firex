@@ -5,6 +5,7 @@
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { LoggingService } from '../services/logging';
+import { setLocale, getLocale, type SupportedLocale } from '../shared/i18n';
 import { promises as fs } from 'fs';
 import path from 'path';
 import os from 'os';
@@ -176,6 +177,9 @@ describe('Security Tests', () => {
 
   describe('Error Message Security', () => {
     it('should not expose internal paths in error messages', async () => {
+      const originalLocale = getLocale();
+      setLocale('ja'); // Set Japanese locale for testing
+
       const { ErrorHandler } = await import('../services/error-handler');
       const { LoggingService: LoggingServiceClass } = await import('../services/logging');
 
@@ -195,6 +199,8 @@ describe('Security Tests', () => {
       expect(message).toContain('認証エラー');
       // In non-verbose mode, should not show stack trace
       expect(message).not.toContain('at ');
+
+      setLocale(originalLocale);
     });
   });
 });

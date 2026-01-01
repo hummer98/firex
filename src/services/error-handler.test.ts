@@ -17,6 +17,7 @@ describe('ErrorHandler', () => {
 
   beforeEach(() => {
     originalLocale = getLocale();
+    setLocale('ja'); // Set Japanese locale for testing Japanese error messages
     loggingService = new LoggingService();
     errorHandler = new ErrorHandler(loggingService);
   });

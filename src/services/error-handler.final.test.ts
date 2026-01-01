@@ -9,19 +9,24 @@ import { LoggingService } from './logging';
 import { promises as fs } from 'fs';
 import path from 'path';
 import os from 'os';
+import { setLocale, getLocale, type SupportedLocale } from '../shared/i18n';
 
 describe('Error Handler Final Validation', () => {
   let loggingService: LoggingService;
   let errorHandler: ErrorHandler;
   let consoleSpy: ReturnType<typeof vi.spyOn>;
+  let originalLocale: SupportedLocale;
 
   beforeEach(() => {
+    originalLocale = getLocale();
+    setLocale('ja'); // Set Japanese locale for testing
     loggingService = new LoggingService({ verbose: false });
     errorHandler = new ErrorHandler(loggingService, false);
     consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
   });
 
   afterEach(() => {
+    setLocale(originalLocale);
     consoleSpy.mockRestore();
   });
 
