@@ -5,6 +5,7 @@
 import type { AuthError } from './auth';
 import type { ConfigError } from './config';
 import type { LoggingService } from './logging';
+import { t } from '../shared/i18n';
 
 /**
  * Error category for exit code determination
@@ -28,28 +29,28 @@ export class ErrorHandler {
   handleAuthError(error: AuthError): string {
     switch (error.type) {
       case 'INVALID_CREDENTIALS':
-        return `認証エラー: ${error.message}${
+        return `${t('err.handler.auth.invalid')}: ${error.message}${
           this.verbose && error.originalError
             ? '\n' + this.formatErrorWithStack(error.originalError)
             : ''
         }`;
 
       case 'CONNECTION_TIMEOUT':
-        return `接続タイムアウト: ${error.message}${
-          error.retryable ? '\n再試行してください。' : ''
+        return `${t('err.handler.auth.timeout')}: ${error.message}${
+          error.retryable ? '\n' + t('err.handler.auth.retryHint') : ''
         }`;
 
       case 'PROJECT_NOT_FOUND':
-        return `プロジェクトが見つかりません: ${error.projectId}\nプロジェクトIDを確認してください。`;
+        return `${t('err.handler.auth.projectNotFound')}: ${error.projectId}\n${t('err.handler.auth.checkProjectId')}`;
 
       case 'PERMISSION_DENIED':
-        return `アクセス権限がありません: ${error.message}\nサービスアカウントの権限を確認してください。`;
+        return `${t('err.handler.auth.permissionDenied')}: ${error.message}\n${t('err.handler.auth.checkPermission')}`;
 
       case 'UNINITIALIZED':
-        return `初期化されていません: ${error.message}`;
+        return `${t('err.handler.auth.uninitialized')}: ${error.message}`;
 
       default:
-        return `認証エラー: ${JSON.stringify(error)}`;
+        return `${t('err.handler.auth.generic')}: ${JSON.stringify(error)}`;
     }
   }
 
@@ -59,20 +60,20 @@ export class ErrorHandler {
   handleConfigError(error: ConfigError): string {
     switch (error.type) {
       case 'FILE_NOT_FOUND':
-        return `設定ファイルが見つかりません: ${error.path}`;
+        return `${t('err.handler.config.fileNotFound')}: ${error.path}`;
 
       case 'PARSE_ERROR':
-        return `設定ファイルの解析エラー: ${error.message}${
+        return `${t('err.handler.config.parseError')}: ${error.message}${
           this.verbose && error.originalError
             ? '\n' + this.formatErrorWithStack(error.originalError)
             : ''
         }`;
 
       case 'VALIDATION_ERROR':
-        return `設定値が不正です: ${error.message}`;
+        return `${t('err.handler.config.validationError')}: ${error.message}`;
 
       default:
-        return `設定エラー: ${JSON.stringify(error)}`;
+        return `${t('err.handler.config.generic')}: ${JSON.stringify(error)}`;
     }
   }
 
@@ -84,28 +85,28 @@ export class ErrorHandler {
 
     switch (code) {
       case 'NOT_FOUND':
-        return `ドキュメントが見つかりません: ${error.message}`;
+        return `${t('err.handler.firestore.notFound')}: ${error.message}`;
 
       case 'PERMISSION_DENIED':
-        return `アクセス権限がありません: ${error.message}\nFirestoreルールを確認してください。`;
+        return `${t('err.handler.firestore.permissionDenied')}: ${error.message}\n${t('err.handler.firestore.checkRules')}`;
 
       case 'RESOURCE_EXHAUSTED':
-        return `クォータを超過しました: ${error.message}\nしばらく待ってから再試行してください。`;
+        return `${t('err.handler.firestore.quotaExceeded')}: ${error.message}\n${t('err.handler.firestore.waitAndRetry')}`;
 
       case 'UNAVAILABLE':
-        return `Firestoreが利用できません: ${error.message}\n接続を確認して再試行してください。`;
+        return `${t('err.handler.firestore.unavailable')}: ${error.message}\n${t('err.handler.firestore.checkConnection')}`;
 
       case 'DEADLINE_EXCEEDED':
-        return `リクエストがタイムアウトしました: ${error.message}\n再試行してください。`;
+        return `${t('err.handler.firestore.timeout')}: ${error.message}\n${t('err.handler.firestore.retry')}`;
 
       case 'ALREADY_EXISTS':
-        return `ドキュメントは既に存在します: ${error.message}`;
+        return `${t('err.handler.firestore.alreadyExists')}: ${error.message}`;
 
       case 'INVALID_ARGUMENT':
-        return `引数が無効です: ${error.message}`;
+        return `${t('err.handler.firestore.invalidArgument')}: ${error.message}`;
 
       default:
-        return `Firestoreエラー: ${error.message}${
+        return `${t('err.handler.firestore.generic')}: ${error.message}${
           this.verbose ? '\n' + this.formatErrorWithStack(error) : ''
         }`;
     }
@@ -116,9 +117,9 @@ export class ErrorHandler {
    */
   handleValidationError(field: string | undefined, message: string): string {
     if (field) {
-      return `バリデーションエラー (${field}): ${message}`;
+      return `${t('err.handler.validation.withField').replace('{field}', field)}: ${message}`;
     }
-    return `バリデーションエラー: ${message}`;
+    return `${t('err.handler.validation.generic')}: ${message}`;
   }
 
   /**
@@ -129,7 +130,7 @@ export class ErrorHandler {
       return error.message;
     }
 
-    return `${error.message}\nスタックトレース:\n${error.stack}`;
+    return `${error.message}\n${t('err.handler.stackTrace')}:\n${error.stack}`;
   }
 
   /**
@@ -142,25 +143,25 @@ export class ErrorHandler {
 
     switch (context) {
       case 'auth':
-        return '\nヘルプを表示: firex --help';
+        return '\n' + t('err.handler.help.showHelp');
 
       case 'config':
-        return '\n設定のヘルプを表示: firex config --help';
+        return '\n' + t('err.handler.help.configHelp');
 
       case 'get':
-        return '\nヘルプを表示: firex get --help';
+        return '\n' + t('err.handler.help.commandHelp').replace('{command}', 'get');
 
       case 'set':
-        return '\nヘルプを表示: firex set --help';
+        return '\n' + t('err.handler.help.commandHelp').replace('{command}', 'set');
 
       case 'list':
-        return '\nヘルプを表示: firex list --help';
+        return '\n' + t('err.handler.help.commandHelp').replace('{command}', 'list');
 
       case 'delete':
-        return '\nヘルプを表示: firex delete --help';
+        return '\n' + t('err.handler.help.commandHelp').replace('{command}', 'delete');
 
       default:
-        return '\nヘルプを表示: firex --help';
+        return '\n' + t('err.handler.help.showHelp');
     }
   }
 

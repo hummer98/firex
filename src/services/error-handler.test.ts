@@ -2,20 +2,27 @@
  * Tests for ErrorHandler service
  */
 
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { ErrorHandler } from './error-handler';
 import { LoggingService } from './logging';
 import type { AuthError } from './auth';
 import type { ConfigError } from './config';
 import { err, ok } from '../shared/types';
+import { setLocale, getLocale, type SupportedLocale } from '../shared/i18n';
 
 describe('ErrorHandler', () => {
   let errorHandler: ErrorHandler;
   let loggingService: LoggingService;
+  let originalLocale: SupportedLocale;
 
   beforeEach(() => {
+    originalLocale = getLocale();
     loggingService = new LoggingService();
     errorHandler = new ErrorHandler(loggingService);
+  });
+
+  afterEach(() => {
+    setLocale(originalLocale);
   });
 
   describe('handleAuthError', () => {
@@ -256,6 +263,68 @@ describe('ErrorHandler', () => {
 
     it('should return 2 when error type is undefined', () => {
       expect(errorHandler.getExitCode()).toBe(2);
+    });
+  });
+
+  describe('i18n locale switching', () => {
+    it('should return English messages when locale is set to en', () => {
+      setLocale('en');
+      const error: AuthError = {
+        type: 'INVALID_CREDENTIALS',
+        message: 'Invalid credentials',
+      };
+
+      const message = errorHandler.handleAuthError(error);
+      expect(message).toContain('Authentication error');
+    });
+
+    it('should return Japanese messages when locale is set to ja', () => {
+      setLocale('ja');
+      const error: AuthError = {
+        type: 'INVALID_CREDENTIALS',
+        message: 'Invalid credentials',
+      };
+
+      const message = errorHandler.handleAuthError(error);
+      expect(message).toContain('認証エラー');
+    });
+
+    it('should switch languages for config errors', () => {
+      const error: ConfigError = {
+        type: 'FILE_NOT_FOUND',
+        path: '/path/to/config',
+      };
+
+      setLocale('en');
+      const enMessage = errorHandler.handleConfigError(error);
+      expect(enMessage).toContain('Configuration file not found');
+
+      setLocale('ja');
+      const jaMessage = errorHandler.handleConfigError(error);
+      expect(jaMessage).toContain('設定ファイルが見つかりません');
+    });
+
+    it('should switch languages for Firestore errors', () => {
+      const error = new Error('Document not found');
+      (error as any).code = 'NOT_FOUND';
+
+      setLocale('en');
+      const enMessage = errorHandler.handleFirestoreError(error);
+      expect(enMessage).toContain('Document not found');
+
+      setLocale('ja');
+      const jaMessage = errorHandler.handleFirestoreError(error);
+      expect(jaMessage).toContain('ドキュメントが見つかりません');
+    });
+
+    it('should switch languages for help suggestions', () => {
+      setLocale('en');
+      const enSuggestion = errorHandler.suggestHelp('auth');
+      expect(enSuggestion).toContain('Show help');
+
+      setLocale('ja');
+      const jaSuggestion = errorHandler.suggestHelp('auth');
+      expect(jaSuggestion).toContain('ヘルプを表示');
     });
   });
 });
