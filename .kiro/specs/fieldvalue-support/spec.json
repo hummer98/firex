@@ -1,0 +1,54 @@
+{
+  "feature_name": "fieldvalue-support",
+  "created_at": "2026-01-01T12:00:00Z",
+  "updated_at": "2026-01-01T04:47:27.048Z",
+  "language": "ja",
+  "phase": "implementation-complete",
+  "approvals": {
+    "requirements": {
+      "generated": true,
+      "approved": true
+    },
+    "design": {
+      "generated": true,
+      "approved": true
+    },
+    "tasks": {
+      "generated": true,
+      "approved": true
+    }
+  },
+  "ready_for_implementation": false,
+  "autoExecution": {
+    "enabled": true,
+    "permissions": {
+      "requirements": true,
+      "design": true,
+      "tasks": true,
+      "impl": false,
+      "inspection": false,
+      "deploy": false
+    },
+    "documentReviewFlag": "run",
+    "validationOptions": {
+      "gap": false,
+      "design": false,
+      "impl": false
+    }
+  },
+  "documentReview": {
+    "rounds": 2,
+    "status": "resolved",
+    "roundDetails": [
+      {
+        "roundNumber": 1,
+        "status": "reply_complete",
+        "fixApplied": true
+      },
+      {
+        "roundNumber": 2,
+        "status": "review_complete"
+      }
+    ]
+  }
+}
