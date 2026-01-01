@@ -50,6 +50,12 @@ export class ExamplesCommand extends Command {
         { title: 'バッチサイズ指定インポート', command: 'firex import backup.json --batch-size=250', description: 'バッチサイズを指定してインポートします' },
         // Config command
         { title: '設定の表示', command: 'firex config --show', description: '現在有効な設定値を表示します' },
+        // FieldValue examples
+        { title: 'サーバータイムスタンプの設定', command: "firex set users/user123 '{\"createdAt\": {\"$fieldValue\": \"serverTimestamp\"}}'", description: 'サーバー側でタイムスタンプを自動設定します' },
+        { title: 'カウンターのインクリメント', command: "firex update posts/post1 '{\"viewCount\": {\"$fieldValue\": \"increment\", \"operand\": 1}}'", description: '数値フィールドを増減します' },
+        { title: '配列への要素追加', command: "firex update users/user123 '{\"tags\": {\"$fieldValue\": \"arrayUnion\", \"elements\": [\"premium\"]}}'", description: '配列に要素を追加します（重複は無視）' },
+        { title: '配列から要素削除', command: "firex update users/user123 '{\"tags\": {\"$fieldValue\": \"arrayRemove\", \"elements\": [\"trial\"]}}'", description: '配列から要素を削除します' },
+        { title: 'フィールドの削除', command: "firex update users/user123 '{\"obsoleteField\": {\"$fieldValue\": \"delete\"}}'", description: 'フィールドをドキュメントから削除します' },
       ];
     }
     // English
@@ -80,6 +86,12 @@ export class ExamplesCommand extends Command {
       { title: 'Import with batch size', command: 'firex import backup.json --batch-size=250', description: 'Import with specified batch size' },
       // Config command
       { title: 'Show configuration', command: 'firex config --show', description: 'Display current configuration values' },
+      // FieldValue examples
+      { title: 'Set server timestamp', command: "firex set users/user123 '{\"createdAt\": {\"$fieldValue\": \"serverTimestamp\"}}'", description: 'Set timestamp automatically on server side' },
+      { title: 'Increment counter', command: "firex update posts/post1 '{\"viewCount\": {\"$fieldValue\": \"increment\", \"operand\": 1}}'", description: 'Increment or decrement a numeric field' },
+      { title: 'Add to array', command: "firex update users/user123 '{\"tags\": {\"$fieldValue\": \"arrayUnion\", \"elements\": [\"premium\"]}}'", description: 'Add elements to array (duplicates ignored)' },
+      { title: 'Remove from array', command: "firex update users/user123 '{\"tags\": {\"$fieldValue\": \"arrayRemove\", \"elements\": [\"trial\"]}}'", description: 'Remove elements from array' },
+      { title: 'Delete a field', command: "firex update users/user123 '{\"obsoleteField\": {\"$fieldValue\": \"delete\"}}'", description: 'Delete a field from the document' },
     ];
   }
 

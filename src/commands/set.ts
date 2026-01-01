@@ -6,6 +6,7 @@ import { Args, Flags } from '@oclif/core';
 import { BaseCommand } from './base-command';
 import { FirestoreOps } from '../domain/firestore-ops';
 import { ValidationService } from '../domain/validation-service';
+import { FieldValueTransformer } from '../domain/field-value-transformer';
 import { FileSystemService } from '../presentation/filesystem-service';
 import { t } from '../shared/i18n';
 
@@ -18,6 +19,9 @@ export class SetCommand extends BaseCommand {
     '<%= config.bin %> set users/user123 \'{"age": 31}\' --merge',
     '<%= config.bin %> set users/user123 --from-file=user.json',
     '<%= config.bin %> set users/user123 --from-file=user.json --merge',
+    // FieldValue examples
+    '<%= config.bin %> set users/user123 \'{"createdAt": {"$fieldValue": "serverTimestamp"}}\'',
+    '<%= config.bin %> set posts/post1 \'{"viewCount": {"$fieldValue": "increment", "operand": 1}}\' --merge',
   ];
 
   static override args = {
@@ -114,8 +118,17 @@ export class SetCommand extends BaseCommand {
       return;
     }
 
+    // Transform $fieldValue objects to FieldValue sentinels
+    const fieldValueTransformer = new FieldValueTransformer();
+    const transformResult = fieldValueTransformer.transform(data);
+    if (transformResult.isErr()) {
+      this.handleError(transformResult.error.message, 'validation');
+      return;
+    }
+    const transformedData = transformResult.value;
+
     // Write document
-    const writeResult = await firestoreOps.setDocument(documentPath, data, merge);
+    const writeResult = await firestoreOps.setDocument(documentPath, transformedData, merge);
     if (writeResult.isErr()) {
       this.handleError(writeResult.error.message, 'firestore');
       return;
