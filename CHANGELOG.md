@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-01-02
+
+### Added
+- **FieldValue syntax support** in set/update commands
+  - `serverTimestamp`: Server-side timestamp
+  - `increment`: Atomic increment/decrement
+  - `arrayUnion`: Add elements to array (duplicates ignored)
+  - `arrayRemove`: Remove elements from array
+  - `delete`: Delete a field from document
+  - Example: `firex set users/user1 '{"createdAt": {"$fieldValue": "serverTimestamp"}}'`
+  - Example: `firex update posts/post1 '{"viewCount": {"$fieldValue": "increment", "operand": 1}}'`
+
+### Changed
+- **Full i18n coverage** for error messages and diagnostics
+  - Error handler messages (auth, config, firestore, validation)
+  - Doctor service progress messages
+  - Checker modules (environment, firebase, config, build)
+  - All messages now support English and Japanese based on system locale
+
+### Docs
+- Added FieldValue usage examples to `examples` command
+
 ## [0.6.1] - 2025-12-22
 
 ### Fixed
@@ -132,7 +154,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - API key and OAuth token masking
 - Secure file permission recommendations
 
-[Unreleased]: https://github.com/hummer98/firex/compare/v0.6.1...HEAD
+[Unreleased]: https://github.com/hummer98/firex/compare/v0.7.0...HEAD
+[0.7.0]: https://github.com/hummer98/firex/compare/v0.6.1...v0.7.0
 [0.6.1]: https://github.com/hummer98/firex/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/hummer98/firex/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/hummer98/firex/compare/v0.4.0...v0.5.0
