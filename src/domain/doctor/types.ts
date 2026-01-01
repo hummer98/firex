@@ -42,6 +42,8 @@ export interface CheckResult {
   details?: string;
   /** Guidance for fixing issues */
   guidance?: string;
+  /** Structured metadata for runtime logic (locale-independent) */
+  metadata?: Record<string, unknown>;
 }
 
 /**
@@ -125,7 +127,8 @@ export function createCheckResult(
   category: CheckCategory,
   message: string,
   details?: string,
-  guidance?: string
+  guidance?: string,
+  metadata?: Record<string, unknown>
 ): CheckResult {
   return {
     status,
@@ -133,6 +136,7 @@ export function createCheckResult(
     message,
     ...(details && { details }),
     ...(guidance && { guidance }),
+    ...(metadata && { metadata }),
   };
 }
 

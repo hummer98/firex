@@ -71,6 +71,20 @@ describe('Doctor Types', () => {
       expect(result.details).toBe('Command "firebase --version" failed');
       expect(result.guidance).toBe('Run: npm install -g firebase-tools');
     });
+
+    it('should create a CheckResult with metadata field', () => {
+      const result: CheckResult = {
+        status: 'success',
+        category: 'config-file',
+        message: 'Config file found: .firex.yaml',
+        details: 'File path: /path/to/.firex.yaml',
+        metadata: { filePath: '/path/to/.firex.yaml', found: true },
+      };
+
+      expect(result.metadata).toBeDefined();
+      expect(result.metadata?.filePath).toBe('/path/to/.firex.yaml');
+      expect(result.metadata?.found).toBe(true);
+    });
   });
 
   describe('DiagnosticSummary', () => {
@@ -225,6 +239,31 @@ describe('Doctor Types', () => {
 
       expect(result.details).toBe('Command failed');
       expect(result.guidance).toBe('Install via npm');
+    });
+
+    it('should create a CheckResult with metadata', () => {
+      const result = createCheckResult(
+        'success',
+        'config-file',
+        'Config file found',
+        'File path: /path/to/.firex.yaml',
+        undefined,
+        { filePath: '/path/to/.firex.yaml', found: true }
+      );
+
+      expect(result.metadata).toBeDefined();
+      expect(result.metadata?.filePath).toBe('/path/to/.firex.yaml');
+      expect(result.metadata?.found).toBe(true);
+    });
+
+    it('should not include metadata if not provided', () => {
+      const result = createCheckResult(
+        'success',
+        'node-version',
+        'Node.js is OK'
+      );
+
+      expect(result.metadata).toBeUndefined();
     });
   });
 

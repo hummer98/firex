@@ -9,6 +9,7 @@ import { z } from 'zod';
 import { Result, ok, err } from '../../shared/types';
 import type { CheckResult, CheckerError } from './types';
 import { createCheckResult } from './types';
+import { t } from '../../shared/i18n';
 
 /**
  * Config file schema for validation
@@ -104,8 +105,10 @@ export class ConfigChecker {
             createCheckResult(
               'success',
               'config-file',
-              `設定ファイルが見つかりました: ${filename}`,
-              `ファイルパス: ${filePath}`
+              `${t('doctor.check.config.found')}: ${filename}`,
+              `${t('doctor.check.config.filePath')}: ${filePath}`,
+              undefined,
+              { filePath, found: true }
             )
           );
         }
@@ -115,9 +118,10 @@ export class ConfigChecker {
         createCheckResult(
           'success',
           'config-file',
-          '設定ファイルが見つかりません - デフォルト設定で動作します',
-          '検索パス: ' + basePath,
-          '設定ファイルを作成する場合は .firex.yaml または .firex.json を作成してください'
+          t('doctor.check.config.notFound'),
+          `${t('doctor.check.config.searchPath')}: ${basePath}`,
+          t('doctor.check.config.createHint'),
+          { found: false }
         )
       );
     } catch (error) {
@@ -143,22 +147,22 @@ export class ConfigChecker {
             createCheckResult(
               'success',
               'config-syntax',
-              'YAML 構文は有効です',
-              `ファイル: ${filePath}`
+              t('doctor.check.syntax.yamlValid'),
+              `File: ${filePath}`
             )
           );
         } catch (error) {
           if (error instanceof YAMLParseError) {
             const position = error.linePos
-              ? `行 ${error.linePos[0].line}, 列 ${error.linePos[0].col}`
-              : '不明';
+              ? `Line ${error.linePos[0].line}, Col ${error.linePos[0].col}`
+              : 'unknown';
             return ok(
               createCheckResult(
                 'error',
                 'config-syntax',
-                'YAML 構文エラー',
-                `位置: ${position}\n${error.message}`,
-                'YAML の構文を確認してください。インデントはスペースを使用してください。'
+                t('doctor.check.syntax.yamlError'),
+                `${t('doctor.check.syntax.position')}: ${position}\n${error.message}`,
+                t('doctor.check.syntax.yamlHint')
               )
             );
           }
@@ -168,9 +172,9 @@ export class ConfigChecker {
               createCheckResult(
                 'error',
                 'config-syntax',
-                'YAML 構文エラー',
+                t('doctor.check.syntax.yamlError'),
                 error.message,
-                'YAML の構文を確認してください。インデントはスペースを使用してください。'
+                t('doctor.check.syntax.yamlHint')
               )
             );
           }
@@ -184,8 +188,8 @@ export class ConfigChecker {
             createCheckResult(
               'success',
               'config-syntax',
-              'JSON 構文は有効です',
-              `ファイル: ${filePath}`
+              t('doctor.check.syntax.jsonValid'),
+              `File: ${filePath}`
             )
           );
         } catch (error) {
@@ -194,9 +198,9 @@ export class ConfigChecker {
             createCheckResult(
               'error',
               'config-syntax',
-              'JSON 構文エラー',
+              t('doctor.check.syntax.jsonError'),
               message,
-              'JSON の構文を確認してください。カンマやクォートを確認してください。'
+              t('doctor.check.syntax.jsonHint')
             )
           );
         }
@@ -221,7 +225,7 @@ export class ConfigChecker {
           createCheckResult(
             'success',
             'config-schema',
-            '設定スキーマは有効です'
+            t('doctor.check.schema.valid')
           )
         );
       }
@@ -235,10 +239,9 @@ export class ConfigChecker {
         createCheckResult(
           'error',
           'config-schema',
-          '設定スキーマの検証に失敗しました',
+          t('doctor.check.schema.invalid'),
           errors.join('\n'),
-          '設定ファイルのフィールドと値の型を確認してください。\n' +
-            '有効なフィールド: projectId (string), credentialPath (string), ' +
+          `${t('doctor.check.schema.validFields')}: projectId (string), credentialPath (string), ` +
             'defaultListLimit (number), watchShowInitial (boolean), verbose (boolean)'
         )
       );
@@ -260,7 +263,7 @@ export class ConfigChecker {
           createCheckResult(
             'success',
             'collection-paths',
-            'コレクションパスの検証: 対象なし'
+            t('doctor.check.paths.noTargets')
           )
         );
       }
@@ -280,7 +283,7 @@ export class ConfigChecker {
           createCheckResult(
             'success',
             'collection-paths',
-            `すべてのコレクションパスが有効です (${paths.length} 件)`
+            `${t('doctor.check.paths.allValid')} (${paths.length})`
           )
         );
       }
@@ -289,10 +292,9 @@ export class ConfigChecker {
         createCheckResult(
           'error',
           'collection-paths',
-          'コレクションパスの形式が不正です',
-          `無効なパス:\n  ${invalidPaths.join('\n  ')}`,
-          'コレクションパスは奇数のセグメント数である必要があります。\n' +
-            '例: "users" (1セグメント), "users/user1/comments" (3セグメント)'
+          t('doctor.check.paths.invalid'),
+          `${t('doctor.check.paths.invalidPaths')}:\n  ${invalidPaths.join('\n  ')}`,
+          `${t('doctor.check.paths.segmentHint')}\nExample: "users" (1), "users/user1/comments" (3)`
         )
       );
     } catch (error) {

@@ -51,6 +51,38 @@ describe('ConfigChecker', () => {
         expect(result.value.category).toBe('config-file');
       }
     });
+
+    // Remediation Task 6.2: metadata-based detection
+    it('should return metadata with filePath and found=true when config file exists', async () => {
+      const checker = new ConfigChecker({
+        fileExists: (path) => path.endsWith('.firex.yaml'),
+        readFile: async () => 'projectId: my-project',
+      });
+
+      const result = await checker.checkConfigFile('/path/to/project');
+
+      expect(result.isOk()).toBe(true);
+      if (result.isOk()) {
+        expect(result.value.metadata).toBeDefined();
+        expect(result.value.metadata?.found).toBe(true);
+        expect(result.value.metadata?.filePath).toBe('/path/to/project/.firex.yaml');
+      }
+    });
+
+    it('should return metadata with found=false when no config file exists', async () => {
+      const checker = new ConfigChecker({
+        fileExists: () => false,
+      });
+
+      const result = await checker.checkConfigFile('/path/to/project');
+
+      expect(result.isOk()).toBe(true);
+      if (result.isOk()) {
+        expect(result.value.metadata).toBeDefined();
+        expect(result.value.metadata?.found).toBe(false);
+        expect(result.value.metadata?.filePath).toBeUndefined();
+      }
+    });
   });
 
   describe('validateConfigSyntax', () => {

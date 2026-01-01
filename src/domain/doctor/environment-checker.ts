@@ -10,6 +10,7 @@ import * as path from 'path';
 import { Result, ok, err } from '../../shared/types';
 import type { CheckResult, CheckerError } from './types';
 import { createCheckResult } from './types';
+import { t } from '../../shared/i18n';
 
 const execAsync = promisify(exec);
 
@@ -107,8 +108,8 @@ export class EnvironmentChecker {
           createCheckResult(
             'success',
             'node-version',
-            `Node.js ${currentVersion} がインストールされています`,
-            `最小要件: v${MIN_NODE_VERSION}`
+            `Node.js ${currentVersion} ${t('doctor.check.node.installed')}`,
+            `${t('doctor.check.node.minVersion')}: v${MIN_NODE_VERSION}`
           )
         );
       } else {
@@ -116,9 +117,9 @@ export class EnvironmentChecker {
           createCheckResult(
             'error',
             'node-version',
-            `Node.js ${currentVersion} は最小要件を満たしていません`,
-            `現在のバージョン: ${currentVersion}, 最小要件: v${MIN_NODE_VERSION}`,
-            `Node.js v${MIN_NODE_VERSION} 以上にアップグレードしてください。\nhttps://nodejs.org/ からダウンロードできます。`
+            `Node.js ${currentVersion} ${t('doctor.check.node.belowMinimum')}`,
+            `${t('doctor.check.node.currentVersion')}: ${currentVersion}, ${t('doctor.check.node.minVersion')}: v${MIN_NODE_VERSION}`,
+            `Node.js v${MIN_NODE_VERSION} ${t('doctor.check.node.upgradeHint')}\nhttps://nodejs.org/`
           )
         );
       }
@@ -141,7 +142,7 @@ export class EnvironmentChecker {
         createCheckResult(
           'success',
           'firebase-cli',
-          `Firebase CLI v${version} がインストールされています`
+          `Firebase CLI v${version} ${t('doctor.check.firebaseCli.installed')}`
         )
       );
     } catch (error) {
@@ -149,9 +150,9 @@ export class EnvironmentChecker {
         createCheckResult(
           'warning',
           'firebase-cli',
-          'Firebase CLI がインストールされていません',
+          t('doctor.check.firebaseCli.notInstalled'),
           error instanceof Error ? error.message : String(error),
-          'Firebase CLI をインストールしてください:\n  npm install -g firebase-tools\n\nまたは:\n  npx firebase-tools'
+          `${t('doctor.check.firebaseCli.installHint')}:\n  npm install -g firebase-tools\n\n  npx firebase-tools`
         )
       );
     }
@@ -241,15 +242,15 @@ export class EnvironmentChecker {
             createCheckResult(
               'success',
               'auth-status',
-              '認証情報',
-              `Type: Emulator Mode\nHost: ${emulatorHost}`
+              t('doctor.check.auth.info'),
+              `Type: ${t('doctor.check.auth.emulatorMode')}\nHost: ${emulatorHost}`
             )
           );
         }
 
         case 'service-account': {
           const details = [
-            'Type: Service Account',
+            `Type: ${t('doctor.check.auth.serviceAccount')}`,
             `File: ${authInfo.filePath}`,
           ];
           if (authInfo.account) {
@@ -262,7 +263,7 @@ export class EnvironmentChecker {
             createCheckResult(
               'success',
               'auth-status',
-              '認証情報',
+              t('doctor.check.auth.info'),
               details.join('\n')
             )
           );
@@ -271,7 +272,7 @@ export class EnvironmentChecker {
         case 'adc': {
           // Try to get gcloud account
           const gcloudAccount = await this.getGcloudAccount();
-          const details = ['Type: Application Default Credentials (ADC)'];
+          const details = [`Type: ${t('doctor.check.auth.adc')}`];
           if (gcloudAccount) {
             details.push(`Account: ${gcloudAccount}`);
           } else if (authInfo.account) {
@@ -284,7 +285,7 @@ export class EnvironmentChecker {
             createCheckResult(
               'success',
               'auth-status',
-              '認証情報',
+              t('doctor.check.auth.info'),
               details.join('\n')
             )
           );
@@ -298,9 +299,9 @@ export class EnvironmentChecker {
               createCheckResult(
                 'error',
                 'auth-status',
-                '認証情報',
-                `Type: Service Account (ファイルが見つかりません)\nFile: ${credentialPath}`,
-                'GOOGLE_APPLICATION_CREDENTIALS に正しいパスを設定するか、\n有効なサービスアカウントキーファイルを作成してください。'
+                t('doctor.check.auth.info'),
+                `Type: ${t('doctor.check.auth.serviceAccount')} (${t('doctor.check.auth.fileNotFound')})\nFile: ${credentialPath}`,
+                t('doctor.check.auth.setCredentialHint')
               )
             );
           }
@@ -309,12 +310,12 @@ export class EnvironmentChecker {
             createCheckResult(
               'error',
               'auth-status',
-              '認証情報が見つかりません',
-              'サービスアカウントキーまたは ADC が設定されていません',
-              '以下のいずれかの方法で認証を設定してください:\n\n' +
-                '1. gcloud ADC を使用:\n   gcloud auth application-default login\n\n' +
-                '2. サービスアカウントキーを使用:\n   export GOOGLE_APPLICATION_CREDENTIALS=/path/to/service-account.json\n\n' +
-                '3. エミュレータを使用:\n   export FIRESTORE_EMULATOR_HOST=localhost:8080'
+              t('doctor.check.auth.notFound'),
+              t('doctor.check.auth.notConfigured'),
+              `${t('doctor.check.auth.setupHint')}:\n\n` +
+                '1. gcloud ADC:\n   gcloud auth application-default login\n\n' +
+                '2. Service Account:\n   export GOOGLE_APPLICATION_CREDENTIALS=/path/to/service-account.json\n\n' +
+                '3. Emulator:\n   export FIRESTORE_EMULATOR_HOST=localhost:8080'
             )
           );
         }

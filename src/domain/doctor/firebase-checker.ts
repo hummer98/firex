@@ -10,6 +10,7 @@ import type { CheckResult, CheckerError } from './types';
 import { createCheckResult } from './types';
 import type { Config } from '../../services/config';
 import type { Firestore } from 'firebase-admin/firestore';
+import { t } from '../../shared/i18n';
 
 /**
  * Project ID source
@@ -102,8 +103,8 @@ export class FirebaseChecker {
                 createCheckResult(
                   'success',
                   'firebaserc',
-                  `.firebaserc が見つかりました - デフォルトプロジェクト: ${defaultProject}`,
-                  `ファイルパス: ${firebasercPath}`
+                  `${t('doctor.check.firebaserc.found')} - Default project: ${defaultProject}`,
+                  `${t('doctor.check.config.filePath')}: ${firebasercPath}`
                 )
               );
             } else {
@@ -111,9 +112,9 @@ export class FirebaseChecker {
                 createCheckResult(
                   'warning',
                   'firebaserc',
-                  '.firebaserc にデフォルトプロジェクトが設定されていません',
-                  `ファイルパス: ${firebasercPath}`,
-                  'firebase use <project-id> を実行してデフォルトプロジェクトを設定してください'
+                  t('doctor.check.firebaserc.noDefault'),
+                  `${t('doctor.check.config.filePath')}: ${firebasercPath}`,
+                  t('doctor.check.firebaserc.useProjectHint')
                 )
               );
             }
@@ -122,9 +123,9 @@ export class FirebaseChecker {
               createCheckResult(
                 'error',
                 'firebaserc',
-                '.firebaserc の解析に失敗しました',
+                t('doctor.check.firebaserc.parseError'),
                 parseError instanceof Error ? parseError.message : String(parseError),
-                '.firebaserc ファイルの JSON 形式を確認してください'
+                t('doctor.check.firebaserc.checkJsonHint')
               )
             );
           }
@@ -137,9 +138,9 @@ export class FirebaseChecker {
         createCheckResult(
           'warning',
           'firebaserc',
-          '.firebaserc ファイルが見つかりません',
-          `検索開始パス: ${startPath}`,
-          'Firebase プロジェクトを初期化してください:\n  firebase init'
+          t('doctor.check.firebaserc.notFound'),
+          `${t('doctor.check.firebaserc.searchPath')}: ${startPath}`,
+          t('doctor.check.firebaserc.initHint')
         )
       );
     } catch (error) {
@@ -163,9 +164,9 @@ export class FirebaseChecker {
           createCheckResult(
             'warning',
             'firestore-api',
-            'Firestore インスタンスが初期化されていません',
-            'プロジェクト設定を確認してください',
-            '認証設定後に再度診断を実行してください'
+            t('doctor.check.firestoreApi.notInitialized'),
+            t('doctor.check.firestoreApi.checkProject'),
+            t('doctor.check.firestoreApi.rerunHint')
           )
         );
       }
@@ -177,7 +178,7 @@ export class FirebaseChecker {
         createCheckResult(
           'success',
           'firestore-api',
-          `Firestore API が有効です (プロジェクト: ${projectId})`
+          `${t('doctor.check.firestoreApi.enabled')} (Project: ${projectId})`
         )
       );
     } catch (error) {
@@ -188,9 +189,9 @@ export class FirebaseChecker {
           createCheckResult(
             'error',
             'firestore-api',
-            'Firestore API が有効化されていません',
+            t('doctor.check.firestoreApi.notEnabled'),
             message,
-            `Firestore API を有効化してください:\n  https://console.cloud.google.com/firestore?project=${projectId}\n\nまたは:\n  gcloud services enable firestore.googleapis.com --project=${projectId}`
+            `${t('doctor.check.firestoreApi.enableHint')}:\n  https://console.cloud.google.com/firestore?project=${projectId}\n\n  gcloud services enable firestore.googleapis.com --project=${projectId}`
           )
         );
       }
@@ -199,9 +200,9 @@ export class FirebaseChecker {
         createCheckResult(
           'error',
           'firestore-api',
-          'Firestore API の確認に失敗しました',
+          t('doctor.check.firestoreApi.checkFailed'),
           message,
-          `Google Cloud Console で Firestore の状態を確認してください:\n  https://console.cloud.google.com/firestore?project=${projectId}`
+          `${t('doctor.check.firestoreApi.consoleHint')}:\n  https://console.cloud.google.com/firestore?project=${projectId}`
         )
       );
     }
@@ -220,9 +221,9 @@ export class FirebaseChecker {
           createCheckResult(
             'warning',
             'firestore-access',
-            'Firestore インスタンスが初期化されていません',
+            t('doctor.check.firestoreApi.notInitialized'),
             undefined,
-            '認証設定後に再度診断を実行してください'
+            t('doctor.check.firestoreApi.rerunHint')
           )
         );
       }
@@ -233,8 +234,8 @@ export class FirebaseChecker {
         createCheckResult(
           'success',
           'firestore-access',
-          'Firestore へのアクセス権限があります',
-          `検出されたコレクション数: ${collections.length}`
+          t('doctor.check.firestoreAccess.hasAccess'),
+          `${t('doctor.check.firestoreAccess.collectionsFound')}: ${collections.length}`
         )
       );
     } catch (error) {
@@ -245,12 +246,11 @@ export class FirebaseChecker {
           createCheckResult(
             'error',
             'firestore-access',
-            'Firestore へのアクセス権限がありません',
+            t('doctor.check.firestoreAccess.noPermission'),
             message,
-            '必要な IAM ロールを付与してください:\n' +
+            `${t('doctor.check.firestoreAccess.grantRoleHint')}:\n` +
               '- Cloud Datastore User (roles/datastore.user)\n' +
-              '- または Firebase Admin (roles/firebase.admin)\n\n' +
-              'サービスアカウントの場合は、IAM コンソールで権限を確認してください'
+              '- Firebase Admin (roles/firebase.admin)'
           )
         );
       }
@@ -259,7 +259,7 @@ export class FirebaseChecker {
         createCheckResult(
           'error',
           'firestore-access',
-          'Firestore アクセスの確認に失敗しました',
+          t('doctor.check.firestoreAccess.checkFailed'),
           message
         )
       );
@@ -285,8 +285,8 @@ export class FirebaseChecker {
           createCheckResult(
             'success',
             'emulator-connection',
-            `Firestore エミュレータに接続できました (${host})`,
-            `HTTP ステータス: ${response.status}`
+            `${t('doctor.check.emulator.connected')} (${host})`,
+            `${t('doctor.check.emulator.httpStatus')}: ${response.status}`
           )
         );
       }
@@ -295,9 +295,9 @@ export class FirebaseChecker {
         createCheckResult(
           'warning',
           'emulator-connection',
-          `エミュレータからの応答が予期しないものでした`,
-          `HTTP ステータス: ${response.status}`,
-          'エミュレータが正常に動作しているか確認してください'
+          t('doctor.check.emulator.unexpectedResponse'),
+          `${t('doctor.check.emulator.httpStatus')}: ${response.status}`,
+          t('doctor.check.emulator.checkRunning')
         )
       );
     } catch (error) {
@@ -307,12 +307,9 @@ export class FirebaseChecker {
         createCheckResult(
           'error',
           'emulator-connection',
-          'Firestore エミュレータに接続できません',
-          `ホスト: ${host}\nエラー: ${message}`,
-          'エミュレータが起動しているか確認してください:\n' +
-            '  firebase emulators:start --only firestore\n\n' +
-            '環境変数が正しいか確認してください:\n' +
-            `  FIRESTORE_EMULATOR_HOST=${host}`
+          t('doctor.check.emulator.connectionFailed'),
+          `${t('doctor.check.emulator.host')}: ${host}\nError: ${message}`,
+          `${t('doctor.check.emulator.startHint')}\n\n  FIRESTORE_EMULATOR_HOST=${host}`
         )
       );
     }
@@ -402,23 +399,23 @@ export class FirebaseChecker {
         createCheckResult(
           'warning',
           'project-id',
-          'プロジェクト ID を特定できません',
+          t('doctor.check.projectId.notResolved'),
           undefined,
-          '以下のいずれかの方法でプロジェクト ID を設定してください:\n\n' +
-            '1. 環境変数を設定:\n   export GCLOUD_PROJECT=your-project-id\n\n' +
-            '2. Firebase プロジェクトを初期化:\n   firebase init\n\n' +
-            '3. サービスアカウントキーを使用'
+          `${t('doctor.check.projectId.setupHint')}:\n\n` +
+            '1. export GCLOUD_PROJECT=your-project-id\n\n' +
+            '2. firebase init\n\n' +
+            '3. Service Account key'
         )
       );
     }
 
     const sourceLabels: Record<ProjectIdSource, string> = {
-      'env-gcloud-project': 'GCLOUD_PROJECT 環境変数',
-      'env-google-cloud-project': 'GOOGLE_CLOUD_PROJECT 環境変数',
-      'env-firebase-project': 'FIREBASE_PROJECT 環境変数',
-      'firebaserc': '.firebaserc (default alias)',
-      'service-account': 'Service Account ファイル',
-      'none': '不明',
+      'env-gcloud-project': t('doctor.check.projectId.source.gcloudProject'),
+      'env-google-cloud-project': t('doctor.check.projectId.source.googleCloudProject'),
+      'env-firebase-project': t('doctor.check.projectId.source.firebaseProject'),
+      'firebaserc': t('doctor.check.projectId.source.firebaserc'),
+      'service-account': t('doctor.check.projectId.source.serviceAccount'),
+      'none': t('doctor.check.projectId.source.unknown'),
     };
 
     const details = [
@@ -434,7 +431,7 @@ export class FirebaseChecker {
       createCheckResult(
         'success',
         'project-id',
-        'プロジェクト',
+        t('doctor.check.projectId.resolved'),
         details.join('\n')
       )
     );

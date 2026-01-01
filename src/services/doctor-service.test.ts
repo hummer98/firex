@@ -361,8 +361,9 @@ describe('DoctorService', () => {
             value: {
               status: 'success',
               category: 'config-file',
-              message: '設定ファイルが見つかりました: .firex.yaml',
-              details: 'ファイルパス: /path/to/.firex.yaml',
+              message: 'Config file found: .firex.yaml',
+              details: 'File path: /path/to/.firex.yaml',
+              metadata: { filePath: '/path/to/.firex.yaml', found: true },
             },
           }),
           readFile: vi.fn().mockResolvedValue({
@@ -371,7 +372,7 @@ describe('DoctorService', () => {
           }),
           validateConfigSyntax: vi.fn().mockReturnValue({
             isOk: () => true,
-            value: { status: 'success', category: 'config-syntax', message: 'YAML 構文は有効です' },
+            value: { status: 'success', category: 'config-syntax', message: 'YAML syntax is valid' },
           }),
           parseConfig: vi.fn().mockReturnValue({
             isOk: () => true,
@@ -379,11 +380,11 @@ describe('DoctorService', () => {
           }),
           validateConfigSchema: vi.fn().mockReturnValue({
             isOk: () => true,
-            value: { status: 'success', category: 'config-schema', message: 'スキーマは有効です' },
+            value: { status: 'success', category: 'config-schema', message: 'Schema is valid' },
           }),
           validateCollectionPaths: vi.fn().mockReturnValue({
             isOk: () => true,
-            value: { status: 'success', category: 'collection-paths', message: 'パスは有効です' },
+            value: { status: 'success', category: 'collection-paths', message: 'Paths are valid' },
           }),
         };
 
@@ -456,8 +457,9 @@ describe('DoctorService', () => {
             value: {
               status: 'success',
               category: 'config-file',
-              message: '設定ファイルが見つかりました: .firex.yaml',
-              details: 'ファイルパス: /path/to/.firex.yaml',
+              message: 'Config file found: .firex.yaml',
+              details: 'File path: /path/to/.firex.yaml',
+              metadata: { filePath: '/path/to/.firex.yaml', found: true },
             },
           }),
           readFile: vi.fn().mockResolvedValue({
@@ -469,9 +471,9 @@ describe('DoctorService', () => {
             value: {
               status: 'error',
               category: 'config-syntax',
-              message: 'YAML 構文エラー',
-              details: '位置: 行 2, 列 3\nInvalid indentation',
-              guidance: 'YAML の構文を確認してください。',
+              message: 'YAML syntax error',
+              details: 'Position: Line 2, Col 3\nInvalid indentation',
+              guidance: 'Check your YAML syntax.',
             },
           }),
           parseConfig: vi.fn(),
@@ -503,8 +505,8 @@ describe('DoctorService', () => {
           const syntaxCheck = result.value.checks.find(c => c.category === 'config-syntax');
           expect(syntaxCheck).toBeDefined();
           expect(syntaxCheck?.status).toBe('error');
-          expect(syntaxCheck?.details).toContain('行');
-          expect(syntaxCheck?.details).toContain('列');
+          expect(syntaxCheck?.details).toContain('Line');
+          expect(syntaxCheck?.details).toContain('Col');
           // Should NOT run schema validation when syntax fails
           expect(mockConfigChecker.validateConfigSchema).not.toHaveBeenCalled();
         }
@@ -549,7 +551,8 @@ describe('DoctorService', () => {
             value: {
               status: 'success',
               category: 'config-file',
-              message: '設定ファイルが見つかりません - デフォルト設定で動作します',
+              message: 'Config file not found - using defaults',
+              metadata: { found: false },
             },
           }),
           readFile: vi.fn(),
@@ -625,8 +628,9 @@ describe('DoctorService', () => {
             value: {
               status: 'success',
               category: 'config-file',
-              message: '設定ファイルが見つかりました: .firex.yaml',
-              details: 'ファイルパス: /path/to/.firex.yaml',
+              message: 'Config file found: .firex.yaml',
+              details: 'File path: /path/to/.firex.yaml',
+              metadata: { filePath: '/path/to/.firex.yaml', found: true },
             },
           }),
           readFile: vi.fn().mockResolvedValue({
@@ -635,7 +639,7 @@ describe('DoctorService', () => {
           }),
           validateConfigSyntax: vi.fn().mockReturnValue({
             isOk: () => true,
-            value: { status: 'success', category: 'config-syntax', message: 'YAML 構文は有効です' },
+            value: { status: 'success', category: 'config-syntax', message: 'YAML syntax is valid' },
           }),
           parseConfig: vi.fn().mockReturnValue({
             isOk: () => true,
@@ -643,11 +647,11 @@ describe('DoctorService', () => {
           }),
           validateConfigSchema: vi.fn().mockReturnValue({
             isOk: () => true,
-            value: { status: 'success', category: 'config-schema', message: '設定スキーマは有効です' },
+            value: { status: 'success', category: 'config-schema', message: 'Schema is valid' },
           }),
           validateCollectionPaths: vi.fn().mockReturnValue({
             isOk: () => true,
-            value: { status: 'success', category: 'collection-paths', message: 'パスは有効です' },
+            value: { status: 'success', category: 'collection-paths', message: 'Paths are valid' },
           }),
         };
 
@@ -720,8 +724,9 @@ describe('DoctorService', () => {
             value: {
               status: 'success',
               category: 'config-file',
-              message: '設定ファイルが見つかりました: .firex.yaml',
-              details: 'ファイルパス: /path/to/.firex.yaml',
+              message: 'Config file found: .firex.yaml',
+              details: 'File path: /path/to/.firex.yaml',
+              metadata: { filePath: '/path/to/.firex.yaml', found: true },
             },
           }),
           readFile: vi.fn().mockResolvedValue({
@@ -730,7 +735,7 @@ describe('DoctorService', () => {
           }),
           validateConfigSyntax: vi.fn().mockReturnValue({
             isOk: () => true,
-            value: { status: 'success', category: 'config-syntax', message: 'YAML 構文は有効です' },
+            value: { status: 'success', category: 'config-syntax', message: 'YAML syntax is valid' },
           }),
           parseConfig: vi.fn().mockReturnValue({
             isOk: () => true,
@@ -741,14 +746,14 @@ describe('DoctorService', () => {
             value: {
               status: 'error',
               category: 'config-schema',
-              message: '設定スキーマの検証に失敗しました',
+              message: 'Schema validation failed',
               details: '  - projectId: Expected string, received number',
-              guidance: '設定ファイルのフィールドと値の型を確認してください。',
+              guidance: 'Check your config file field values.',
             },
           }),
           validateCollectionPaths: vi.fn().mockReturnValue({
             isOk: () => true,
-            value: { status: 'success', category: 'collection-paths', message: 'パスは有効です' },
+            value: { status: 'success', category: 'collection-paths', message: 'Paths are valid' },
           }),
         };
 
@@ -779,6 +784,183 @@ describe('DoctorService', () => {
           expect(schemaCheck?.details).toBeDefined();
           expect(schemaCheck?.guidance).toBeDefined();
         }
+      });
+    });
+
+    // Task 6.3: metadata-based config file detection (replaces hardcoded Japanese strings)
+    describe('Metadata-based config file detection', () => {
+      it('should use metadata.found and metadata.filePath instead of message string matching', async () => {
+        const mockEnvironmentChecker = {
+          checkNodeVersion: vi.fn().mockReturnValue({
+            isOk: () => true,
+            value: { status: 'success', category: 'node-version', message: 'OK' },
+          }),
+          checkFirebaseCLI: vi.fn().mockResolvedValue({
+            isOk: () => true,
+            value: { status: 'success', category: 'firebase-cli', message: 'OK' },
+          }),
+          checkAuthStatus: vi.fn().mockResolvedValue({
+            isOk: () => true,
+            value: { status: 'success', category: 'auth-status', message: 'OK' },
+          }),
+        };
+
+        const mockFirebaseChecker = {
+          checkProjectId: vi.fn().mockReturnValue({
+            isOk: () => true,
+            value: { status: 'success', category: 'project-id', message: 'OK' },
+          }),
+          resolveProjectId: vi.fn().mockReturnValue({ projectId: 'test-project', source: 'firebaserc' }),
+          checkFirestoreAPI: vi.fn().mockResolvedValue({
+            isOk: () => true,
+            value: { status: 'success', category: 'firestore-api', message: 'OK' },
+          }),
+          checkFirestoreAccess: vi.fn().mockResolvedValue({
+            isOk: () => true,
+            value: { status: 'success', category: 'firestore-access', message: 'OK' },
+          }),
+          checkEmulatorConnection: vi.fn(),
+        };
+
+        // Use ENGLISH message (locale-independent) with metadata
+        const mockConfigChecker = {
+          checkConfigFile: vi.fn().mockResolvedValue({
+            isOk: () => true,
+            value: {
+              status: 'success',
+              category: 'config-file',
+              message: 'Config file found: .firex.yaml',  // English message
+              details: 'File path: /path/to/.firex.yaml',  // English details
+              metadata: { filePath: '/path/to/.firex.yaml', found: true },  // Metadata for logic
+            },
+          }),
+          readFile: vi.fn().mockResolvedValue({
+            isOk: () => true,
+            value: 'projectId: my-project',
+          }),
+          validateConfigSyntax: vi.fn().mockReturnValue({
+            isOk: () => true,
+            value: { status: 'success', category: 'config-syntax', message: 'YAML syntax is valid' },
+          }),
+          parseConfig: vi.fn().mockReturnValue({
+            isOk: () => true,
+            value: { projectId: 'my-project' },
+          }),
+          validateConfigSchema: vi.fn().mockReturnValue({
+            isOk: () => true,
+            value: { status: 'success', category: 'config-schema', message: 'Schema is valid' },
+          }),
+          validateCollectionPaths: vi.fn().mockReturnValue({
+            isOk: () => true,
+            value: { status: 'success', category: 'collection-paths', message: 'Paths are valid' },
+          }),
+        };
+
+        const mockBuildChecker = {
+          checkBuildStatus: vi.fn().mockResolvedValue({
+            isOk: () => true,
+            value: { status: 'success', category: 'build-status', message: 'OK' },
+          }),
+          isNpmPackageInstall: vi.fn().mockReturnValue(false),
+        };
+
+        delete process.env.FIRESTORE_EMULATOR_HOST;
+
+        const service = new DoctorService({
+          environmentChecker: mockEnvironmentChecker as any,
+          firebaseChecker: mockFirebaseChecker as any,
+          configChecker: mockConfigChecker as any,
+          buildChecker: mockBuildChecker as any,
+        });
+
+        const result = await service.runDiagnostics({ verbose: false });
+
+        expect(result.isOk()).toBe(true);
+        if (result.isOk()) {
+          // Should call validateConfigSyntax with the correct file path from metadata
+          expect(mockConfigChecker.validateConfigSyntax).toHaveBeenCalled();
+          expect(mockConfigChecker.readFile).toHaveBeenCalledWith('/path/to/.firex.yaml');
+
+          // Should have config-syntax check result
+          const syntaxCheck = result.value.checks.find(c => c.category === 'config-syntax');
+          expect(syntaxCheck).toBeDefined();
+          expect(syntaxCheck?.status).toBe('success');
+        }
+      });
+
+      it('should not run syntax validation when metadata.found is false', async () => {
+        const mockEnvironmentChecker = {
+          checkNodeVersion: vi.fn().mockReturnValue({
+            isOk: () => true,
+            value: { status: 'success', category: 'node-version', message: 'OK' },
+          }),
+          checkFirebaseCLI: vi.fn().mockResolvedValue({
+            isOk: () => true,
+            value: { status: 'success', category: 'firebase-cli', message: 'OK' },
+          }),
+          checkAuthStatus: vi.fn().mockResolvedValue({
+            isOk: () => true,
+            value: { status: 'success', category: 'auth-status', message: 'OK' },
+          }),
+        };
+
+        const mockFirebaseChecker = {
+          checkProjectId: vi.fn().mockReturnValue({
+            isOk: () => true,
+            value: { status: 'success', category: 'project-id', message: 'OK' },
+          }),
+          resolveProjectId: vi.fn().mockReturnValue({ projectId: 'test-project', source: 'firebaserc' }),
+          checkFirestoreAPI: vi.fn().mockResolvedValue({
+            isOk: () => true,
+            value: { status: 'success', category: 'firestore-api', message: 'OK' },
+          }),
+          checkFirestoreAccess: vi.fn().mockResolvedValue({
+            isOk: () => true,
+            value: { status: 'success', category: 'firestore-access', message: 'OK' },
+          }),
+          checkEmulatorConnection: vi.fn(),
+        };
+
+        // Config file not found - English message with metadata
+        const mockConfigChecker = {
+          checkConfigFile: vi.fn().mockResolvedValue({
+            isOk: () => true,
+            value: {
+              status: 'success',
+              category: 'config-file',
+              message: 'Config file not found - using defaults',  // English message
+              metadata: { found: false },  // Metadata for logic
+            },
+          }),
+          readFile: vi.fn(),
+          validateConfigSyntax: vi.fn(),
+          parseConfig: vi.fn(),
+          validateConfigSchema: vi.fn(),
+          validateCollectionPaths: vi.fn(),
+        };
+
+        const mockBuildChecker = {
+          checkBuildStatus: vi.fn().mockResolvedValue({
+            isOk: () => true,
+            value: { status: 'success', category: 'build-status', message: 'OK' },
+          }),
+          isNpmPackageInstall: vi.fn().mockReturnValue(false),
+        };
+
+        delete process.env.FIRESTORE_EMULATOR_HOST;
+
+        const service = new DoctorService({
+          environmentChecker: mockEnvironmentChecker as any,
+          firebaseChecker: mockFirebaseChecker as any,
+          configChecker: mockConfigChecker as any,
+          buildChecker: mockBuildChecker as any,
+        });
+
+        const result = await service.runDiagnostics({ verbose: false });
+
+        expect(result.isOk()).toBe(true);
+        // Should NOT call validateConfigSyntax when config file not found
+        expect(mockConfigChecker.validateConfigSyntax).not.toHaveBeenCalled();
       });
     });
 
@@ -823,8 +1005,9 @@ describe('DoctorService', () => {
             value: {
               status: 'success',
               category: 'config-file',
-              message: '設定ファイルが見つかりました: .firex.yaml',
-              details: 'ファイルパス: /path/to/.firex.yaml',
+              message: 'Config file found: .firex.yaml',
+              details: 'File path: /path/to/.firex.yaml',
+              metadata: { filePath: '/path/to/.firex.yaml', found: true },
             },
           }),
           readFile: vi.fn().mockResolvedValue({
@@ -833,7 +1016,7 @@ describe('DoctorService', () => {
           }),
           validateConfigSyntax: vi.fn().mockReturnValue({
             isOk: () => true,
-            value: { status: 'success', category: 'config-syntax', message: 'YAML 構文は有効です' },
+            value: { status: 'success', category: 'config-syntax', message: 'YAML syntax is valid' },
           }),
           parseConfig: vi.fn().mockReturnValue({
             isOk: () => true,
@@ -841,14 +1024,14 @@ describe('DoctorService', () => {
           }),
           validateConfigSchema: vi.fn().mockReturnValue({
             isOk: () => true,
-            value: { status: 'success', category: 'config-schema', message: '設定スキーマは有効です' },
+            value: { status: 'success', category: 'config-schema', message: 'Schema is valid' },
           }),
           validateCollectionPaths: vi.fn().mockReturnValue({
             isOk: () => true,
             value: {
               status: 'success',
               category: 'collection-paths',
-              message: 'すべてのコレクションパスが有効です (2 件)',
+              message: 'All collection paths are valid (2)',
             },
           }),
         };
@@ -922,8 +1105,9 @@ describe('DoctorService', () => {
             value: {
               status: 'success',
               category: 'config-file',
-              message: '設定ファイルが見つかりました: .firex.yaml',
-              details: 'ファイルパス: /path/to/.firex.yaml',
+              message: 'Config file found: .firex.yaml',
+              details: 'File path: /path/to/.firex.yaml',
+              metadata: { filePath: '/path/to/.firex.yaml', found: true },
             },
           }),
           readFile: vi.fn().mockResolvedValue({
@@ -932,7 +1116,7 @@ describe('DoctorService', () => {
           }),
           validateConfigSyntax: vi.fn().mockReturnValue({
             isOk: () => true,
-            value: { status: 'success', category: 'config-syntax', message: 'YAML 構文は有効です' },
+            value: { status: 'success', category: 'config-syntax', message: 'YAML syntax is valid' },
           }),
           parseConfig: vi.fn().mockReturnValue({
             isOk: () => true,
@@ -940,16 +1124,16 @@ describe('DoctorService', () => {
           }),
           validateConfigSchema: vi.fn().mockReturnValue({
             isOk: () => true,
-            value: { status: 'success', category: 'config-schema', message: '設定スキーマは有効です' },
+            value: { status: 'success', category: 'config-schema', message: 'Schema is valid' },
           }),
           validateCollectionPaths: vi.fn().mockReturnValue({
             isOk: () => true,
             value: {
               status: 'error',
               category: 'collection-paths',
-              message: 'コレクションパスの形式が不正です',
-              details: '無効なパス:\n  users/user1',
-              guidance: 'コレクションパスは奇数のセグメント数である必要があります。',
+              message: 'Invalid collection paths format',
+              details: 'Invalid paths:\n  users/user1',
+              guidance: 'Collection paths must have an odd number of segments.',
             },
           }),
         };
@@ -979,8 +1163,153 @@ describe('DoctorService', () => {
           expect(pathsCheck).toBeDefined();
           expect(pathsCheck?.status).toBe('error');
           expect(pathsCheck?.details).toContain('users/user1');
-          expect(pathsCheck?.guidance).toContain('奇数');
+          expect(pathsCheck?.guidance).toContain('odd');
         }
+      });
+    });
+
+    // Task 6.5: Locale switching verification
+    describe('Locale switching behavior verification', () => {
+      it('should run syntax/schema validation regardless of locale (metadata-based)', async () => {
+        // This test verifies that the fix works for both locales
+        // by testing that metadata.found and metadata.filePath are used
+        // instead of hardcoded message strings
+
+        const mockEnvironmentChecker = {
+          checkNodeVersion: vi.fn().mockReturnValue({
+            isOk: () => true,
+            value: { status: 'success', category: 'node-version', message: 'OK' },
+          }),
+          checkFirebaseCLI: vi.fn().mockResolvedValue({
+            isOk: () => true,
+            value: { status: 'success', category: 'firebase-cli', message: 'OK' },
+          }),
+          checkAuthStatus: vi.fn().mockResolvedValue({
+            isOk: () => true,
+            value: { status: 'success', category: 'auth-status', message: 'OK' },
+          }),
+        };
+
+        const mockFirebaseChecker = {
+          checkProjectId: vi.fn().mockReturnValue({
+            isOk: () => true,
+            value: { status: 'success', category: 'project-id', message: 'OK' },
+          }),
+          resolveProjectId: vi.fn().mockReturnValue({ projectId: 'test-project', source: 'firebaserc' }),
+          checkFirestoreAPI: vi.fn().mockResolvedValue({
+            isOk: () => true,
+            value: { status: 'success', category: 'firestore-api', message: 'OK' },
+          }),
+          checkFirestoreAccess: vi.fn().mockResolvedValue({
+            isOk: () => true,
+            value: { status: 'success', category: 'firestore-access', message: 'OK' },
+          }),
+          checkEmulatorConnection: vi.fn(),
+        };
+
+        // Simulate Japanese locale messages with metadata
+        const mockConfigCheckerJa = {
+          checkConfigFile: vi.fn().mockResolvedValue({
+            isOk: () => true,
+            value: {
+              status: 'success',
+              category: 'config-file',
+              message: '設定ファイルが見つかりました: .firex.yaml',  // Japanese message
+              details: 'ファイルパス: /path/to/.firex.yaml',  // Japanese details
+              metadata: { filePath: '/path/to/.firex.yaml', found: true },  // Metadata for logic
+            },
+          }),
+          readFile: vi.fn().mockResolvedValue({
+            isOk: () => true,
+            value: 'projectId: my-project',
+          }),
+          validateConfigSyntax: vi.fn().mockReturnValue({
+            isOk: () => true,
+            value: { status: 'success', category: 'config-syntax', message: 'YAML 構文は有効です' },
+          }),
+          parseConfig: vi.fn().mockReturnValue({
+            isOk: () => true,
+            value: { projectId: 'my-project' },
+          }),
+          validateConfigSchema: vi.fn().mockReturnValue({
+            isOk: () => true,
+            value: { status: 'success', category: 'config-schema', message: 'スキーマは有効です' },
+          }),
+          validateCollectionPaths: vi.fn().mockReturnValue({
+            isOk: () => true,
+            value: { status: 'success', category: 'collection-paths', message: 'パスは有効です' },
+          }),
+        };
+
+        // Simulate English locale messages with metadata
+        const mockConfigCheckerEn = {
+          checkConfigFile: vi.fn().mockResolvedValue({
+            isOk: () => true,
+            value: {
+              status: 'success',
+              category: 'config-file',
+              message: 'Config file found: .firex.yaml',  // English message
+              details: 'File path: /path/to/.firex.yaml',  // English details
+              metadata: { filePath: '/path/to/.firex.yaml', found: true },  // Metadata for logic
+            },
+          }),
+          readFile: vi.fn().mockResolvedValue({
+            isOk: () => true,
+            value: 'projectId: my-project',
+          }),
+          validateConfigSyntax: vi.fn().mockReturnValue({
+            isOk: () => true,
+            value: { status: 'success', category: 'config-syntax', message: 'YAML syntax is valid' },
+          }),
+          parseConfig: vi.fn().mockReturnValue({
+            isOk: () => true,
+            value: { projectId: 'my-project' },
+          }),
+          validateConfigSchema: vi.fn().mockReturnValue({
+            isOk: () => true,
+            value: { status: 'success', category: 'config-schema', message: 'Schema is valid' },
+          }),
+          validateCollectionPaths: vi.fn().mockReturnValue({
+            isOk: () => true,
+            value: { status: 'success', category: 'collection-paths', message: 'Paths are valid' },
+          }),
+        };
+
+        const mockBuildChecker = {
+          checkBuildStatus: vi.fn().mockResolvedValue({
+            isOk: () => true,
+            value: { status: 'success', category: 'build-status', message: 'OK' },
+          }),
+          isNpmPackageInstall: vi.fn().mockReturnValue(false),
+        };
+
+        delete process.env.FIRESTORE_EMULATOR_HOST;
+
+        // Test with Japanese-style messages (both work because metadata is used)
+        const serviceJa = new DoctorService({
+          environmentChecker: mockEnvironmentChecker as any,
+          firebaseChecker: mockFirebaseChecker as any,
+          configChecker: mockConfigCheckerJa as any,
+          buildChecker: mockBuildChecker as any,
+        });
+
+        const resultJa = await serviceJa.runDiagnostics({ verbose: false });
+        expect(resultJa.isOk()).toBe(true);
+        expect(mockConfigCheckerJa.validateConfigSyntax).toHaveBeenCalled();
+        expect(mockConfigCheckerJa.validateConfigSchema).toHaveBeenCalled();
+
+        // Test with English-style messages (both work because metadata is used)
+        const serviceEn = new DoctorService({
+          environmentChecker: mockEnvironmentChecker as any,
+          firebaseChecker: mockFirebaseChecker as any,
+          configChecker: mockConfigCheckerEn as any,
+          buildChecker: mockBuildChecker as any,
+        });
+
+        const resultEn = await serviceEn.runDiagnostics({ verbose: false });
+        expect(resultEn.isOk()).toBe(true);
+        expect(mockConfigCheckerEn.validateConfigSyntax).toHaveBeenCalled();
+        expect(mockConfigCheckerEn.validateConfigSchema).toHaveBeenCalled();
       });
     });
   });

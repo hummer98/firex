@@ -16,6 +16,7 @@ import { ConfigChecker } from '../domain/doctor/config-checker';
 import { BuildChecker } from '../domain/doctor/build-checker';
 import type { Firestore } from 'firebase-admin/firestore';
 import type { Config } from './config';
+import { t } from '../shared/i18n';
 
 /**
  * Dependencies for testing
@@ -70,12 +71,12 @@ export class DoctorService {
       const emulatorHost = process.env.FIRESTORE_EMULATOR_HOST;
 
       if (options.verbose) {
-        console.log('Starting diagnostics...');
-        console.log(`Emulator mode: ${emulatorMode}`);
+        console.log(t('doctor.progress.starting'));
+        console.log(`${t('doctor.progress.emulatorMode')}: ${emulatorMode}`);
       }
 
       // 1. Environment checks
-      if (options.verbose) console.log('Checking Node.js version...');
+      if (options.verbose) console.log(t('doctor.progress.checkingNode'));
       const nodeResult = this.environmentChecker.checkNodeVersion();
       if (nodeResult.isOk()) {
         checks.push(nodeResult.value);
@@ -83,7 +84,7 @@ export class DoctorService {
         checks.push(this.createErrorResult('node-version', nodeResult.error.message));
       }
 
-      if (options.verbose) console.log('Checking Firebase CLI...');
+      if (options.verbose) console.log(t('doctor.progress.checkingFirebaseCli'));
       const cliResult = await this.environmentChecker.checkFirebaseCLI();
       if (cliResult.isOk()) {
         checks.push(cliResult.value);
@@ -91,7 +92,7 @@ export class DoctorService {
         checks.push(this.createErrorResult('firebase-cli', cliResult.error.message));
       }
 
-      if (options.verbose) console.log('Checking authentication status...');
+      if (options.verbose) console.log(t('doctor.progress.checkingAuth'));
       const authResult = await this.environmentChecker.checkAuthStatus();
       if (authResult.isOk()) {
         checks.push(authResult.value);
@@ -100,7 +101,7 @@ export class DoctorService {
       }
 
       // 2. Project ID resolution (always show)
-      if (options.verbose) console.log('Resolving project ID...');
+      if (options.verbose) console.log(t('doctor.progress.resolvingProjectId'));
       const projectIdResult = this.firebaseChecker.checkProjectId();
       let projectId: string | undefined;
 
@@ -115,7 +116,7 @@ export class DoctorService {
 
       // 3. Emulator or production Firestore checks
       if (emulatorMode && emulatorHost) {
-        if (options.verbose) console.log('Checking emulator connection...');
+        if (options.verbose) console.log(t('doctor.progress.checkingEmulator'));
         const emulatorResult = await this.firebaseChecker.checkEmulatorConnection(emulatorHost);
         if (emulatorResult.isOk()) {
           checks.push(emulatorResult.value);
@@ -125,7 +126,7 @@ export class DoctorService {
       } else {
         // Production mode - check Firestore API and access
         if (projectId) {
-          if (options.verbose) console.log('Checking Firestore API...');
+          if (options.verbose) console.log(t('doctor.progress.checkingFirestoreApi'));
           const apiResult = await this.firebaseChecker.checkFirestoreAPI(projectId);
           if (apiResult.isOk()) {
             checks.push(apiResult.value);
@@ -135,7 +136,7 @@ export class DoctorService {
 
           const config = this.getConfig();
           if (config) {
-            if (options.verbose) console.log('Checking Firestore access...');
+            if (options.verbose) console.log(t('doctor.progress.checkingFirestoreAccess'));
             const accessResult = await this.firebaseChecker.checkFirestoreAccess(config);
             if (accessResult.isOk()) {
               checks.push(accessResult.value);
@@ -147,7 +148,7 @@ export class DoctorService {
       }
 
       // 4. Config file checks
-      if (options.verbose) console.log('Checking config file...');
+      if (options.verbose) console.log(t('doctor.progress.checkingConfig'));
       const configResult = await this.configChecker.checkConfigFile();
       let configFilePath: string | undefined;
       let configContent: string | undefined;
@@ -156,12 +157,9 @@ export class DoctorService {
       if (configResult.isOk()) {
         checks.push(configResult.value);
 
-        // Extract file path from details if config file was found
-        if (configResult.value.message.includes('設定ファイルが見つかりました')) {
-          const pathMatch = configResult.value.details?.match(/ファイルパス: (.+)$/);
-          if (pathMatch) {
-            configFilePath = pathMatch[1];
-          }
+        // Extract file path from metadata if config file was found (locale-independent)
+        if (configResult.value.metadata?.found && configResult.value.metadata?.filePath) {
+          configFilePath = configResult.value.metadata.filePath as string;
         }
       } else {
         checks.push(this.createErrorResult('config-file', configResult.error.message));
@@ -169,7 +167,7 @@ export class DoctorService {
 
       // 4.1 Syntax validation (only if config file was found)
       if (configFilePath) {
-        if (options.verbose) console.log('Validating config file syntax...');
+        if (options.verbose) console.log(t('doctor.progress.validatingSyntax'));
         const readResult = await this.configChecker.readFile(configFilePath);
 
         if (readResult.isOk()) {
@@ -181,7 +179,7 @@ export class DoctorService {
 
             // 4.2 Schema validation (only if syntax is valid)
             if (syntaxResult.value.status === 'success') {
-              if (options.verbose) console.log('Validating config schema...');
+              if (options.verbose) console.log(t('doctor.progress.validatingSchema'));
               const parseResult = this.configChecker.parseConfig(configFilePath, configContent);
 
               if (parseResult.isOk()) {
@@ -204,7 +202,7 @@ export class DoctorService {
 
         // 4.3 Collection paths validation (always run if we have parsed config)
         if (parsedConfig && typeof parsedConfig === 'object' && parsedConfig !== null) {
-          if (options.verbose) console.log('Validating collection paths...');
+          if (options.verbose) console.log(t('doctor.progress.validatingPaths'));
           // Extract collection paths from config if they exist
           // Note: Currently the config schema doesn't define collection paths,
           // so we'll pass an empty array unless the config contains them
@@ -230,7 +228,7 @@ export class DoctorService {
 
       // 5. Build status check (only in verbose mode - low value for users)
       if (options.verbose && !options.skipBuildCheck) {
-        console.log('Checking build status...');
+        console.log(t('doctor.progress.checkingBuild'));
         const buildResult = await this.buildChecker.checkBuildStatus();
         if (buildResult.isOk()) {
           checks.push(buildResult.value);
@@ -254,7 +252,7 @@ export class DoctorService {
       };
 
       if (options.verbose) {
-        console.log('Diagnostics complete.');
+        console.log(t('doctor.progress.complete'));
       }
 
       return ok(report);
@@ -273,6 +271,6 @@ export class DoctorService {
     category: CheckResult['category'],
     message: string
   ): CheckResult {
-    return createCheckResult('error', category, `チェックに失敗しました: ${message}`);
+    return createCheckResult('error', category, `${t('doctor.error.checkFailed')}: ${message}`);
   }
 }

@@ -25,7 +25,7 @@ export class DoctorCommand extends BaseCommand {
       default: false,
     }),
     json: Flags.boolean({
-      description: '診断結果を JSON 形式で出力する',
+      description: t('flag.doctor.json'),
       default: false,
     }),
   };
@@ -55,7 +55,7 @@ export class DoctorCommand extends BaseCommand {
       const errorMsg = result.error.type === 'UNEXPECTED_ERROR'
         ? result.error.message
         : `${result.error.checker}: ${result.error.error.message}`;
-      this.loggingService.error(`診断の実行に失敗しました: ${errorMsg}`);
+      this.loggingService.error(`${t('doctor.error.executionFailed')}: ${errorMsg}`);
       this.exit(1);
       return;
     }
@@ -66,7 +66,7 @@ export class DoctorCommand extends BaseCommand {
     const formatResult = reporter.formatReport(report, jsonOutput ? 'json' : 'text');
 
     if (formatResult.isErr()) {
-      this.loggingService.error(`診断結果のフォーマットに失敗しました: ${formatResult.error.message}`);
+      this.loggingService.error(`${t('doctor.error.formatFailed')}: ${formatResult.error.message}`);
       this.exit(1);
       return;
     }

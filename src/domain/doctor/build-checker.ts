@@ -7,6 +7,7 @@ import * as path from 'path';
 import { Result, ok, err } from '../../shared/types';
 import type { CheckResult, CheckerError } from './types';
 import { createCheckResult } from './types';
+import { t } from '../../shared/i18n';
 
 /**
  * Dependencies for testing
@@ -92,8 +93,8 @@ export class BuildChecker {
           createCheckResult(
             'success',
             'build-status',
-            'npm パッケージとしてインストールされています',
-            'ビルドチェックはスキップされました'
+            t('doctor.check.build.npmPackage'),
+            t('doctor.check.build.skipped')
           )
         );
       }
@@ -126,9 +127,9 @@ export class BuildChecker {
           createCheckResult(
             'warning',
             'build-status',
-            'dist ディレクトリが見つかりません',
-            `期待されるパス: ${distDir}`,
-            'ビルドを実行してください:\n  npm run build'
+            t('doctor.check.build.noDistDir'),
+            `${t('doctor.check.build.expectedPath')}: ${distDir}`,
+            t('doctor.check.build.runBuildHint')
           )
         );
       }
@@ -139,8 +140,8 @@ export class BuildChecker {
           createCheckResult(
             'success',
             'build-status',
-            'ビルド済み環境で動作中',
-            'ソースディレクトリが見つからないため、ビルドチェックをスキップしました'
+            t('doctor.check.build.builtEnv'),
+            t('doctor.check.build.noSrcDir')
           )
         );
       }
@@ -154,9 +155,9 @@ export class BuildChecker {
           createCheckResult(
             'warning',
             'build-status',
-            'ソースファイルがビルドファイルより新しいため、リビルドが必要です',
-            `最新のソース: ${srcNewest.toISOString()}\n最新のビルド: ${distNewest.toISOString()}`,
-            'ビルドを再実行してください:\n  npm run build'
+            t('doctor.check.build.rebuildRequired'),
+            `${t('doctor.check.build.newestSource')}: ${srcNewest.toISOString()}\n${t('doctor.check.build.newestBuild')}: ${distNewest.toISOString()}`,
+            t('doctor.check.build.runBuildHint')
           )
         );
       }
@@ -165,8 +166,8 @@ export class BuildChecker {
         createCheckResult(
           'success',
           'build-status',
-          'ビルドは最新です',
-          `最新のビルド: ${distNewest.toISOString()}`
+          t('doctor.check.build.upToDate'),
+          `${t('doctor.check.build.newestBuild')}: ${distNewest.toISOString()}`
         )
       );
     } catch (error) {
