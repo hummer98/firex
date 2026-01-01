@@ -1,0 +1,98 @@
+{
+  "feature_name": "i18n-full-coverage",
+  "created_at": "2026-01-01T12:00:00Z",
+  "updated_at": "2026-01-02T11:00:00.000Z",
+  "language": "ja",
+  "phase": "implementation-complete",
+  "approvals": {
+    "requirements": {
+      "generated": true,
+      "approved": true
+    },
+    "design": {
+      "generated": true,
+      "approved": true,
+      "amended": true,
+      "amendmentReason": "Add structured metadata to CheckResult for locale-independent logic"
+    },
+    "tasks": {
+      "generated": true,
+      "approved": true,
+      "amended": true,
+      "amendmentReason": "Add remediation tasks 6.1-6.5 for Critical Issue fix"
+    }
+  },
+  "ready_for_implementation": true,
+  "autoExecution": {
+    "enabled": true,
+    "permissions": {
+      "requirements": true,
+      "design": true,
+      "tasks": true,
+      "impl": false,
+      "inspection": false,
+      "deploy": false
+    },
+    "documentReviewFlag": "run",
+    "validationOptions": {
+      "gap": false,
+      "design": false,
+      "impl": false
+    }
+  },
+  "documentReview": {
+    "rounds": 2,
+    "status": "approved",
+    "roundDetails": [
+      {
+        "roundNumber": 1,
+        "status": "reply_complete",
+        "fixApplied": true
+      },
+      {
+        "roundNumber": 2,
+        "status": "reply_complete"
+      }
+    ]
+  },
+  "inspection": {
+    "rounds": 3,
+    "status": "go",
+    "inspectionDate": "2026-01-02",
+    "reportFile": "inspection-3.md",
+    "criticalIssues": 0,
+    "majorIssues": 0,
+    "minorIssues": 0,
+    "summary": "All critical issues resolved. Metadata-based logic implemented for locale-independent config detection.",
+    "remediationTasks": [
+      "6.1",
+      "6.2",
+      "6.3",
+      "6.4",
+      "6.5"
+    ],
+    "remediationStatus": "complete",
+    "history": [
+      {
+        "round": 1,
+        "reportFile": "inspection-1.md",
+        "judgment": "nogo",
+        "criticalIssues": 1
+      },
+      {
+        "round": 2,
+        "reportFile": "inspection-2.md",
+        "judgment": "nogo",
+        "criticalIssues": 1,
+        "note": "Critical issue remains unfixed, remediation tasks added"
+      },
+      {
+        "round": 3,
+        "reportFile": "inspection-3.md",
+        "judgment": "go",
+        "criticalIssues": 0,
+        "note": "All remediation tasks completed, critical issue resolved"
+      }
+    ]
+  }
+}
