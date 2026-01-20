@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.1] - 2026-01-21
+
+### Fixed
+- `doctor` command `--project-id` option not working correctly
+
 ## [0.7.0] - 2026-01-02
 
 ### Added
@@ -154,7 +159,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - API key and OAuth token masking
 - Secure file permission recommendations
 
-[Unreleased]: https://github.com/hummer98/firex/compare/v0.7.0...HEAD
+[Unreleased]: https://github.com/hummer98/firex/compare/v0.7.1...HEAD
+[0.7.1]: https://github.com/hummer98/firex/compare/v0.7.0...v0.7.1
 [0.7.0]: https://github.com/hummer98/firex/compare/v0.6.1...v0.7.0
 [0.6.1]: https://github.com/hummer98/firex/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/hummer98/firex/compare/v0.5.0...v0.6.0
