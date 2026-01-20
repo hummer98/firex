@@ -12,6 +12,7 @@ coverage/
 .env
 .env.local
 .env.*.local
+.envrc
 
 # Service account keys (SECURITY - CRITICAL)
 # These patterns protect against accidental credential commits
