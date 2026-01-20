@@ -35,6 +35,13 @@ export class DoctorCommand extends BaseCommand {
     const verbose = flags.verbose;
     const jsonOutput = flags.json;
 
+    // Initialize config and auth to get Firestore instance
+    const initResult = await this.initialize();
+    if (initResult.isOk()) {
+      // Try to initialize auth (ignore errors - doctor should still run)
+      await this.initializeAuth();
+    }
+
     // Create services
     const doctorService = new DoctorService({
       getFirestore: () => this.firestore,

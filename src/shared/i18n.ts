@@ -257,6 +257,7 @@ export interface Messages {
   'doctor.check.projectId.source.firebaseProject': string;
   'doctor.check.projectId.source.firebaserc': string;
   'doctor.check.projectId.source.serviceAccount': string;
+  'doctor.check.projectId.source.cliFlag': string;
   'doctor.check.projectId.source.unknown': string;
 
   // ConfigChecker - Config file
@@ -554,6 +555,7 @@ const jaMessages: Messages = {
   'doctor.check.projectId.source.firebaseProject': 'FIREBASE_PROJECT 環境変数',
   'doctor.check.projectId.source.firebaserc': '.firebaserc (default alias)',
   'doctor.check.projectId.source.serviceAccount': 'Service Account ファイル',
+  'doctor.check.projectId.source.cliFlag': '--project-id オプション',
   'doctor.check.projectId.source.unknown': '不明',
 
   // ConfigChecker - Config file
@@ -851,6 +853,7 @@ const enMessages: Messages = {
   'doctor.check.projectId.source.firebaseProject': 'FIREBASE_PROJECT environment variable',
   'doctor.check.projectId.source.firebaserc': '.firebaserc (default alias)',
   'doctor.check.projectId.source.serviceAccount': 'Service Account file',
+  'doctor.check.projectId.source.cliFlag': '--project-id option',
   'doctor.check.projectId.source.unknown': 'Unknown',
 
   // ConfigChecker - Config file

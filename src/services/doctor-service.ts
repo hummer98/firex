@@ -101,17 +101,32 @@ export class DoctorService {
       }
 
       // 2. Project ID resolution (always show)
+      // Priority: CLI flag (from config) > environment variables > .firebaserc
       if (options.verbose) console.log(t('doctor.progress.resolvingProjectId'));
-      const projectIdResult = this.firebaseChecker.checkProjectId();
+      const config = this.getConfig();
       let projectId: string | undefined;
 
-      if (projectIdResult.isOk()) {
-        checks.push(projectIdResult.value);
-        // Extract project ID from resolved info
-        const projectInfo = this.firebaseChecker.resolveProjectId();
-        projectId = projectInfo.projectId;
+      // Check if project ID is provided via CLI flag (stored in config)
+      if (config?.projectId) {
+        projectId = config.projectId;
+        checks.push(
+          createCheckResult(
+            'success',
+            'project-id',
+            t('doctor.check.projectId.resolved'),
+            `Project ID: ${projectId}\nSource: ${t('doctor.check.projectId.source.cliFlag')}`
+          )
+        );
       } else {
-        checks.push(this.createErrorResult('project-id', projectIdResult.error.message));
+        const projectIdResult = this.firebaseChecker.checkProjectId();
+        if (projectIdResult.isOk()) {
+          checks.push(projectIdResult.value);
+          // Extract project ID from resolved info
+          const projectInfo = this.firebaseChecker.resolveProjectId();
+          projectId = projectInfo.projectId;
+        } else {
+          checks.push(this.createErrorResult('project-id', projectIdResult.error.message));
+        }
       }
 
       // 3. Emulator or production Firestore checks
