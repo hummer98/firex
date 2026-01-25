@@ -119,7 +119,7 @@ export class FirestoreManager {
   /**
    * Format authentication error with helpful hints
    */
-  private formatAuthError(message: string, projectId?: string): string {
+  private formatAuthError(message: string, _projectId?: string): string {
     if (message.includes('Unable to detect a Project Id')) {
       return `プロジェクトIDが検出できませんでした。ツールパラメータでprojectIdを指定してください。
 
