@@ -5,15 +5,19 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { Firestore, CollectionReference, DocumentReference, WriteBatch } from 'firebase-admin/firestore';
+import type { FirestoreManager } from '../firestore-manager.js';
+import { ok } from '../../shared/types.js';
 import { registerImportTool } from './import.js';
 
 describe('firestore_import tool', () => {
   let mockServer: Partial<McpServer>;
   let mockFirestore: Partial<Firestore>;
+  let mockFirestoreManager: Partial<FirestoreManager>;
   let mockCollectionRef: Partial<CollectionReference>;
   let mockDocRef: Partial<DocumentReference>;
   let mockBatch: Partial<WriteBatch>;
   let registeredHandler: (params: {
+    projectId?: string;
     path: string;
     documents: Array<{ id?: string; data: Record<string, unknown> }>;
     merge?: boolean;
@@ -45,7 +49,11 @@ describe('firestore_import tool', () => {
       batch: vi.fn().mockReturnValue(mockBatch),
     };
 
-    registerImportTool(mockServer as McpServer, mockFirestore as Firestore);
+    mockFirestoreManager = {
+      getFirestore: vi.fn().mockResolvedValue(ok(mockFirestore as Firestore)),
+    };
+
+    registerImportTool(mockServer as McpServer, mockFirestoreManager as FirestoreManager);
   });
 
   it('should register tool with correct name and description', () => {

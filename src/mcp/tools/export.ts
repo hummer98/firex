@@ -6,10 +6,12 @@
 
 import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import type { Firestore, DocumentSnapshot } from 'firebase-admin/firestore';
+import type { DocumentSnapshot } from 'firebase-admin/firestore';
+import type { FirestoreManager } from '../firestore-manager.js';
 import { ToonEncoder } from '../../presentation/toon-encoder.js';
 
 const ExportSchema = {
+  projectId: z.string().optional().describe('Firebase project ID (optional, uses default if not specified)'),
   path: z.string().describe('Collection path to export'),
   recursive: z.boolean().optional().default(false).describe('If true, include subcollections'),
   limit: z.number().optional().describe('Maximum number of documents to export'),
@@ -50,12 +52,28 @@ async function exportDocument(
   return exported;
 }
 
-export function registerExportTool(server: McpServer, firestore: Firestore): void {
+export function registerExportTool(server: McpServer, firestoreManager: FirestoreManager): void {
   server.tool(
     'firestore_export',
     'Export documents from a Firestore collection as JSON',
     ExportSchema,
-    async ({ path, recursive, limit, format }) => {
+    async ({ projectId, path, recursive, limit, format }) => {
+      const firestoreResult = await firestoreManager.getFirestore({ projectId });
+
+      if (firestoreResult.isErr()) {
+        return {
+          content: [
+            {
+              type: 'text' as const,
+              text: `Error: ${firestoreResult.error.message}`,
+            },
+          ],
+          isError: true,
+        };
+      }
+
+      const firestore = firestoreResult.value;
+
       try {
         let query = firestore.collection(path).orderBy('__name__');
 

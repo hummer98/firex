@@ -5,15 +5,18 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { Firestore, DocumentReference, CollectionReference, QuerySnapshot, WriteBatch } from 'firebase-admin/firestore';
+import type { FirestoreManager } from '../firestore-manager.js';
+import { ok } from '../../shared/types.js';
 import { registerDeleteTool } from './delete.js';
 
 describe('firestore_delete tool', () => {
   let mockServer: Partial<McpServer>;
   let mockFirestore: Partial<Firestore>;
+  let mockFirestoreManager: Partial<FirestoreManager>;
   let mockDocRef: Partial<DocumentReference>;
   let mockCollectionRef: Partial<CollectionReference>;
   let mockBatch: Partial<WriteBatch>;
-  let registeredHandler: (params: { path: string; recursive?: boolean }) => Promise<unknown>;
+  let registeredHandler: (params: { projectId?: string; path: string; recursive?: boolean }) => Promise<unknown>;
 
   beforeEach(() => {
     mockServer = {
@@ -53,7 +56,11 @@ describe('firestore_delete tool', () => {
       batch: vi.fn().mockReturnValue(mockBatch),
     };
 
-    registerDeleteTool(mockServer as McpServer, mockFirestore as Firestore);
+    mockFirestoreManager = {
+      getFirestore: vi.fn().mockResolvedValue(ok(mockFirestore as Firestore)),
+    };
+
+    registerDeleteTool(mockServer as McpServer, mockFirestoreManager as FirestoreManager);
   });
 
   it('should register tool with correct name and description', () => {

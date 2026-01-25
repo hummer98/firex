@@ -5,14 +5,18 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { Firestore, CollectionReference, Query, QuerySnapshot, QueryDocumentSnapshot, DocumentReference } from 'firebase-admin/firestore';
+import type { FirestoreManager } from '../firestore-manager.js';
+import { ok } from '../../shared/types.js';
 import { registerExportTool } from './export.js';
 
 describe('firestore_export tool', () => {
   let mockServer: Partial<McpServer>;
   let mockFirestore: Partial<Firestore>;
+  let mockFirestoreManager: Partial<FirestoreManager>;
   let mockCollectionRef: Partial<CollectionReference>;
   let mockQuery: Partial<Query>;
   let registeredHandler: (params: {
+    projectId?: string;
     path: string;
     recursive?: boolean;
     limit?: number;
@@ -61,7 +65,11 @@ describe('firestore_export tool', () => {
       collection: vi.fn().mockReturnValue(mockCollectionRef),
     };
 
-    registerExportTool(mockServer as McpServer, mockFirestore as Firestore);
+    mockFirestoreManager = {
+      getFirestore: vi.fn().mockResolvedValue(ok(mockFirestore as Firestore)),
+    };
+
+    registerExportTool(mockServer as McpServer, mockFirestoreManager as FirestoreManager);
   });
 
   it('should register tool with correct name and description', () => {

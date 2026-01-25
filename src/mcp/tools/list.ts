@@ -6,7 +6,7 @@
 
 import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import type { Firestore } from 'firebase-admin/firestore';
+import type { FirestoreManager } from '../firestore-manager.js';
 import { QueryBuilder } from '../../domain/query-builder.js';
 import type { WhereCondition, OrderBy, FirestoreOperator, OrderDirection, OutputFormat } from '../../shared/types.js';
 import { OutputFormatter, TimestampFormatOptions } from '../../presentation/output-formatter.js';
@@ -27,6 +27,7 @@ const OrderBySchema = z.object({
 });
 
 const ListSchema = {
+  projectId: z.string().optional().describe('Firebase project ID (optional, uses default if not specified)'),
   path: z.string().describe('Collection path (e.g., users)'),
   where: z.array(WhereConditionSchema).optional().describe('Filter conditions'),
   orderBy: z.array(OrderBySchema).optional().describe('Sort order'),
@@ -37,13 +38,27 @@ const ListSchema = {
   rawOutput: z.boolean().optional().default(false).describe('Disable all formatting'),
 };
 
-export function registerListTool(server: McpServer, firestore: Firestore): void {
+export function registerListTool(server: McpServer, firestoreManager: FirestoreManager): void {
   server.tool(
     'firestore_list',
     'Query documents from a Firestore collection with optional filters, sorting, and pagination',
     ListSchema,
-    async ({ path, where, orderBy, limit, format, timezone, dateFormat, rawOutput }) => {
-      const queryBuilder = new QueryBuilder(firestore);
+    async ({ projectId, path, where, orderBy, limit, format, timezone, dateFormat, rawOutput }) => {
+      const firestoreResult = await firestoreManager.getFirestore({ projectId });
+
+      if (firestoreResult.isErr()) {
+        return {
+          content: [
+            {
+              type: 'text' as const,
+              text: `Error: ${firestoreResult.error.message}`,
+            },
+          ],
+          isError: true,
+        };
+      }
+
+      const queryBuilder = new QueryBuilder(firestoreResult.value);
 
       const whereConditions: WhereCondition[] | undefined = where?.map((w) => ({
         field: w.field,

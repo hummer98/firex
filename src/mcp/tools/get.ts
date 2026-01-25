@@ -6,7 +6,7 @@
 
 import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import type { Firestore } from 'firebase-admin/firestore';
+import type { FirestoreManager } from '../firestore-manager.js';
 import { FirestoreOps } from '../../domain/firestore-ops.js';
 import { OutputFormatter, TimestampFormatOptions } from '../../presentation/output-formatter.js';
 import type { OutputFormat } from '../../shared/types.js';
@@ -14,6 +14,7 @@ import { DEFAULT_DATE_FORMAT } from '../../presentation/date-formatter.js';
 import { TimezoneService } from '../../services/timezone.js';
 
 const GetSchema = {
+  projectId: z.string().optional().describe('Firebase project ID (optional, uses default if not specified)'),
   path: z.string().describe('Document path (e.g., users/user123)'),
   format: z.enum(['json', 'toon']).optional().default('json').describe('Output format (json or toon)'),
   timezone: z.string().optional().describe('Timezone (IANA format, e.g., Asia/Tokyo)'),
@@ -21,13 +22,27 @@ const GetSchema = {
   rawOutput: z.boolean().optional().default(false).describe('Disable all formatting'),
 };
 
-export function registerGetTool(server: McpServer, firestore: Firestore): void {
+export function registerGetTool(server: McpServer, firestoreManager: FirestoreManager): void {
   server.tool(
     'firestore_get',
     'Get a document from Firestore by its path',
     GetSchema,
-    async ({ path, format, timezone, dateFormat, rawOutput }) => {
-      const ops = new FirestoreOps(firestore);
+    async ({ projectId, path, format, timezone, dateFormat, rawOutput }) => {
+      const firestoreResult = await firestoreManager.getFirestore({ projectId });
+
+      if (firestoreResult.isErr()) {
+        return {
+          content: [
+            {
+              type: 'text' as const,
+              text: `Error: ${firestoreResult.error.message}`,
+            },
+          ],
+          isError: true,
+        };
+      }
+
+      const ops = new FirestoreOps(firestoreResult.value);
       const result = await ops.getDocument(path);
 
       if (result.isErr()) {

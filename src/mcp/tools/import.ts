@@ -6,7 +6,7 @@
 
 import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import type { Firestore } from 'firebase-admin/firestore';
+import type { FirestoreManager } from '../firestore-manager.js';
 import { ToonEncoder } from '../../presentation/toon-encoder.js';
 
 const DocumentSchema = z.object({
@@ -15,18 +15,35 @@ const DocumentSchema = z.object({
 });
 
 const ImportSchema = {
+  projectId: z.string().optional().describe('Firebase project ID (optional, uses default if not specified)'),
   path: z.string().describe('Collection path to import into'),
   documents: z.array(DocumentSchema).describe('Array of documents to import'),
   merge: z.boolean().optional().describe('If true, merge with existing documents'),
   format: z.enum(['json', 'toon']).optional().default('json').describe('Output format (json or toon)'),
 };
 
-export function registerImportTool(server: McpServer, firestore: Firestore): void {
+export function registerImportTool(server: McpServer, firestoreManager: FirestoreManager): void {
   server.tool(
     'firestore_import',
     'Import documents into a Firestore collection',
     ImportSchema,
-    async ({ path, documents, merge, format }) => {
+    async ({ projectId, path, documents, merge, format }) => {
+      const firestoreResult = await firestoreManager.getFirestore({ projectId });
+
+      if (firestoreResult.isErr()) {
+        return {
+          content: [
+            {
+              type: 'text' as const,
+              text: `Error: ${firestoreResult.error.message}`,
+            },
+          ],
+          isError: true,
+        };
+      }
+
+      const firestore = firestoreResult.value;
+
       try {
         const collectionRef = firestore.collection(path);
         const results = {

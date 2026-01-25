@@ -5,14 +5,17 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { Firestore, DocumentReference, DocumentSnapshot, CollectionReference } from 'firebase-admin/firestore';
+import type { FirestoreManager } from '../firestore-manager.js';
+import { ok } from '../../shared/types.js';
 import { registerCollectionsTool } from './collections.js';
 
 describe('firestore_collections tool', () => {
   let mockServer: Partial<McpServer>;
   let mockFirestore: Partial<Firestore>;
+  let mockFirestoreManager: Partial<FirestoreManager>;
   let mockDocRef: Partial<DocumentReference>;
   let mockDocSnapshot: Partial<DocumentSnapshot>;
-  let registeredHandler: (params: { documentPath?: string; format?: string }) => Promise<unknown>;
+  let registeredHandler: (params: { projectId?: string; documentPath?: string; format?: string }) => Promise<unknown>;
 
   beforeEach(() => {
     mockServer = {
@@ -47,7 +50,11 @@ describe('firestore_collections tool', () => {
       listCollections: vi.fn().mockResolvedValue(mockRootCollections),
     };
 
-    registerCollectionsTool(mockServer as McpServer, mockFirestore as Firestore);
+    mockFirestoreManager = {
+      getFirestore: vi.fn().mockResolvedValue(ok(mockFirestore as Firestore)),
+    };
+
+    registerCollectionsTool(mockServer as McpServer, mockFirestoreManager as FirestoreManager);
   });
 
   it('should register tool with correct name and description', () => {
@@ -98,7 +105,11 @@ describe('firestore_collections tool', () => {
   });
 
   it('should handle Firestore errors', async () => {
-    mockFirestore.listCollections = vi.fn().mockRejectedValue(new Error('List failed'));
+    const errorMockFirestore = {
+      ...mockFirestore,
+      listCollections: vi.fn().mockRejectedValue(new Error('List failed')),
+    };
+    mockFirestoreManager.getFirestore = vi.fn().mockResolvedValue(ok(errorMockFirestore as unknown as Firestore));
 
     const result = await registeredHandler({ format: 'json' });
 

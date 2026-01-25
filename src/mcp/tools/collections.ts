@@ -6,12 +6,13 @@
 
 import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import type { Firestore } from 'firebase-admin/firestore';
+import type { FirestoreManager } from '../firestore-manager.js';
 import { FirestoreOps } from '../../domain/firestore-ops.js';
 import { OutputFormatter } from '../../presentation/output-formatter.js';
 import type { OutputFormat } from '../../shared/types.js';
 
 const CollectionsSchema = {
+  projectId: z.string().optional().describe('Firebase project ID (optional, uses default if not specified)'),
   documentPath: z
     .string()
     .optional()
@@ -19,13 +20,27 @@ const CollectionsSchema = {
   format: z.enum(['json', 'toon']).optional().default('json').describe('Output format (json or toon)'),
 };
 
-export function registerCollectionsTool(server: McpServer, firestore: Firestore): void {
+export function registerCollectionsTool(server: McpServer, firestoreManager: FirestoreManager): void {
   server.tool(
     'firestore_collections',
     'List collections in Firestore. Provide a document path to list its subcollections, or omit to list root collections.',
     CollectionsSchema,
-    async ({ documentPath, format }) => {
-      const ops = new FirestoreOps(firestore);
+    async ({ projectId, documentPath, format }) => {
+      const firestoreResult = await firestoreManager.getFirestore({ projectId });
+
+      if (firestoreResult.isErr()) {
+        return {
+          content: [
+            {
+              type: 'text' as const,
+              text: `Error: ${firestoreResult.error.message}`,
+            },
+          ],
+          isError: true,
+        };
+      }
+
+      const ops = new FirestoreOps(firestoreResult.value);
       const outputFormatter = new OutputFormatter();
 
       if (documentPath) {

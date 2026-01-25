@@ -6,12 +6,13 @@
 
 import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import type { Firestore } from 'firebase-admin/firestore';
+import type { FirestoreManager } from '../firestore-manager.js';
 import { FirestoreOps } from '../../domain/firestore-ops.js';
 import { BatchProcessor } from '../../domain/batch-processor.js';
 import { ToonEncoder } from '../../presentation/toon-encoder.js';
 
 const DeleteSchema = {
+  projectId: z.string().optional().describe('Firebase project ID (optional, uses default if not specified)'),
   path: z.string().describe('Document or collection path'),
   recursive: z
     .boolean()
@@ -56,12 +57,27 @@ function formatResponse(response: Record<string, unknown>, format: string): { co
   };
 }
 
-export function registerDeleteTool(server: McpServer, firestore: Firestore): void {
+export function registerDeleteTool(server: McpServer, firestoreManager: FirestoreManager): void {
   server.tool(
     'firestore_delete',
     'Delete a document from Firestore. Use recursive=true to delete an entire collection.',
     DeleteSchema,
-    async ({ path, recursive, format }) => {
+    async ({ projectId, path, recursive, format }) => {
+      const firestoreResult = await firestoreManager.getFirestore({ projectId });
+
+      if (firestoreResult.isErr()) {
+        return {
+          content: [
+            {
+              type: 'text' as const,
+              text: `Error: ${firestoreResult.error.message}`,
+            },
+          ],
+          isError: true,
+        };
+      }
+
+      const firestore = firestoreResult.value;
       const ops = new FirestoreOps(firestore);
 
       // Check if it's a document or collection path

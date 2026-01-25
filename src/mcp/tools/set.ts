@@ -7,24 +7,39 @@
 
 import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import type { Firestore } from 'firebase-admin/firestore';
+import type { FirestoreManager } from '../firestore-manager.js';
 import { FirestoreOps } from '../../domain/firestore-ops.js';
 import { FieldValueTransformer } from '../../domain/field-value-transformer.js';
 import { ToonEncoder } from '../../presentation/toon-encoder.js';
 
 const SetSchema = {
+  projectId: z.string().optional().describe('Firebase project ID (optional, uses default if not specified)'),
   path: z.string().describe('Document path (e.g., users/user123)'),
   data: z.record(z.string(), z.unknown()).describe('Document data to write. Supports $fieldValue syntax: {"$fieldValue": "serverTimestamp"}, {"$fieldValue": "increment", "operand": 1}, {"$fieldValue": "arrayUnion", "elements": [...]}, {"$fieldValue": "arrayRemove", "elements": [...]}, {"$fieldValue": "delete"}'),
   merge: z.boolean().optional().describe('If true, merge with existing data instead of overwriting'),
   format: z.enum(['json', 'toon']).optional().default('json').describe('Output format (json or toon)'),
 };
 
-export function registerSetTool(server: McpServer, firestore: Firestore): void {
+export function registerSetTool(server: McpServer, firestoreManager: FirestoreManager): void {
   server.tool(
     'firestore_set',
     'Create or update a document in Firestore. Use merge=true to partially update existing documents. Supports $fieldValue syntax for serverTimestamp, increment, arrayUnion, arrayRemove, delete operations.',
     SetSchema,
-    async ({ path, data, merge, format }) => {
+    async ({ projectId, path, data, merge, format }) => {
+      const firestoreResult = await firestoreManager.getFirestore({ projectId });
+
+      if (firestoreResult.isErr()) {
+        return {
+          content: [
+            {
+              type: 'text' as const,
+              text: `Error: ${firestoreResult.error.message}`,
+            },
+          ],
+          isError: true,
+        };
+      }
+
       // Transform $fieldValue objects to FieldValue sentinels
       const transformer = new FieldValueTransformer();
       const transformResult = transformer.transform(data as Record<string, unknown>);
@@ -42,7 +57,7 @@ export function registerSetTool(server: McpServer, firestore: Firestore): void {
       }
 
       const transformedData = transformResult.value;
-      const ops = new FirestoreOps(firestore);
+      const ops = new FirestoreOps(firestoreResult.value);
       const result = await ops.setDocument(path, transformedData, merge ?? false);
 
       if (result.isErr()) {

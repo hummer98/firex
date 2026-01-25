@@ -5,7 +5,7 @@
  * allowing Claude Desktop and other MCP clients to interact with Firestore.
  */
 
-import { Command } from '@oclif/core';
+import { Command, Flags } from '@oclif/core';
 import { startMcpServer } from '../mcp/server.js';
 
 export class McpCommand extends Command {
@@ -17,16 +17,34 @@ export class McpCommand extends Command {
       description: 'Start MCP Server using default credentials',
     },
     {
-      command: 'GOOGLE_APPLICATION_CREDENTIALS=/path/to/key.json <%= config.bin %> mcp',
+      command: '<%= config.bin %> mcp --project-id my-project',
+      description: 'Start with specific project ID',
+    },
+    {
+      command: '<%= config.bin %> mcp --credential-path /path/to/key.json',
       description: 'Start with service account key',
     },
   ];
 
-  static override flags = {};
+  static override flags = {
+    'project-id': Flags.string({
+      description: 'Firebase project ID',
+      env: 'FIRESTORE_PROJECT_ID',
+    }),
+    'credential-path': Flags.string({
+      description: 'Path to service account key file',
+      env: 'GOOGLE_APPLICATION_CREDENTIALS',
+    }),
+  };
 
   async run(): Promise<void> {
+    const { flags } = await this.parse(McpCommand);
+
     // Note: All output must go to stderr in MCP mode
     // stdout is reserved for JSON-RPC communication
-    await startMcpServer();
+    await startMcpServer({
+      projectId: flags['project-id'],
+      credentialPath: flags['credential-path'],
+    });
   }
 }

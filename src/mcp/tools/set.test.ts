@@ -5,13 +5,17 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { Firestore, DocumentReference } from 'firebase-admin/firestore';
+import type { FirestoreManager } from '../firestore-manager.js';
+import { ok } from '../../shared/types.js';
 import { registerSetTool } from './set.js';
 
 describe('firestore_set tool', () => {
   let mockServer: Partial<McpServer>;
   let mockFirestore: Partial<Firestore>;
+  let mockFirestoreManager: Partial<FirestoreManager>;
   let mockDocRef: Partial<DocumentReference>;
   let registeredHandler: (params: {
+    projectId?: string;
     path: string;
     data: Record<string, unknown>;
     merge?: boolean;
@@ -35,7 +39,11 @@ describe('firestore_set tool', () => {
       doc: vi.fn().mockReturnValue(mockDocRef),
     };
 
-    registerSetTool(mockServer as McpServer, mockFirestore as Firestore);
+    mockFirestoreManager = {
+      getFirestore: vi.fn().mockResolvedValue(ok(mockFirestore as Firestore)),
+    };
+
+    registerSetTool(mockServer as McpServer, mockFirestoreManager as FirestoreManager);
   });
 
   it('should register tool with correct name and description', () => {

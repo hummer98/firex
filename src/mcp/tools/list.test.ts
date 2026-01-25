@@ -5,15 +5,19 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { Firestore, CollectionReference, Query, QuerySnapshot, QueryDocumentSnapshot } from 'firebase-admin/firestore';
+import type { FirestoreManager } from '../firestore-manager.js';
+import { ok } from '../../shared/types.js';
 import { registerListTool } from './list.js';
 
 describe('firestore_list tool', () => {
   let mockServer: Partial<McpServer>;
   let mockFirestore: Partial<Firestore>;
+  let mockFirestoreManager: Partial<FirestoreManager>;
   let mockCollectionRef: Partial<CollectionReference>;
   let mockQuery: Partial<Query>;
   let mockQuerySnapshot: Partial<QuerySnapshot>;
   let registeredHandler: (params: {
+    projectId?: string;
     path: string;
     where?: Array<{ field: string; operator: string; value: unknown }>;
     orderBy?: Array<{ field: string; direction: string }>;
@@ -70,7 +74,11 @@ describe('firestore_list tool', () => {
       collection: vi.fn().mockReturnValue(mockCollectionRef),
     };
 
-    registerListTool(mockServer as McpServer, mockFirestore as Firestore);
+    mockFirestoreManager = {
+      getFirestore: vi.fn().mockResolvedValue(ok(mockFirestore as Firestore)),
+    };
+
+    registerListTool(mockServer as McpServer, mockFirestoreManager as FirestoreManager);
   });
 
   it('should register tool with correct name and description', () => {
@@ -143,7 +151,10 @@ describe('firestore_list tool', () => {
       get: vi.fn().mockRejectedValue(new Error('Query failed')),
     };
 
-    mockFirestore.collection = vi.fn().mockReturnValue(errorMockQuery);
+    const errorMockFirestore = {
+      collection: vi.fn().mockReturnValue(errorMockQuery),
+    };
+    mockFirestoreManager.getFirestore = vi.fn().mockResolvedValue(ok(errorMockFirestore as unknown as Firestore));
 
     const result = await registeredHandler({ path: 'users', format: 'json' });
 
