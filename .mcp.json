@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "firex": {
+      "type": "stdio",
+      "command": "node",
+      "args": [
+        "/Users/yamamoto/git/firex/bin/run.js",
+        "mcp"
+      ],
+      "env": {}
+    }
+  }
+}
