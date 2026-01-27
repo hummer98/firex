@@ -144,14 +144,17 @@ describe('ConfigService', () => {
   });
 
   describe('environment variable mapping', () => {
-    it('should map GOOGLE_APPLICATION_CREDENTIALS to credentialPath', async () => {
+    it('should NOT map GOOGLE_APPLICATION_CREDENTIALS to credentialPath (handled by ADC)', async () => {
+      // GOOGLE_APPLICATION_CREDENTIALS is handled automatically by Firebase Admin SDK's
+      // applicationDefault(). We don't set credentialPath because cert() only supports
+      // service account keys, not ADC user credentials (authorized_user type).
       process.env.GOOGLE_APPLICATION_CREDENTIALS = '/path/to/creds.json';
 
       const result = await configService.loadConfig({ searchFrom: tmpDir });
 
       expect(result.isOk()).toBe(true);
       if (result.isOk()) {
-        expect(result.value.credentialPath).toBe('/path/to/creds.json');
+        expect(result.value.credentialPath).toBeUndefined();
       }
     });
 

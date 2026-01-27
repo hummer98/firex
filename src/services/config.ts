@@ -242,9 +242,10 @@ export class ConfigService {
       config.projectId = process.env.FIRESTORE_PROJECT_ID;
     }
 
-    if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
-      config.credentialPath = process.env.GOOGLE_APPLICATION_CREDENTIALS;
-    }
+    // Note: GOOGLE_APPLICATION_CREDENTIALS is handled automatically by
+    // Firebase Admin SDK's applicationDefault(). We don't set credentialPath
+    // here because cert() only supports service account keys, not ADC user
+    // credentials (authorized_user type).
 
     if (process.env.FIRESTORE_EMULATOR_HOST) {
       config.emulatorHost = process.env.FIRESTORE_EMULATOR_HOST;
