@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.4] - 2026-01-27
+
+### Fixed
+- `--credential-path`フラグが`GOOGLE_APPLICATION_CREDENTIALS`環境変数を誤って読み込んでいた問題を修正
+
 ## [0.7.3] - 2026-01-27
 
 ### Fixed
@@ -172,7 +177,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - API key and OAuth token masking
 - Secure file permission recommendations
 
-[Unreleased]: https://github.com/hummer98/firex/compare/v0.7.3...HEAD
+[Unreleased]: https://github.com/hummer98/firex/compare/v0.7.4...HEAD
+[0.7.4]: https://github.com/hummer98/firex/compare/v0.7.3...v0.7.4
 [0.7.3]: https://github.com/hummer98/firex/compare/v0.7.2...v0.7.3
 [0.7.2]: https://github.com/hummer98/firex/compare/v0.7.1...v0.7.2
 [0.7.1]: https://github.com/hummer98/firex/compare/v0.7.0...v0.7.1
