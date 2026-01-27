@@ -33,7 +33,8 @@ export class McpCommand extends Command {
     }),
     'credential-path': Flags.string({
       description: 'Path to service account key file',
-      env: 'GOOGLE_APPLICATION_CREDENTIALS',
+      // Note: Don't use env: 'GOOGLE_APPLICATION_CREDENTIALS' here.
+      // ADC is handled automatically by Firebase Admin SDK's applicationDefault().
     }),
   };
 

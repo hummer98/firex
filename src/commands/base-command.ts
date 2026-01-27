@@ -41,7 +41,8 @@ export abstract class BaseCommand extends Command {
     }),
     'credential-path': Flags.string({
       description: t('flag.credentialPath'),
-      env: 'GOOGLE_APPLICATION_CREDENTIALS',
+      // Note: Don't use env: 'GOOGLE_APPLICATION_CREDENTIALS' here.
+      // ADC is handled automatically by Firebase Admin SDK's applicationDefault().
     }),
     format: Flags.string({
       char: 'f',
