@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.5] - 2026-02-13
+
+### Fixed
+- MCPサーバーでFirebase初期化後の接続検証失敗時に`[DEFAULT]`アプリが残存し、以降のリトライがすべて失敗するバグを修正
+
 ## [0.7.4] - 2026-01-27
 
 ### Fixed
@@ -177,7 +182,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - API key and OAuth token masking
 - Secure file permission recommendations
 
-[Unreleased]: https://github.com/hummer98/firex/compare/v0.7.4...HEAD
+[Unreleased]: https://github.com/hummer98/firex/compare/v0.7.5...HEAD
+[0.7.5]: https://github.com/hummer98/firex/compare/v0.7.4...v0.7.5
 [0.7.4]: https://github.com/hummer98/firex/compare/v0.7.3...v0.7.4
 [0.7.3]: https://github.com/hummer98/firex/compare/v0.7.2...v0.7.3
 [0.7.2]: https://github.com/hummer98/firex/compare/v0.7.1...v0.7.2
