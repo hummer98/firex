@@ -2,7 +2,7 @@
  * Authentication service for Firebase Admin SDK initialization
  */
 
-import { initializeApp, cert, applicationDefault, App } from 'firebase-admin/app';
+import { initializeApp, deleteApp, cert, applicationDefault, App } from 'firebase-admin/app';
 import { getFirestore, Firestore } from 'firebase-admin/firestore';
 import { Result, ok, err } from '../shared/types';
 import type { Config } from './config';
@@ -54,6 +54,12 @@ export class AuthService {
         credential = applicationDefault();
       }
 
+      // Clean up previous app if it exists (e.g., from a failed initialization)
+      if (this.app) {
+        await deleteApp(this.app);
+        this.app = null;
+      }
+
       // Initialize app
       this.app = initializeApp({
         credential,
@@ -71,6 +77,7 @@ export class AuthService {
         const port = parseInt(portStr, 10);
 
         if (isNaN(port)) {
+          await this.cleanup();
           return err({
             type: 'INVALID_CREDENTIALS',
             message: `Emulatorホストの形式が不正です: ${config.emulatorHost}`,
@@ -88,6 +95,8 @@ export class AuthService {
         // Try to access Firestore settings to verify connection
         await this.firestore.listCollections();
       } catch (error) {
+        await this.cleanup();
+
         if (error instanceof Error) {
           if (error.message.includes('permission')) {
             return err({
@@ -152,5 +161,20 @@ export class AuthService {
    */
   isInitialized(): boolean {
     return this.firestore !== null;
+  }
+
+  /**
+   * Clean up Firebase app and reset state
+   */
+  private async cleanup(): Promise<void> {
+    if (this.app) {
+      try {
+        await deleteApp(this.app);
+      } catch {
+        // Ignore cleanup errors
+      }
+    }
+    this.app = null;
+    this.firestore = null;
   }
 }
