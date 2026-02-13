@@ -32,6 +32,29 @@ interface JsonRpcResponse {
   error?: { code: number; message: string };
 }
 
+const MESSAGE_TIMEOUT = 10_000;
+
+/**
+ * Wait for MCP server to be ready by watching stderr for startup message
+ */
+const waitForServerReady = (child: ChildProcess): Promise<void> => {
+  return new Promise((resolve, reject) => {
+    const timeout = setTimeout(() => {
+      reject(new Error('MCP server startup timeout'));
+    }, MESSAGE_TIMEOUT);
+
+    const onData = (data: Buffer) => {
+      if (data.toString().includes('started')) {
+        clearTimeout(timeout);
+        child.stderr?.off('data', onData);
+        resolve();
+      }
+    };
+
+    child.stderr?.on('data', onData);
+  });
+};
+
 /**
  * Send a JSONRPC message to MCP server and get response
  */
@@ -42,7 +65,7 @@ const sendMcpMessage = (
   return new Promise((resolve, reject) => {
     const timeout = setTimeout(() => {
       reject(new Error('MCP server response timeout'));
-    }, 5000);
+    }, MESSAGE_TIMEOUT);
 
     let buffer = '';
 
@@ -65,22 +88,24 @@ const sendMcpMessage = (
 };
 
 /**
- * Start MCP server process
+ * Start MCP server process and wait for it to be ready
  */
-const startMcpServer = (): ChildProcess => {
-  return spawn('node', [CLI_PATH, 'mcp'], {
+const startMcpServer = async (): Promise<ChildProcess> => {
+  const child = spawn('node', [CLI_PATH, 'mcp'], {
     stdio: ['pipe', 'pipe', 'pipe'],
     env: {
       ...process.env,
       // Don't require actual credentials for startup test
     },
   });
+  await waitForServerReady(child);
+  return child;
 };
 
-describe('MCP Server E2E', () => {
+describe('MCP Server E2E', { timeout: 30_000 }, () => {
   describe('Server Startup', () => {
     it('should start and respond to initialize request', async () => {
-      const child = startMcpServer();
+      const child = await startMcpServer();
 
       try {
         const initRequest: JsonRpcRequest = {
@@ -117,7 +142,7 @@ describe('MCP Server E2E', () => {
     });
 
     it('should list available tools after initialization', async () => {
-      const child = startMcpServer();
+      const child = await startMcpServer();
 
       try {
         // First initialize
@@ -170,9 +195,7 @@ describe('MCP Server E2E', () => {
 
   describe('Entry Point Validation', () => {
     it('should work with bin/run.js entry point', async () => {
-      const child = spawn('node', [CLI_PATH, 'mcp'], {
-        stdio: ['pipe', 'pipe', 'pipe'],
-      });
+      const child = await startMcpServer();
 
       try {
         const response = await sendMcpMessage(child, {
