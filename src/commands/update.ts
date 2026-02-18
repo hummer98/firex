@@ -21,6 +21,8 @@ export class UpdateCommand extends BaseCommand {
     '<%= config.bin %> update posts/post1 \'{"viewCount": {"$fieldValue": "increment", "operand": 1}}\'',
     '<%= config.bin %> update users/user123 \'{"tags": {"$fieldValue": "arrayUnion", "elements": ["premium"]}}\'',
     '<%= config.bin %> update users/user123 \'{"oldField": {"$fieldValue": "delete"}}\'',
+    // $timestampValue example
+    '<%= config.bin %> update events/event1 \'{"startAt": {"$timestampValue": "2025-06-01T09:00:00Z"}}\'',
   ];
 
   static override args = {

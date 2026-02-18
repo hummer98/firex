@@ -56,6 +56,8 @@ export class ExamplesCommand extends Command {
         { title: '配列への要素追加', command: "firex update users/user123 '{\"tags\": {\"$fieldValue\": \"arrayUnion\", \"elements\": [\"premium\"]}}'", description: '配列に要素を追加します（重複は無視）' },
         { title: '配列から要素削除', command: "firex update users/user123 '{\"tags\": {\"$fieldValue\": \"arrayRemove\", \"elements\": [\"trial\"]}}'", description: '配列から要素を削除します' },
         { title: 'フィールドの削除', command: "firex update users/user123 '{\"obsoleteField\": {\"$fieldValue\": \"delete\"}}'", description: 'フィールドをドキュメントから削除します' },
+        // $timestampValue example
+        { title: '指定日時のタイムスタンプ設定', command: "firex set events/event1 '{\"startAt\": {\"$timestampValue\": \"2025-06-01T09:00:00Z\"}}'", description: 'ISO 8601文字列をFirestore Timestampとして保存します' },
       ];
     }
     // English
@@ -92,6 +94,8 @@ export class ExamplesCommand extends Command {
       { title: 'Add to array', command: "firex update users/user123 '{\"tags\": {\"$fieldValue\": \"arrayUnion\", \"elements\": [\"premium\"]}}'", description: 'Add elements to array (duplicates ignored)' },
       { title: 'Remove from array', command: "firex update users/user123 '{\"tags\": {\"$fieldValue\": \"arrayRemove\", \"elements\": [\"trial\"]}}'", description: 'Remove elements from array' },
       { title: 'Delete a field', command: "firex update users/user123 '{\"obsoleteField\": {\"$fieldValue\": \"delete\"}}'", description: 'Delete a field from the document' },
+      // $timestampValue example
+      { title: 'Set specific timestamp', command: "firex set events/event1 '{\"startAt\": {\"$timestampValue\": \"2025-06-01T09:00:00Z\"}}'", description: 'Store an ISO 8601 string as a Firestore Timestamp' },
     ];
   }
 

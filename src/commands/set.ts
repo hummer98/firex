@@ -22,6 +22,8 @@ export class SetCommand extends BaseCommand {
     // FieldValue examples
     '<%= config.bin %> set users/user123 \'{"createdAt": {"$fieldValue": "serverTimestamp"}}\'',
     '<%= config.bin %> set posts/post1 \'{"viewCount": {"$fieldValue": "increment", "operand": 1}}\' --merge',
+    // $timestampValue example
+    '<%= config.bin %> set events/event1 \'{"startAt": {"$timestampValue": "2025-06-01T09:00:00Z"}}\'',
   ];
 
   static override args = {
