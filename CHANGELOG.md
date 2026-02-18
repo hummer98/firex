@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.6] - 2026-02-18
+
+### Added
+- **`$timestampValue` syntax support** in set/update commands and MCP tools
+  - ISO 8601文字列を指定してFirestore Timestampとして保存可能
+  - Example: `firex set events/event1 '{"startAt": {"$timestampValue": "2025-06-01T09:00:00Z"}}'`
+  - タイムゾーンオフセット付きISO文字列にも対応（例: `2025-02-18T21:00:00+09:00`）
+  - 既存の`$fieldValue`構文（serverTimestamp等）と併用可能
+  - ネストされたオブジェクト・配列内でも使用可能
+  - 無効な日時文字列に対するバリデーションとエラーメッセージ（日英対応）
+
+### Fixed
+- MCP E2Eテストの並行実行時タイムアウトを修正
+
 ## [0.7.5] - 2026-02-13
 
 ### Fixed
@@ -182,7 +196,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - API key and OAuth token masking
 - Secure file permission recommendations
 
-[Unreleased]: https://github.com/hummer98/firex/compare/v0.7.5...HEAD
+[Unreleased]: https://github.com/hummer98/firex/compare/v0.7.6...HEAD
+[0.7.6]: https://github.com/hummer98/firex/compare/v0.7.5...v0.7.6
 [0.7.5]: https://github.com/hummer98/firex/compare/v0.7.4...v0.7.5
 [0.7.4]: https://github.com/hummer98/firex/compare/v0.7.3...v0.7.4
 [0.7.3]: https://github.com/hummer98/firex/compare/v0.7.2...v0.7.3
