@@ -15,7 +15,7 @@ import { ToonEncoder } from '../../presentation/toon-encoder.js';
 const SetSchema = {
   projectId: z.string().optional().describe('Firebase project ID (optional, uses default if not specified)'),
   path: z.string().describe('Document path (e.g., users/user123)'),
-  data: z.record(z.string(), z.unknown()).describe('Document data to write. Supports $fieldValue syntax: {"$fieldValue": "serverTimestamp"}, {"$fieldValue": "increment", "operand": 1}, {"$fieldValue": "arrayUnion", "elements": [...]}, {"$fieldValue": "arrayRemove", "elements": [...]}, {"$fieldValue": "delete"}'),
+  data: z.record(z.string(), z.unknown()).describe('Document data to write. Supports $fieldValue syntax: {"$fieldValue": "serverTimestamp"}, {"$fieldValue": "increment", "operand": 1}, {"$fieldValue": "arrayUnion", "elements": [...]}, {"$fieldValue": "arrayRemove", "elements": [...]}, {"$fieldValue": "delete"}. Supports $timestampValue syntax for specific timestamps: {"$timestampValue": "2025-02-18T12:00:00Z"}'),
   merge: z.boolean().optional().describe('If true, merge with existing data instead of overwriting'),
   format: z.enum(['json', 'toon']).optional().default('json').describe('Output format (json or toon)'),
 };
@@ -23,7 +23,7 @@ const SetSchema = {
 export function registerSetTool(server: McpServer, firestoreManager: FirestoreManager): void {
   server.tool(
     'firestore_set',
-    'Create or update a document in Firestore. Use merge=true to partially update existing documents. Supports $fieldValue syntax for serverTimestamp, increment, arrayUnion, arrayRemove, delete operations.',
+    'Create or update a document in Firestore. Use merge=true to partially update existing documents. Supports $fieldValue syntax for serverTimestamp, increment, arrayUnion, arrayRemove, delete operations. Supports $timestampValue syntax for specific timestamps: {"$timestampValue": "2025-02-18T12:00:00Z"}.',
     SetSchema,
     async ({ projectId, path, data, merge, format }) => {
       const firestoreResult = await firestoreManager.getFirestore({ projectId });

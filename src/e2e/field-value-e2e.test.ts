@@ -482,6 +482,70 @@ describe('FieldValue E2E Tests', () => {
     });
   });
 
+  describe('$timestampValue E2E', () => {
+    it('should set document with specific timestamp', async () => {
+      if (!emulatorAvailable) return;
+
+      const data = {
+        title: 'Scheduled Event',
+        eventAt: { $timestampValue: '2025-06-01T09:00:00Z' },
+        createdAt: { $fieldValue: 'serverTimestamp' },
+      };
+
+      const transformResult = transformer.transform(data);
+      expect(transformResult.isOk()).toBe(true);
+      if (transformResult.isErr()) return;
+
+      const path = 'fv_test_posts/ts1';
+      const writeResult = await firestoreOps.setDocument(path, transformResult.value, false);
+      expect(writeResult.isOk()).toBe(true);
+
+      // Verify the document
+      const getResult = await firestoreOps.getDocument(path);
+      expect(getResult.isOk()).toBe(true);
+      if (getResult.isOk()) {
+        expect(getResult.value.data.title).toBe('Scheduled Event');
+        expect(getResult.value.data.eventAt).toBeInstanceOf(Timestamp);
+        const eventAt = getResult.value.data.eventAt as Timestamp;
+        expect(eventAt.toDate().toISOString()).toBe('2025-06-01T09:00:00.000Z');
+        expect(getResult.value.data.createdAt).toBeInstanceOf(Timestamp);
+      }
+    });
+
+    it('should update document with specific timestamp', async () => {
+      if (!emulatorAvailable) return;
+
+      // Create initial document
+      const path = 'fv_test_posts/ts2';
+      await firestoreOps.setDocument(path, { title: 'Post', status: 'draft' }, false);
+
+      // Update with specific timestamp
+      const updateData = {
+        publishedAt: { $timestampValue: '2025-03-15T10:00:00+09:00' },
+        status: 'published',
+      };
+
+      const transformResult = transformer.transform(updateData);
+      expect(transformResult.isOk()).toBe(true);
+      if (transformResult.isErr()) return;
+
+      const updateResult = await firestoreOps.setDocument(path, transformResult.value, true);
+      expect(updateResult.isOk()).toBe(true);
+
+      // Verify
+      const getResult = await firestoreOps.getDocument(path);
+      expect(getResult.isOk()).toBe(true);
+      if (getResult.isOk()) {
+        expect(getResult.value.data.title).toBe('Post');
+        expect(getResult.value.data.status).toBe('published');
+        expect(getResult.value.data.publishedAt).toBeInstanceOf(Timestamp);
+        const publishedAt = getResult.value.data.publishedAt as Timestamp;
+        // 2025-03-15T10:00:00+09:00 = 2025-03-15T01:00:00Z
+        expect(publishedAt.toDate().toISOString()).toBe('2025-03-15T01:00:00.000Z');
+      }
+    });
+  });
+
   describe('Error handling in E2E scenarios', () => {
     it('should handle transform errors before write', async () => {
       if (!emulatorAvailable) return;

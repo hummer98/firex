@@ -5,7 +5,7 @@
  * Supports: serverTimestamp, increment, arrayUnion, arrayRemove, delete
  */
 
-import { FieldValue } from 'firebase-admin/firestore';
+import { FieldValue, Timestamp } from 'firebase-admin/firestore';
 import { Result, ok, err } from '../shared/types';
 import { t } from '../shared/i18n';
 
@@ -40,13 +40,21 @@ export interface FieldValueSpec {
 }
 
 /**
+ * $timestampValue object structure
+ */
+export interface TimestampValueSpec {
+  $timestampValue: string;  // ISO 8601 date string
+}
+
+/**
  * Transform error types
  */
 export type FieldValueTransformError =
   | { type: 'INVALID_FIELD_VALUE_TYPE'; message: string; fieldPath: string; value: string }
   | { type: 'INVALID_OPERAND'; message: string; fieldPath: string; expected: string; actual: string }
   | { type: 'INVALID_ELEMENTS'; message: string; fieldPath: string }
-  | { type: 'INVALID_FORMAT'; message: string; fieldPath: string };
+  | { type: 'INVALID_FORMAT'; message: string; fieldPath: string }
+  | { type: 'INVALID_TIMESTAMP_VALUE'; message: string; fieldPath: string; value: string };
 
 /**
  * Maximum recursion depth for nested objects
@@ -74,6 +82,23 @@ export function isFieldValueSpec(value: unknown): value is FieldValueSpec {
     return false;
   }
   return true;
+}
+
+/**
+ * Check if a value is a $timestampValue specification
+ */
+export function isTimestampValueSpec(value: unknown): value is TimestampValueSpec {
+  if (value === null || value === undefined) {
+    return false;
+  }
+  if (typeof value !== 'object' || Array.isArray(value)) {
+    return false;
+  }
+  const obj = value as Record<string, unknown>;
+  if (!('$timestampValue' in obj)) {
+    return false;
+  }
+  return typeof obj.$timestampValue === 'string';
 }
 
 /**
@@ -113,8 +138,15 @@ export class FieldValueTransformer {
     for (const [key, value] of Object.entries(data)) {
       const fieldPath = parentPath ? `${parentPath}.${key}` : key;
 
+      // Check if this is a $timestampValue specification
+      if (isTimestampValueSpec(value)) {
+        const transformResult = this.transformTimestampValue(value, fieldPath);
+        if (transformResult.isErr()) {
+          return err(transformResult.error);
+        }
+        result[key] = transformResult.value;
       // Check if this is a $fieldValue specification
-      if (isFieldValueSpec(value)) {
+      } else if (isFieldValueSpec(value)) {
         const transformResult = this.transformFieldValue(value, fieldPath);
         if (transformResult.isErr()) {
           return err(transformResult.error);
@@ -161,7 +193,13 @@ export class FieldValueTransformer {
       const item = arr[i];
       const itemPath = `${parentPath}[${i}]`;
 
-      if (isFieldValueSpec(item)) {
+      if (isTimestampValueSpec(item)) {
+        const transformResult = this.transformTimestampValue(item, itemPath);
+        if (transformResult.isErr()) {
+          return err(transformResult.error);
+        }
+        result.push(transformResult.value);
+      } else if (isFieldValueSpec(item)) {
         const transformResult = this.transformFieldValue(item, itemPath);
         if (transformResult.isErr()) {
           return err(transformResult.error);
@@ -189,6 +227,25 @@ export class FieldValueTransformer {
     }
 
     return ok(result);
+  }
+
+  /**
+   * Transform a $timestampValue specification to a Firestore Timestamp
+   */
+  private transformTimestampValue(
+    spec: TimestampValueSpec,
+    fieldPath: string
+  ): Result<Timestamp, FieldValueTransformError> {
+    const date = new Date(spec.$timestampValue);
+    if (isNaN(date.getTime())) {
+      return err({
+        type: 'INVALID_TIMESTAMP_VALUE',
+        message: `${t('err.fieldValue.atPath')} "${fieldPath}" ${t('err.fieldValue.invalidTimestampValue')} "${spec.$timestampValue}"`,
+        fieldPath,
+        value: spec.$timestampValue,
+      });
+    }
+    return ok(Timestamp.fromDate(date));
   }
 
   /**

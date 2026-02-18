@@ -117,6 +117,7 @@ export interface Messages {
   'err.fieldValue.invalidFormat': string;
   'err.fieldValue.atPath': string;
   'err.fieldValue.validTypes': string;
+  'err.fieldValue.invalidTimestampValue': string;
 
   // === Error Handler Messages ===
   // Auth errors
@@ -415,6 +416,7 @@ const jaMessages: Messages = {
   'err.fieldValue.invalidFormat': '$fieldValueオブジェクトの形式が不正です',
   'err.fieldValue.atPath': 'フィールド',
   'err.fieldValue.validTypes': '有効な値: serverTimestamp, increment, arrayUnion, arrayRemove, delete',
+  'err.fieldValue.invalidTimestampValue': '$timestampValueは有効なISO 8601日時文字列である必要があります',
 
   // === Error Handler Messages ===
   // Auth errors
@@ -713,6 +715,7 @@ const enMessages: Messages = {
   'err.fieldValue.invalidFormat': 'Invalid $fieldValue object format',
   'err.fieldValue.atPath': 'Field',
   'err.fieldValue.validTypes': 'Valid types: serverTimestamp, increment, arrayUnion, arrayRemove, delete',
+  'err.fieldValue.invalidTimestampValue': '$timestampValue must be a valid ISO 8601 date string',
 
   // === Error Handler Messages ===
   // Auth errors

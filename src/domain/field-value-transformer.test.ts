@@ -6,10 +6,11 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import {
   FieldValueTransformer,
   isFieldValueSpec,
+  isTimestampValueSpec,
   type FieldValueType,
   type FieldValueSpec,
 } from './field-value-transformer';
-import { FieldValue } from 'firebase-admin/firestore';
+import { FieldValue, Timestamp } from 'firebase-admin/firestore';
 
 describe('FieldValueTransformer', () => {
   let transformer: FieldValueTransformer;
@@ -432,6 +433,154 @@ describe('FieldValueTransformer', () => {
       expect(result.isErr()).toBe(true);
       if (result.isErr()) {
         expect(result.error.type).toBe('INVALID_ELEMENTS');
+      }
+    });
+  });
+
+  describe('isTimestampValueSpec', () => {
+    it('should return true for valid $timestampValue spec', () => {
+      expect(isTimestampValueSpec({ $timestampValue: '2025-02-18T12:00:00Z' })).toBe(true);
+    });
+
+    it('should return true for $timestampValue with timezone offset', () => {
+      expect(isTimestampValueSpec({ $timestampValue: '2025-02-18T21:00:00+09:00' })).toBe(true);
+    });
+
+    it('should return false for non-string $timestampValue', () => {
+      expect(isTimestampValueSpec({ $timestampValue: 12345 })).toBe(false);
+    });
+
+    it('should return false for regular objects', () => {
+      expect(isTimestampValueSpec({ name: 'test' })).toBe(false);
+      expect(isTimestampValueSpec(null)).toBe(false);
+      expect(isTimestampValueSpec(undefined)).toBe(false);
+      expect(isTimestampValueSpec('string')).toBe(false);
+      expect(isTimestampValueSpec([])).toBe(false);
+    });
+
+    it('should return false for $fieldValue spec', () => {
+      expect(isTimestampValueSpec({ $fieldValue: 'serverTimestamp' })).toBe(false);
+    });
+  });
+
+  describe('transform - $timestampValue', () => {
+    it('should transform ISO 8601 UTC string to Firestore Timestamp', () => {
+      const data = {
+        name: 'test',
+        createdAt: { $timestampValue: '2025-02-18T12:00:00Z' },
+      };
+
+      const result = transformer.transform(data);
+      expect(result.isOk()).toBe(true);
+      if (result.isOk()) {
+        expect(result.value.name).toBe('test');
+        const expected = Timestamp.fromDate(new Date('2025-02-18T12:00:00Z'));
+        expect(result.value.createdAt).toEqual(expected);
+      }
+    });
+
+    it('should transform ISO 8601 string with timezone offset', () => {
+      const data = {
+        eventAt: { $timestampValue: '2025-02-18T21:00:00+09:00' },
+      };
+
+      const result = transformer.transform(data);
+      expect(result.isOk()).toBe(true);
+      if (result.isOk()) {
+        const expected = Timestamp.fromDate(new Date('2025-02-18T21:00:00+09:00'));
+        expect(result.value.eventAt).toEqual(expected);
+      }
+    });
+
+    it('should transform date-only string', () => {
+      const data = {
+        birthday: { $timestampValue: '2000-01-15' },
+      };
+
+      const result = transformer.transform(data);
+      expect(result.isOk()).toBe(true);
+      if (result.isOk()) {
+        const expected = Timestamp.fromDate(new Date('2000-01-15'));
+        expect(result.value.birthday).toEqual(expected);
+      }
+    });
+
+    it('should transform $timestampValue in nested objects', () => {
+      const data = {
+        metadata: {
+          publishedAt: { $timestampValue: '2025-06-01T00:00:00Z' },
+        },
+      };
+
+      const result = transformer.transform(data);
+      expect(result.isOk()).toBe(true);
+      if (result.isOk()) {
+        const metadata = result.value.metadata as Record<string, unknown>;
+        const expected = Timestamp.fromDate(new Date('2025-06-01T00:00:00Z'));
+        expect(metadata.publishedAt).toEqual(expected);
+      }
+    });
+
+    it('should transform $timestampValue in arrays', () => {
+      const data = {
+        events: [
+          { name: 'event1', at: { $timestampValue: '2025-01-01T00:00:00Z' } },
+          { name: 'event2', at: { $timestampValue: '2025-12-31T23:59:59Z' } },
+        ],
+      };
+
+      const result = transformer.transform(data);
+      expect(result.isOk()).toBe(true);
+      if (result.isOk()) {
+        const events = result.value.events as Record<string, unknown>[];
+        expect(events[0].at).toEqual(Timestamp.fromDate(new Date('2025-01-01T00:00:00Z')));
+        expect(events[1].at).toEqual(Timestamp.fromDate(new Date('2025-12-31T23:59:59Z')));
+      }
+    });
+
+    it('should coexist with $fieldValue in same document', () => {
+      const data = {
+        updatedAt: { $fieldValue: 'serverTimestamp' },
+        scheduledAt: { $timestampValue: '2025-03-01T09:00:00Z' },
+        count: { $fieldValue: 'increment', operand: 1 },
+      };
+
+      const result = transformer.transform(data);
+      expect(result.isOk()).toBe(true);
+      if (result.isOk()) {
+        expect(result.value.updatedAt).toEqual(FieldValue.serverTimestamp());
+        expect(result.value.scheduledAt).toEqual(Timestamp.fromDate(new Date('2025-03-01T09:00:00Z')));
+        expect(result.value.count).toEqual(FieldValue.increment(1));
+      }
+    });
+
+    it('should return error for invalid date string', () => {
+      const data = {
+        createdAt: { $timestampValue: 'not-a-date' },
+      };
+
+      const result = transformer.transform(data);
+      expect(result.isErr()).toBe(true);
+      if (result.isErr()) {
+        expect(result.error.type).toBe('INVALID_TIMESTAMP_VALUE');
+        expect(result.error.fieldPath).toBe('createdAt');
+      }
+    });
+
+    it('should return error for invalid date in nested path', () => {
+      const data = {
+        meta: {
+          schedule: {
+            startAt: { $timestampValue: 'invalid' },
+          },
+        },
+      };
+
+      const result = transformer.transform(data);
+      expect(result.isErr()).toBe(true);
+      if (result.isErr()) {
+        expect(result.error.type).toBe('INVALID_TIMESTAMP_VALUE');
+        expect(result.error.fieldPath).toBe('meta.schedule.startAt');
       }
     });
   });

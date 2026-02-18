@@ -7,7 +7,7 @@
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { FieldValueTransformer } from '../domain/field-value-transformer';
-import { FieldValue } from 'firebase-admin/firestore';
+import { FieldValue, Timestamp } from 'firebase-admin/firestore';
 
 describe('FieldValue Integration Tests', () => {
   describe('FieldValueTransformer with CLI-like data', () => {
@@ -244,6 +244,74 @@ describe('FieldValue Integration Tests', () => {
         expect(result.isOk()).toBe(true);
         if (result.isOk()) {
           expect(result.value.deprecatedField).toEqual(FieldValue.delete());
+        }
+      });
+    });
+
+    describe('$timestampValue scenarios', () => {
+      it('should transform $timestampValue for scheduled document creation', () => {
+        const data = {
+          title: 'Scheduled Post',
+          publishAt: { $timestampValue: '2025-06-01T09:00:00Z' },
+          createdAt: { $fieldValue: 'serverTimestamp' },
+        };
+
+        const result = transformer.transform(data);
+        expect(result.isOk()).toBe(true);
+        if (result.isOk()) {
+          expect(result.value.title).toBe('Scheduled Post');
+          expect(result.value.publishAt).toEqual(Timestamp.fromDate(new Date('2025-06-01T09:00:00Z')));
+          expect(result.value.createdAt).toEqual(FieldValue.serverTimestamp());
+        }
+      });
+
+      it('should transform $timestampValue in update data', () => {
+        const data = {
+          'schedule.startAt': { $timestampValue: '2025-03-01T10:00:00+09:00' },
+          'schedule.endAt': { $timestampValue: '2025-03-01T18:00:00+09:00' },
+        };
+
+        const result = transformer.transform(data);
+        expect(result.isOk()).toBe(true);
+        if (result.isOk()) {
+          expect(result.value['schedule.startAt']).toEqual(
+            Timestamp.fromDate(new Date('2025-03-01T10:00:00+09:00'))
+          );
+          expect(result.value['schedule.endAt']).toEqual(
+            Timestamp.fromDate(new Date('2025-03-01T18:00:00+09:00'))
+          );
+        }
+      });
+
+      it('should handle data migration with specific timestamps', () => {
+        const data = {
+          name: 'Migrated User',
+          originalCreatedAt: { $timestampValue: '2020-01-15T08:30:00Z' },
+          migratedAt: { $fieldValue: 'serverTimestamp' },
+          loginCount: { $fieldValue: 'increment', operand: 0 },
+        };
+
+        const result = transformer.transform(data);
+        expect(result.isOk()).toBe(true);
+        if (result.isOk()) {
+          expect(result.value.name).toBe('Migrated User');
+          expect(result.value.originalCreatedAt).toEqual(
+            Timestamp.fromDate(new Date('2020-01-15T08:30:00Z'))
+          );
+          expect(result.value.migratedAt).toEqual(FieldValue.serverTimestamp());
+          expect(result.value.loginCount).toEqual(FieldValue.increment(0));
+        }
+      });
+
+      it('should return error for invalid $timestampValue', () => {
+        const data = {
+          eventAt: { $timestampValue: 'not-a-valid-date' },
+        };
+
+        const result = transformer.transform(data);
+        expect(result.isErr()).toBe(true);
+        if (result.isErr()) {
+          expect(result.error.type).toBe('INVALID_TIMESTAMP_VALUE');
         }
       });
     });
