@@ -14,12 +14,30 @@ export class CollectionsCommand extends BaseCommand {
   static override description = t('cmd.collections.description');
 
   static override examples = [
-    '<%= config.bin %> collections',
-    '<%= config.bin %> collections users/user123',
-    '<%= config.bin %> collections --json',
-    '<%= config.bin %> collections users/user123 --yaml',
-    '<%= config.bin %> collections --table',
-    '<%= config.bin %> collections --quiet',
+    {
+      command: '<%= config.bin %> collections',
+      description: 'List all root-level collections',
+    },
+    {
+      command: '<%= config.bin %> collections users/user123',
+      description: 'List subcollections under a specific document',
+    },
+    {
+      command: '<%= config.bin %> collections --json',
+      description: 'Output in JSON format',
+    },
+    {
+      command: '<%= config.bin %> collections users/user123 --yaml',
+      description: 'List subcollections in YAML format',
+    },
+    {
+      command: '<%= config.bin %> collections --table',
+      description: 'Output in table format',
+    },
+    {
+      command: '<%= config.bin %> collections --quiet',
+      description: 'Output only collection names without summary',
+    },
   ];
 
   static override args = {

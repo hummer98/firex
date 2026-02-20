@@ -13,8 +13,18 @@ export class ConfigCommand extends BaseCommand {
   static override description = t('cmd.config.description');
 
   static override examples = [
-    '<%= config.bin %> config --show',
-    '<%= config.bin %> config --show --format=yaml',
+    {
+      command: '<%= config.bin %> config --show',
+      description: 'Display current effective configuration (JSON)',
+    },
+    {
+      command: '<%= config.bin %> config --show --format=yaml',
+      description: 'Display configuration in YAML format',
+    },
+    {
+      command: '<%= config.bin %> config --show --profile=staging',
+      description: 'Show configuration for a specific profile',
+    },
   ];
 
   static override flags = {

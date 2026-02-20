@@ -17,12 +17,72 @@ export class GetCommand extends BaseCommand {
   static override description = t('cmd.get.description');
 
   static override examples = [
-    '<%= config.bin %> get users/user123',
-    '<%= config.bin %> get users/user123 --format=yaml',
-    '<%= config.bin %> get users/user123 --yaml',
-    '<%= config.bin %> get users/user123 --table',
-    '<%= config.bin %> get users/user123 --watch',
-    '<%= config.bin %> get users/user123 --watch --show-initial',
+    {
+      command: '<%= config.bin %> get users/user123',
+      description: 'Get a single document by path (JSON output)',
+    },
+    {
+      command: '<%= config.bin %> get users/user123 --format=yaml',
+      description: 'Get a document in YAML format',
+    },
+    {
+      command: '<%= config.bin %> get users/user123 --yaml',
+      description: 'Shorthand for --format=yaml',
+    },
+    {
+      command: '<%= config.bin %> get users/user123 --table',
+      description: 'Display document fields in table format',
+    },
+    {
+      command: '<%= config.bin %> get users/user123 --toon',
+      description: 'TOON format (token-efficient output for LLMs)',
+    },
+    {
+      command: '<%= config.bin %> get users/user123 --quiet',
+      description: 'Output only data without metadata',
+    },
+    {
+      command: '<%= config.bin %> get users/user123 --watch',
+      description: 'Watch for realtime changes on the document',
+    },
+    {
+      command: '<%= config.bin %> get users/user123 --watch --show-initial',
+      description: 'Watch mode with initial data displayed',
+    },
+    // Timestamp formatting examples
+    {
+      command: '<%= config.bin %> get users/user123 --timezone=Asia/Tokyo',
+      description: 'Display timestamps in Asia/Tokyo timezone',
+    },
+    {
+      command: '<%= config.bin %> get users/user123 --date-format="yyyy-MM-dd HH:mm:ss"',
+      description: 'Custom date format (e.g. 2025-06-01 09:00:00)',
+    },
+    {
+      command: '<%= config.bin %> get users/user123 --date-format="yyyy/MM/dd" --timezone=America/New_York',
+      description: 'Combine date format and timezone',
+    },
+    {
+      command: '<%= config.bin %> get users/user123 --no-date-format',
+      description: 'Disable date formatting (show raw Firestore Timestamp objects)',
+    },
+    {
+      command: '<%= config.bin %> get users/user123 --raw-output',
+      description: 'Disable all formatting including timestamp conversion',
+    },
+    // Authentication examples
+    {
+      command: '<%= config.bin %> get users/user123 --project-id=my-project',
+      description: 'Specify Firebase project ID explicitly',
+    },
+    {
+      command: '<%= config.bin %> get users/user123 --credential-path=/path/to/key.json',
+      description: 'Use a specific service account key file',
+    },
+    {
+      command: '<%= config.bin %> get users/user123 --profile=staging',
+      description: 'Use a named configuration profile',
+    },
   ];
 
   static override args = {

@@ -18,14 +18,86 @@ export class ListCommand extends BaseCommand {
   static override description = t('cmd.list.description');
 
   static override examples = [
-    '<%= config.bin %> list',
-    '<%= config.bin %> list users',
-    '<%= config.bin %> list users --limit=10',
-    '<%= config.bin %> list users --yaml',
-    '<%= config.bin %> list users --table',
-    '<%= config.bin %> list users --where="age>=18" --order-by="age:desc"',
-    '<%= config.bin %> list posts --where="status==published" --where="author==alice"',
-    '<%= config.bin %> list users --watch',
+    {
+      command: '<%= config.bin %> list',
+      description: 'List root-level collections in the database',
+    },
+    {
+      command: '<%= config.bin %> list users',
+      description: 'List documents in the "users" collection (default: 100)',
+    },
+    {
+      command: '<%= config.bin %> list users --limit=10',
+      description: 'Limit results to 10 documents',
+    },
+    {
+      command: '<%= config.bin %> list users --yaml',
+      description: 'Output in YAML format',
+    },
+    {
+      command: '<%= config.bin %> list users --table',
+      description: 'Output in table format',
+    },
+    {
+      command: '<%= config.bin %> list users --toon',
+      description: 'TOON format (token-efficient output for LLMs)',
+    },
+    {
+      command: '<%= config.bin %> list users --quiet',
+      description: 'Output only data without summary/metadata',
+    },
+    // Query examples
+    {
+      command: '<%= config.bin %> list users --where="age>=18"',
+      description: 'Filter: documents where age >= 18',
+    },
+    {
+      command: '<%= config.bin %> list users --where="age>=18" --order-by="age:desc"',
+      description: 'Filter with sorting (descending by age)',
+    },
+    {
+      command: '<%= config.bin %> list posts --where="status==published" --where="author==alice"',
+      description: 'Multiple AND conditions',
+    },
+    {
+      command: '<%= config.bin %> list users --order-by="createdAt:desc" --limit=5',
+      description: 'Latest 5 users sorted by creation date',
+    },
+    // Watch mode
+    {
+      command: '<%= config.bin %> list users --watch',
+      description: 'Watch for realtime changes on the collection',
+    },
+    {
+      command: '<%= config.bin %> list users --watch --show-initial',
+      description: 'Watch mode with initial snapshot displayed',
+    },
+    // Subcollection path
+    {
+      command: '<%= config.bin %> list users/user123/orders',
+      description: 'List documents in a subcollection',
+    },
+    // Timestamp formatting examples
+    {
+      command: '<%= config.bin %> list users --timezone=Asia/Tokyo',
+      description: 'Display timestamps in Asia/Tokyo timezone',
+    },
+    {
+      command: '<%= config.bin %> list users --date-format="yyyy-MM-dd HH:mm:ss"',
+      description: 'Custom date format (e.g. 2025-06-01 09:00:00)',
+    },
+    {
+      command: '<%= config.bin %> list users --date-format="yyyy/MM/dd" --timezone=UTC',
+      description: 'Combine date format and timezone',
+    },
+    {
+      command: '<%= config.bin %> list users --no-date-format',
+      description: 'Disable date formatting (show raw Firestore Timestamp objects)',
+    },
+    {
+      command: '<%= config.bin %> list users --raw-output',
+      description: 'Disable all formatting including timestamp conversion',
+    },
   ];
 
   static override args = {

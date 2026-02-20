@@ -15,14 +15,48 @@ export class UpdateCommand extends BaseCommand {
   static override description = t('cmd.update.description');
 
   static override examples = [
-    '<%= config.bin %> update users/user123 \'{"age": 31}\'',
-    '<%= config.bin %> update users/user123 --from-file=update.json',
+    {
+      command: '<%= config.bin %> update users/user123 \'{"age": 31}\'',
+      description: 'Partially update a document (same as set --merge)',
+    },
+    {
+      command: '<%= config.bin %> update users/user123 --from-file=update.json',
+      description: 'Update from a JSON file',
+    },
     // FieldValue examples
-    '<%= config.bin %> update posts/post1 \'{"viewCount": {"$fieldValue": "increment", "operand": 1}}\'',
-    '<%= config.bin %> update users/user123 \'{"tags": {"$fieldValue": "arrayUnion", "elements": ["premium"]}}\'',
-    '<%= config.bin %> update users/user123 \'{"oldField": {"$fieldValue": "delete"}}\'',
-    // $timestampValue example
-    '<%= config.bin %> update events/event1 \'{"startAt": {"$timestampValue": "2025-06-01T09:00:00Z"}}\'',
+    {
+      command: '<%= config.bin %> update posts/post1 \'{"viewCount": {"$fieldValue": "increment", "operand": 1}}\'',
+      description: 'Atomically increment a numeric field by 1',
+    },
+    {
+      command: '<%= config.bin %> update posts/post1 \'{"viewCount": {"$fieldValue": "increment", "operand": -1}}\'',
+      description: 'Atomically decrement a numeric field by 1',
+    },
+    {
+      command: '<%= config.bin %> update users/user123 \'{"tags": {"$fieldValue": "arrayUnion", "elements": ["premium"]}}\'',
+      description: 'Add elements to an array (ignores duplicates)',
+    },
+    {
+      command: '<%= config.bin %> update users/user123 \'{"tags": {"$fieldValue": "arrayRemove", "elements": ["trial"]}}\'',
+      description: 'Remove elements from an array',
+    },
+    {
+      command: '<%= config.bin %> update users/user123 \'{"oldField": {"$fieldValue": "delete"}}\'',
+      description: 'Delete a specific field from the document',
+    },
+    {
+      command: '<%= config.bin %> update users/user123 \'{"updatedAt": {"$fieldValue": "serverTimestamp"}}\'',
+      description: 'Set server timestamp on update',
+    },
+    // $timestampValue examples
+    {
+      command: '<%= config.bin %> update events/event1 \'{"startAt": {"$timestampValue": "2025-06-01T09:00:00Z"}}\'',
+      description: 'Store an ISO 8601 string as a Firestore Timestamp',
+    },
+    {
+      command: '<%= config.bin %> update events/event1 \'{"startAt": {"$timestampValue": "2025-06-01T18:00:00+09:00"}}\'',
+      description: 'Timestamp with timezone offset (JST)',
+    },
   ];
 
   static override args = {

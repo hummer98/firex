@@ -15,15 +15,48 @@ export class SetCommand extends BaseCommand {
   static override description = t('cmd.set.description');
 
   static override examples = [
-    '<%= config.bin %> set users/user123 \'{"name": "Alice", "age": 30}\'',
-    '<%= config.bin %> set users/user123 \'{"age": 31}\' --merge',
-    '<%= config.bin %> set users/user123 --from-file=user.json',
-    '<%= config.bin %> set users/user123 --from-file=user.json --merge',
+    {
+      command: '<%= config.bin %> set users/user123 \'{"name": "Alice", "age": 30}\'',
+      description: 'Create or overwrite a document with JSON data',
+    },
+    {
+      command: '<%= config.bin %> set users/user123 \'{"age": 31}\' --merge',
+      description: 'Partial update: merge with existing data instead of overwriting',
+    },
+    {
+      command: '<%= config.bin %> set users/user123 --from-file=user.json',
+      description: 'Create a document from a JSON file',
+    },
+    {
+      command: '<%= config.bin %> set users/user123 --from-file=user.json --merge',
+      description: 'Merge file data with existing document',
+    },
     // FieldValue examples
-    '<%= config.bin %> set users/user123 \'{"createdAt": {"$fieldValue": "serverTimestamp"}}\'',
-    '<%= config.bin %> set posts/post1 \'{"viewCount": {"$fieldValue": "increment", "operand": 1}}\' --merge',
-    // $timestampValue example
-    '<%= config.bin %> set events/event1 \'{"startAt": {"$timestampValue": "2025-06-01T09:00:00Z"}}\'',
+    {
+      command: '<%= config.bin %> set users/user123 \'{"createdAt": {"$fieldValue": "serverTimestamp"}}\'',
+      description: 'Set server timestamp (auto-filled by Firestore server)',
+    },
+    {
+      command: '<%= config.bin %> set posts/post1 \'{"viewCount": {"$fieldValue": "increment", "operand": 1}}\' --merge',
+      description: 'Atomically increment a numeric field by 1',
+    },
+    {
+      command: '<%= config.bin %> set users/user123 \'{"tags": {"$fieldValue": "arrayUnion", "elements": ["vip"]}}\' --merge',
+      description: 'Add elements to an array field (ignores duplicates)',
+    },
+    // $timestampValue examples
+    {
+      command: '<%= config.bin %> set events/event1 \'{"startAt": {"$timestampValue": "2025-06-01T09:00:00Z"}}\'',
+      description: 'Store an ISO 8601 string as a Firestore Timestamp',
+    },
+    {
+      command: '<%= config.bin %> set events/event1 \'{"startAt": {"$timestampValue": "2025-06-01T18:00:00+09:00"}}\'',
+      description: 'Timestamp with timezone offset (JST)',
+    },
+    {
+      command: '<%= config.bin %> set logs/entry1 \'{"createdAt": {"$fieldValue": "serverTimestamp"}, "scheduledAt": {"$timestampValue": "2025-12-25T00:00:00Z"}}\'',
+      description: 'Combine server timestamp and specific timestamp in one document',
+    },
   ];
 
   static override args = {

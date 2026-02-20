@@ -14,15 +14,19 @@ export class McpCommand extends Command {
   static override examples = [
     {
       command: '<%= config.bin %> mcp',
-      description: 'Start MCP Server using default credentials',
+      description: 'Start MCP Server using default credentials (ADC)',
     },
     {
       command: '<%= config.bin %> mcp --project-id my-project',
-      description: 'Start with specific project ID',
+      description: 'Start with specific Firebase project ID',
     },
     {
       command: '<%= config.bin %> mcp --credential-path /path/to/key.json',
-      description: 'Start with service account key',
+      description: 'Start with a service account key file',
+    },
+    {
+      command: '<%= config.bin %> mcp --project-id my-project --credential-path /path/to/key.json',
+      description: 'Start with both project ID and service account key',
     },
   ];
 

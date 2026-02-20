@@ -15,7 +15,10 @@ export class ExamplesCommand extends Command {
   static override description = t('cmd.examples.description');
 
   static override examples = [
-    '<%= config.bin %> examples',
+    {
+      command: '<%= config.bin %> examples',
+      description: 'Show all usage examples',
+    },
   ];
 
   /**
@@ -58,6 +61,13 @@ export class ExamplesCommand extends Command {
         { title: 'フィールドの削除', command: "firex update users/user123 '{\"obsoleteField\": {\"$fieldValue\": \"delete\"}}'", description: 'フィールドをドキュメントから削除します' },
         // $timestampValue example
         { title: '指定日時のタイムスタンプ設定', command: "firex set events/event1 '{\"startAt\": {\"$timestampValue\": \"2025-06-01T09:00:00Z\"}}'", description: 'ISO 8601文字列をFirestore Timestampとして保存します' },
+        { title: 'タイムゾーン付きタイムスタンプ', command: "firex set events/event1 '{\"startAt\": {\"$timestampValue\": \"2025-06-01T18:00:00+09:00\"}}'", description: 'タイムゾーンオフセット付きのISO 8601文字列をTimestampとして保存' },
+        // Timestamp display formatting examples
+        { title: 'タイムゾーン指定で表示', command: 'firex get users/user123 --timezone=Asia/Tokyo', description: 'Timestampを指定タイムゾーンで表示します（IANA形式）' },
+        { title: '日付フォーマットの指定', command: 'firex get users/user123 --date-format="yyyy-MM-dd HH:mm:ss"', description: '日時の表示形式をカスタマイズします' },
+        { title: 'フォーマットとタイムゾーンの組み合わせ', command: 'firex list users --date-format="yyyy/MM/dd HH:mm" --timezone=America/New_York', description: '日付フォーマットとタイムゾーンを同時に指定' },
+        { title: '日付フォーマット無効化', command: 'firex get users/user123 --no-date-format', description: '日付変換を無効化し、生のFirestore Timestampオブジェクトを表示' },
+        { title: '全フォーマット無効化', command: 'firex get users/user123 --raw-output', description: 'Timestamp変換を含む全ての整形処理を無効化' },
       ];
     }
     // English
@@ -96,6 +106,13 @@ export class ExamplesCommand extends Command {
       { title: 'Delete a field', command: "firex update users/user123 '{\"obsoleteField\": {\"$fieldValue\": \"delete\"}}'", description: 'Delete a field from the document' },
       // $timestampValue example
       { title: 'Set specific timestamp', command: "firex set events/event1 '{\"startAt\": {\"$timestampValue\": \"2025-06-01T09:00:00Z\"}}'", description: 'Store an ISO 8601 string as a Firestore Timestamp' },
+      { title: 'Timestamp with timezone offset', command: "firex set events/event1 '{\"startAt\": {\"$timestampValue\": \"2025-06-01T18:00:00+09:00\"}}'", description: 'Store ISO 8601 with timezone offset as a Firestore Timestamp' },
+      // Timestamp display formatting examples
+      { title: 'Display with timezone', command: 'firex get users/user123 --timezone=Asia/Tokyo', description: 'Display timestamps in a specific timezone (IANA format)' },
+      { title: 'Custom date format', command: 'firex get users/user123 --date-format="yyyy-MM-dd HH:mm:ss"', description: 'Customize the date/time display format' },
+      { title: 'Format + timezone combined', command: 'firex list users --date-format="yyyy/MM/dd HH:mm" --timezone=America/New_York', description: 'Combine date format and timezone settings' },
+      { title: 'Disable date formatting', command: 'firex get users/user123 --no-date-format', description: 'Disable date conversion, show raw Firestore Timestamp objects' },
+      { title: 'Disable all formatting', command: 'firex get users/user123 --raw-output', description: 'Disable all formatting including timestamp conversion' },
     ];
   }
 

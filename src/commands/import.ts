@@ -12,8 +12,22 @@ export class ImportCommand extends BaseCommand {
   static override description = t('cmd.import.description');
 
   static override examples = [
-    '<%= config.bin %> import backup.json',
-    '<%= config.bin %> import users.json --batch-size=250',
+    {
+      command: '<%= config.bin %> import backup.json',
+      description: 'Import data from a JSON file (default batch size: 500)',
+    },
+    {
+      command: '<%= config.bin %> import users.json --batch-size=250',
+      description: 'Import with smaller batch size (useful for large documents)',
+    },
+    {
+      command: '<%= config.bin %> import backup.json --batch-size=100',
+      description: 'Import with batch size of 100 for rate-limited environments',
+    },
+    {
+      command: '<%= config.bin %> import backup.json --project-id=my-project',
+      description: 'Import to a specific project',
+    },
   ];
 
   static override args = {
