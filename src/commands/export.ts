@@ -13,8 +13,22 @@ export class ExportCommand extends BaseCommand {
   static override description = t('cmd.export.description');
 
   static override examples = [
-    '<%= config.bin %> export users --output=users.json',
-    '<%= config.bin %> export users --output=backup.json --include-subcollections',
+    {
+      command: '<%= config.bin %> export users --output=users.json',
+      description: 'Export "users" collection to a JSON file',
+    },
+    {
+      command: '<%= config.bin %> export users --output=backup.json --include-subcollections',
+      description: 'Export including all subcollections',
+    },
+    {
+      command: '<%= config.bin %> export orders --output=orders-backup.json --project-id=my-project',
+      description: 'Export from a specific project',
+    },
+    {
+      command: '<%= config.bin %> export users/user123/orders --output=user-orders.json',
+      description: 'Export a subcollection',
+    },
   ];
 
   static override args = {

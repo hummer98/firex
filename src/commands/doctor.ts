@@ -13,9 +13,18 @@ export class DoctorCommand extends BaseCommand {
   static override description = t('cmd.doctor.description');
 
   static override examples = [
-    '<%= config.bin %> doctor',
-    '<%= config.bin %> doctor --json',
-    '<%= config.bin %> doctor --verbose',
+    {
+      command: '<%= config.bin %> doctor',
+      description: 'Run all diagnostic checks (environment, auth, config, build)',
+    },
+    {
+      command: '<%= config.bin %> doctor --json',
+      description: 'Output diagnostic results in JSON (for CI/scripting)',
+    },
+    {
+      command: '<%= config.bin %> doctor --verbose',
+      description: 'Show detailed information for each check',
+    },
   ];
 
   static override flags = {

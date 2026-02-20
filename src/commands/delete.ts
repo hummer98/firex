@@ -14,9 +14,26 @@ export class DeleteCommand extends BaseCommand {
   static override description = t('cmd.delete.description');
 
   static override examples = [
-    '<%= config.bin %> delete users/user123',
-    '<%= config.bin %> delete users --recursive',
-    '<%= config.bin %> delete users --recursive --yes',
+    {
+      command: '<%= config.bin %> delete users/user123',
+      description: 'Delete a single document (with confirmation prompt)',
+    },
+    {
+      command: '<%= config.bin %> delete users/user123 --yes',
+      description: 'Delete without confirmation prompt',
+    },
+    {
+      command: '<%= config.bin %> delete users --recursive',
+      description: 'Delete all documents in a collection (with confirmation)',
+    },
+    {
+      command: '<%= config.bin %> delete users --recursive --yes',
+      description: 'Delete all documents in a collection without confirmation',
+    },
+    {
+      command: '<%= config.bin %> delete users/user123/orders --recursive --yes',
+      description: 'Delete all documents in a subcollection',
+    },
   ];
 
   static override args = {

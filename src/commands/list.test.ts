@@ -221,10 +221,11 @@ describe('ListCommand', () => {
 
   describe('no path (list root collections)', () => {
     it('should have example for list without path', () => {
-      const examples = ListCommand.examples as string[];
-      const hasNoPathExample = examples.some(
-        (ex) => ex.includes('list') && !ex.includes('list ') || ex.endsWith(' list')
-      );
+      const examples = ListCommand.examples as Array<string | { command: string; description: string }>;
+      const hasNoPathExample = examples.some((ex) => {
+        const cmd = typeof ex === 'string' ? ex : ex.command;
+        return cmd.includes('list') && !cmd.includes('list ') || cmd.endsWith(' list');
+      });
       expect(hasNoPathExample).toBe(true);
     });
 
