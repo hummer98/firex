@@ -26,8 +26,10 @@ export class AuthService {
 
   /**
    * Initialize Firebase Admin SDK and return Firestore instance
+   * @param config - Firebase configuration
+   * @param appName - Optional unique app name (required when managing multiple apps)
    */
-  async initialize(config: Config): Promise<Result<Firestore, AuthError>> {
+  async initialize(config: Config, appName?: string): Promise<Result<Firestore, AuthError>> {
     try {
       // If already initialized, return existing instance
       if (this.firestore) {
@@ -60,12 +62,15 @@ export class AuthService {
         this.app = null;
       }
 
-      // Initialize app
-      this.app = initializeApp({
-        credential,
-        projectId: config.projectId,
-        databaseURL: config.databaseURL,
-      });
+      // Initialize app with optional unique name
+      this.app = initializeApp(
+        {
+          credential,
+          projectId: config.projectId,
+          databaseURL: config.databaseURL,
+        },
+        appName
+      );
 
       // Get Firestore instance
       this.firestore = getFirestore(this.app);

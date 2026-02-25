@@ -1,8 +1,9 @@
 /**
  * Firestore Manager for MCP Server
  *
- * Manages Firestore connections with lazy initialization and caching.
- * Supports multiple projects with automatic re-authentication when project changes.
+ * Manages Firestore connections with lazy initialization and per-project pooling.
+ * Caches Firestore instances per project/credential combination to avoid
+ * re-initialization overhead when switching between projects.
  */
 
 import type { Firestore } from 'firebase-admin/firestore';
@@ -26,13 +27,18 @@ export interface GetFirestoreOptions {
 }
 
 /**
- * Manages Firestore connections with caching
+ * Cached Firestore connection entry
+ */
+interface CachedEntry {
+  firestore: Firestore;
+  authService: AuthService;
+}
+
+/**
+ * Manages Firestore connections with per-project pooling
  */
 export class FirestoreManager {
-  private currentProjectId: string | null = null;
-  private currentCredentialPath: string | null = null;
-  private firestore: Firestore | null = null;
-  private authService: AuthService | null = null;
+  private cache: Map<string, CachedEntry> = new Map();
   private baseConfig: Config | null = null;
 
   /**
@@ -53,27 +59,32 @@ export class FirestoreManager {
   }
 
   /**
-   * Get Firestore instance, initializing if necessary
-   * Re-authenticates if projectId or credentialPath changes
+   * Build cache key from resolved projectId and credentialPath
+   */
+  private getCacheKey(projectId?: string, credentialPath?: string): string {
+    return `${projectId || ''}::${credentialPath || ''}`;
+  }
+
+  /**
+   * Get Firestore instance, initializing if necessary.
+   * Returns cached instance if the same project/credential combination was previously initialized.
    */
   async getFirestore(
     options: GetFirestoreOptions = {}
   ): Promise<Result<Firestore, FirestoreManagerError>> {
     const projectId = options.projectId || this.baseConfig?.projectId;
     const credentialPath = options.credentialPath || this.baseConfig?.credentialPath;
+    const cacheKey = this.getCacheKey(projectId, credentialPath);
 
-    // Check if we need to re-authenticate
-    const needsReauth =
-      !this.firestore ||
-      (projectId && projectId !== this.currentProjectId) ||
-      (credentialPath && credentialPath !== this.currentCredentialPath);
-
-    if (!needsReauth && this.firestore) {
-      return ok(this.firestore);
+    // Return cached instance if available
+    const cached = this.cache.get(cacheKey);
+    if (cached) {
+      return ok(cached.firestore);
     }
 
-    // Create new AuthService for each authentication to avoid Firebase app name conflicts
-    this.authService = new AuthService();
+    // Create new AuthService with unique app name for this project
+    const authService = new AuthService();
+    const appName = `firex-${cacheKey}`;
 
     const config: Config = {
       ...this.baseConfig,
@@ -83,7 +94,7 @@ export class FirestoreManager {
       watchShowInitial: this.baseConfig?.watchShowInitial ?? false,
     };
 
-    const authResult = await this.authService.initialize(config);
+    const authResult = await authService.initialize(config, appName);
 
     if (authResult.isErr()) {
       const error = authResult.error;
@@ -109,11 +120,10 @@ export class FirestoreManager {
       return err({ type: 'AUTH_ERROR', message });
     }
 
-    this.firestore = authResult.value;
-    this.currentProjectId = projectId || null;
-    this.currentCredentialPath = credentialPath || null;
+    // Cache the new instance
+    this.cache.set(cacheKey, { firestore: authResult.value, authService });
 
-    return ok(this.firestore);
+    return ok(authResult.value);
   }
 
   /**
@@ -137,16 +147,18 @@ export class FirestoreManager {
   }
 
   /**
-   * Get current project ID
+   * Get cached project IDs
    */
-  getCurrentProjectId(): string | null {
-    return this.currentProjectId;
+  getCachedProjectIds(): string[] {
+    return Array.from(this.cache.keys())
+      .map((key) => key.split('::')[0])
+      .filter(Boolean);
   }
 
   /**
-   * Check if connected
+   * Check if connected to any project
    */
   isConnected(): boolean {
-    return this.firestore !== null;
+    return this.cache.size > 0;
   }
 }
