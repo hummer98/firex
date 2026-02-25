@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.7] - 2026-02-25
+
+### Changed
+- MCPサーバーのFirebase Appをプロジェクト別にプーリングするように改善
+  - 従来は単一インスタンスのみキャッシュし、プロジェクト切り替え時に毎回再初期化が発生していた
+  - 一度接続したプロジェクトのインスタンスを保持し、切り替え時の再初期化コストを削減
+
 ## [0.7.6] - 2026-02-18
 
 ### Added
@@ -196,7 +203,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - API key and OAuth token masking
 - Secure file permission recommendations
 
-[Unreleased]: https://github.com/hummer98/firex/compare/v0.7.6...HEAD
+[Unreleased]: https://github.com/hummer98/firex/compare/v0.7.7...HEAD
+[0.7.7]: https://github.com/hummer98/firex/compare/v0.7.6...v0.7.7
 [0.7.6]: https://github.com/hummer98/firex/compare/v0.7.5...v0.7.6
 [0.7.5]: https://github.com/hummer98/firex/compare/v0.7.4...v0.7.5
 [0.7.4]: https://github.com/hummer98/firex/compare/v0.7.3...v0.7.4
