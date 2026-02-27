@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.8] - 2026-02-27
+
+### Changed
+- MCPツールのdescriptionで`$timestampValue`の説明を改善
+  - Firestore Timestamp型として保存されることを明記
+  - ラッパーなしの日付文字列はstring型として保存される旨を追記
+
 ## [0.7.7] - 2026-02-25
 
 ### Changed
@@ -203,7 +210,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - API key and OAuth token masking
 - Secure file permission recommendations
 
-[Unreleased]: https://github.com/hummer98/firex/compare/v0.7.7...HEAD
+[Unreleased]: https://github.com/hummer98/firex/compare/v0.7.8...HEAD
+[0.7.8]: https://github.com/hummer98/firex/compare/v0.7.7...v0.7.8
 [0.7.7]: https://github.com/hummer98/firex/compare/v0.7.6...v0.7.7
 [0.7.6]: https://github.com/hummer98/firex/compare/v0.7.5...v0.7.6
 [0.7.5]: https://github.com/hummer98/firex/compare/v0.7.4...v0.7.5
