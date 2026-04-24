@@ -50,9 +50,6 @@ jobs:
           cache: 'npm'
           registry-url: 'https://registry.npmjs.org'
 
-      - name: Upgrade npm for OIDC Trusted Publishing (requires npm >=11.5.1)
-        run: npm install -g npm@latest
-
       - name: Install dependencies
         run: npm install --no-audit --no-fund
 
@@ -62,12 +59,14 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Publish to npm (OIDC Trusted Publishing)
+      - name: Publish to npm (OIDC Trusted Publishing, npm 11+)
         run: |
           # setup-node が書き込む .npmrc の _authToken プレースホルダを削除し
           # npm に OIDC 認証を使わせる
           sed -i '/_authToken/d' "$NPM_CONFIG_USERCONFIG" 2>/dev/null || true
-          npm publish --provenance --access public
+          # OIDC Trusted Publishing は npm >=11.5.1 が必要。
+          # Node 22 の同梱 npm は 10.x なので npx で新しい npm を取得して publish する
+          npx -y npm@11 publish --provenance --access public
 
       - name: Extract changelog and create GitHub Release
         env:
