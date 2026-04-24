@@ -4,6 +4,9 @@
     "name": "hummer98",
     "email": "github@hummer98"
   },
+  "metadata": {
+    "description": "Firestore 操作スキルとして firex CLI / MCP サーバーを Claude Code に配布するマーケットプレイス"
+  },
   "plugins": [
     {
       "name": "firex",

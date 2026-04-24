@@ -40,6 +40,16 @@ npm run typecheck
 - エラー内容をユーザーに報告
 - リリースを中断
 
+### 2.5. プラグインマニフェスト検証（preflight）
+
+Claude Code plugin のマニフェストに構造的な問題がないか検証する：
+
+```bash
+claude plugin validate .
+```
+
+これで `.claude-plugin/plugin.json` と `.claude-plugin/marketplace.json` の整合性・スキーマ準拠を確認する。**失敗した場合はリリースを中断し、マニフェストを修正してから再実行**。CI でも同じチェックが走るが、手元で先に潰したほうが速い。
+
 ### 3. バージョン決定
 
 現在のバージョンを確認し、次のバージョンを決定します：
@@ -156,7 +166,17 @@ gh run watch ${RUN_ID} --exit-status
 
 CI が成功すれば npm 公開 & GitHub Release 作成まで完了している。失敗時は `gh run view ${RUN_ID} --log-failed` でログ確認。
 
-### 8. ローカルインストール（--local指定時のみ）
+### 8. ローカル Claude Code プラグインキャッシュを更新
+
+CI が成功して npm / marketplace.json 両方に新版が出ている前提で、ローカルマシンのプラグインキャッシュを最新化する：
+
+```bash
+claude plugin update firex
+```
+
+これはマシン単位のキャッシュ更新で、**実行中の Claude Code セッションには即時反映されない**（"restart required to apply"）。以降に新しく開くセッションは自動的に新版を掴む。既に起動中の他ペイン / 他セッションで即座に使いたい場合のみ、そのセッションで `/reload-plugins` を実行するよう完了報告で案内する。
+
+### 9. ローカル CLI インストール（--local指定時のみ）
 
 **`--local` が指定されている場合のみ実行:**
 
@@ -169,15 +189,15 @@ npm link
 **`--local` が指定されていない場合:**
 - このステップをスキップ
 
-### 9. 完了報告
+### 10. 完了報告
 
 ユーザーに以下を報告：
 - リリースバージョン
 - GitHubリリースURL
-- **--local指定時のみ**: ローカルインストール完了の旨
+- **--local指定時のみ**: ローカル CLI (`npm link`) インストール完了の旨
 - 主な変更内容のサマリー
 - npm 公開状況: CI (release.yml) が OIDC で自動 publish。GitHub Release も CI が自動作成。
-- Claude Code plugin 更新: `/plugin update firex` でユーザーが取得可能
+- Claude Code plugin: ローカルキャッシュは `claude plugin update firex` で更新済み。**既に起動中の他の Claude Code セッション**で新版を使いたい場合は `/reload-plugins` を実行。新規セッションは自動で新版。
 
 ## 注意事項
 
@@ -211,6 +231,7 @@ git reset --hard HEAD~1
 ```bash
 # リリース手順
 npm test && npm run typecheck
+claude plugin validate .                   # preflight
 # CHANGELOG.md を編集
 git add CHANGELOG.md && git commit -m "docs: update CHANGELOG for vX.Y.Z"
 npm version patch  # または minor / major
@@ -219,9 +240,14 @@ npm version patch  # または minor / major
 # タグ push 後、release.yml が自動で npm publish + GitHub Release 作成
 gh run list --workflow=release.yml --limit 3
 
+# ローカル Claude Code プラグインキャッシュを更新
+claude plugin update firex
+# 起動中の他セッションで即時反映したい場合のみ、そのセッションで:
+#   /reload-plugins
+
 # プラグインバージョン手動同期（通常は不要）
 npm run sync:plugin-version
 
-# ローカルインストール（オプション）
+# ローカル CLI インストール（オプション）
 npm link
 ```

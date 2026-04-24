@@ -133,6 +133,12 @@ jobs:
           grep -q '^name: firex$' skills/firex/SKILL.md || { echo "::error::SKILL.md missing name: firex"; exit 1; }
           grep -q '^description:' skills/firex/SKILL.md || { echo "::error::SKILL.md missing description"; exit 1; }
 
+      - name: Install Claude Code CLI
+        run: npm install -g @anthropic-ai/claude-code
+
+      - name: Validate plugin manifest (claude plugin validate)
+        run: claude plugin validate .
+
   build:
     runs-on: ubuntu-latest
     needs: [lint, typecheck, test]
