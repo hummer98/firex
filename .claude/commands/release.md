@@ -110,10 +110,33 @@ npm version patch  # または minor / major
 
 このコマンドは以下を自動実行します：
 1. package.jsonのversion更新
-2. `npm run build` の実行（prepareスクリプト経由）
-3. git commit（バージョンタグ付き）
-4. git tag vX.Y.Z
-5. git push && git push --tags（postversion経由）
+2. `npm run sync:plugin-version` で **Claude Code plugin のバージョンも同期**
+   - `.claude-plugin/plugin.json` の version を package.json に揃える
+   - `.claude-plugin/marketplace.json` の plugins[name=firex].version を揃える
+   - 両ファイルを `git add` してバージョンコミットに含める
+3. `npm run build` の実行
+4. git commit（バージョンタグ付き）
+5. git tag vX.Y.Z
+6. git push && git push --tags（postversion経由）
+
+**プラグインバージョンアップを忘れずに**: 上記2は `version` スクリプトに組み込まれているため自動実行される。手動で version を書き換えた場合は `npm run sync:plugin-version` を必ず実行してから commit する。CI (ci.yml の `validate-plugin` ジョブ) が不整合を検出して落とす。
+
+### 6.5. Plugin 配布 (CIによる自動公開)
+
+タグ push 後、GitHub Actions の `.github/workflows/release.yml` が自動で以下を実行する：
+
+1. tag と package.json / plugin.json / marketplace.json のバージョン整合性を検証
+2. `npm publish --access public` で npm 公開
+3. GitHub Release を作成
+
+Claude Code plugin としての配布は **marketplace.json を master ブランチに置くだけ**で完了する（GitHub がマニフェストを配信）。ユーザーは以下で取得する:
+
+```
+/plugin marketplace add hummer98/firex
+/plugin install firex
+```
+
+そのため、追加のアップロード/公開手順は不要。release.yml が落ちていないかは `gh run list --workflow=release.yml` で確認する。
 
 ### 7. GitHubリリース作成
 
@@ -145,10 +168,9 @@ npm link
 - GitHubリリースURL
 - **--local指定時のみ**: ローカルインストール完了の旨
 - 主な変更内容のサマリー
-- npm公開用コマンド（手動実行用）:
-  ```bash
-  npm publish --access public
-  ```
+- npm 公開状況: CI (release.yml) が自動実行。失敗時は `gh run list --workflow=release.yml` で確認。
+  - 手動公開が必要な場合: `npm publish --access public`
+- Claude Code plugin 更新: `/plugin update firex` でユーザーが取得可能
 
 ## 注意事項
 
@@ -186,10 +208,16 @@ npm test && npm run typecheck
 # CHANGELOG.md を編集
 git add CHANGELOG.md && git commit -m "docs: update CHANGELOG for vX.Y.Z"
 npm version patch  # または minor / major
-gh release create vX.Y.Z --title "firex vX.Y.Z" --notes "..."
+# → plugin.json / marketplace.json は `version` スクリプトで自動同期
 
-# npm公開（手動で実行）
+# タグ push 後、release.yml が自動で npm publish + GitHub Release 作成
+gh run list --workflow=release.yml --limit 3
+
+# 手動で公開する場合
 npm publish --access public
+
+# プラグインバージョン手動同期（通常は不要）
+npm run sync:plugin-version
 
 # ローカルインストール（オプション）
 npm link
