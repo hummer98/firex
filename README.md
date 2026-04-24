@@ -4,6 +4,11 @@ English | **[日本語](README-jp.md)**
 
 # firex
 
+[![npm version](https://img.shields.io/npm/v/@hummer98/firex.svg)](https://www.npmjs.com/package/@hummer98/firex)
+[![npm downloads](https://img.shields.io/npm/dm/@hummer98/firex.svg)](https://www.npmjs.com/package/@hummer98/firex)
+[![npm total downloads](https://img.shields.io/npm/dt/@hummer98/firex.svg)](https://www.npmjs.com/package/@hummer98/firex)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 Firebase Firestore CLI tool for command-line operations.
 
 `firex` is a powerful command-line interface tool for managing Firebase Firestore databases. It allows developers to perform CRUD operations, execute queries, and manage data efficiently without relying on the Firebase Console GUI. It also works as an **MCP (Model Context Protocol) server**, enabling AI assistants like Claude to interact with Firestore directly.

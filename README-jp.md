@@ -4,6 +4,11 @@
 
 # firex
 
+[![npm version](https://img.shields.io/npm/v/@hummer98/firex.svg)](https://www.npmjs.com/package/@hummer98/firex)
+[![npm downloads](https://img.shields.io/npm/dm/@hummer98/firex.svg)](https://www.npmjs.com/package/@hummer98/firex)
+[![npm total downloads](https://img.shields.io/npm/dt/@hummer98/firex.svg)](https://www.npmjs.com/package/@hummer98/firex)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 Firebase Firestore のコマンドライン操作ツール
 
 `firex` は Firebase Firestore データベースを管理するための強力なコマンドラインインターフェースツールです。Firebase Console の GUI に頼らずに、CRUD 操作やクエリの実行、データ管理を効率的に行うことができます。また、**MCP（Model Context Protocol）サーバー**としても動作し、Claude などの AI アシスタントが Firestore を直接操作できます。
