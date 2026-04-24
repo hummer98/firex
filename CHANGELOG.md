@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.8.0] - 2026-04-25
+
+### Added
+- **Named database support** (Issue #3): Firestore の `(default)` 以外のデータベースに `--database-id` / `.firex.yaml` の `databaseId` / プロファイル経由で接続可能に
+- **Claude Code plugin distribution**: `/plugin marketplace add hummer98/firex` で `firex` スキル一式を配布可能に。SKILL.md は `npx @hummer98/firex` 前提で Firestore 操作 / MCP 連携の使い方を案内
+
 ## [0.7.8] - 2026-02-27
 
 ### Changed
@@ -210,7 +216,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - API key and OAuth token masking
 - Secure file permission recommendations
 
-[Unreleased]: https://github.com/hummer98/firex/compare/v0.7.8...HEAD
+[Unreleased]: https://github.com/hummer98/firex/compare/v0.8.0...HEAD
+[0.8.0]: https://github.com/hummer98/firex/compare/v0.7.8...v0.8.0
 [0.7.8]: https://github.com/hummer98/firex/compare/v0.7.7...v0.7.8
 [0.7.7]: https://github.com/hummer98/firex/compare/v0.7.6...v0.7.7
 [0.7.6]: https://github.com/hummer98/firex/compare/v0.7.5...v0.7.6
