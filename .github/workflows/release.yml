@@ -50,6 +50,9 @@ jobs:
           cache: 'npm'
           registry-url: 'https://registry.npmjs.org'
 
+      - name: Upgrade npm for OIDC Trusted Publishing (requires npm >=11.5.1)
+        run: npm install -g npm@latest
+
       - name: Install dependencies
         run: npm install --no-audit --no-fund
 
