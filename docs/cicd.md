@@ -97,6 +97,19 @@ jobs:
 
 > **Note**: The `google-github-actions/auth` action automatically sets `GOOGLE_APPLICATION_CREDENTIALS`. firex (via Firebase Admin SDK) uses this for authentication automatically. No additional configuration is required.
 
+### Named database
+
+If you target a Firestore database other than `(default)`, pass `--database-id` to firex or set `FIRESTORE_DATABASE_ID`. The database ID can be hardcoded in the workflow, stored as a repository variable, or read from a secret.
+
+```yaml
+- name: Export Firestore collection
+  env:
+    FIRESTORE_DATABASE_ID: my-db   # optional; omit to use (default)
+  run: npx @hummer98/firex export users --output backup.json
+```
+
+The same env var / flag works in the Service account key variant below.
+
 ### Other CI/CD Platforms
 
 Workload Identity Federation also supports:

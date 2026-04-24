@@ -100,11 +100,13 @@ Manage multiple environments with `.firex.yaml`:
 ```yaml
 # .firex.yaml
 projectId: dev-project
+databaseId: my-db            # Optional. Omit to use the (default) database.
 credentialPath: ./dev-service-account.json
 
 profiles:
   staging:
     projectId: staging-project
+    databaseId: staging-db
   production:
     projectId: prod-project
     credentialPath: ./prod-service-account.json
@@ -212,6 +214,8 @@ Add to `~/Library/Application Support/Claude/claude_desktop_config.json`:
 }
 ```
 
+> To target a **named database** (anything other than `(default)`), add `FIRESTORE_DATABASE_ID` to the `env` block. Omit it to keep using `(default)`.
+
 ### Usage
 
 After setup, just give natural language instructions to the AI:
@@ -283,6 +287,17 @@ npx @hummer98/firex list users --project-id your-project-id
 
 # Or set via environment variable
 export FIRESTORE_PROJECT_ID=your-project-id
+npx @hummer98/firex list users
+```
+
+### Using a named database
+
+To target a Firestore database other than `(default)`, pass `--database-id` (or set `FIRESTORE_DATABASE_ID`).
+
+```bash
+npx @hummer98/firex list users --project-id your-project-id --database-id my-db
+# or
+export FIRESTORE_DATABASE_ID=my-db
 npx @hummer98/firex list users
 ```
 

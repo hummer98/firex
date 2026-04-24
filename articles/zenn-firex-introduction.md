@@ -100,11 +100,13 @@ firex import backup.json
 ```yaml
 # .firex.yaml
 projectId: dev-project
+databaseId: my-db            # 任意。省略時は (default) データベースを使用。
 credentialPath: ./dev-service-account.json
 
 profiles:
   staging:
     projectId: staging-project
+    databaseId: staging-db
   production:
     projectId: prod-project
     credentialPath: ./prod-service-account.json
@@ -176,6 +178,8 @@ claude mcp add firex \
 }
 ```
 
+`(default)` 以外の **named database** を対象にしたい場合は、`FIRESTORE_DATABASE_ID` を `env` に追加してください（省略時は `(default)` が使われます）。
+
 ### 使い方
 
 セットアップ後は、AIに自然言語で指示するだけです。
@@ -245,6 +249,17 @@ npx @hummer98/firex list users --project-id your-project-id
 
 # または環境変数で指定
 export FIRESTORE_PROJECT_ID=your-project-id
+npx @hummer98/firex list users
+```
+
+### named database を使う場合
+
+`(default)` 以外の Firestore データベースを使う場合は `--database-id`（または `FIRESTORE_DATABASE_ID`）を指定します。
+
+```bash
+npx @hummer98/firex list users --project-id your-project-id --database-id my-db
+# または
+export FIRESTORE_DATABASE_ID=my-db
 npx @hummer98/firex list users
 ```
 

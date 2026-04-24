@@ -49,6 +49,17 @@
 **実装ファイル**: `src/services/auth.ts`
 **テスト**: `src/services/auth.test.ts` ✅ 4 tests passed
 
+#### Task 2.2.1: Named Database サポート ✅ (Issue #3)
+- CLI フラグ `--database-id`（env: `FIRESTORE_DATABASE_ID`）を BaseCommand / mcp コマンドに追加
+- `Config.databaseId` と `.firex.yaml` / ConfigSchema / profile 対応
+- AuthService: `config.databaseId` 指定時に `getFirestore(app, databaseId)` を呼び出し
+- FirestoreManager: キャッシュキーを `${projectId||''}::${databaseId||''}::${credentialPath||''}` に拡張
+- MCP: 8 ツール (`get` / `list` / `set` / `update` / `delete` / `collections` / `export` / `import`) 全てで `databaseId` パラメータを追加
+- 未指定時は従来通り `(default)` データベースを使用（後方互換）
+
+**実装ファイル**: `src/commands/base-command.ts`, `src/commands/mcp.ts`, `src/services/config.ts`, `src/services/auth.ts`, `src/mcp/firestore-manager.ts`, `src/mcp/tools/*.ts`, `src/shared/i18n.ts`
+**テスト**: `src/mcp/firestore-manager.test.ts` (9) + 既存 5 ファイルに計 28 件追加 ✅
+
 #### Task 2.4: LoggingService実装 ✅
 - ログレベル別出力 (error, warn, info, debug)
 - タイムスタンプとログレベルフォーマット
