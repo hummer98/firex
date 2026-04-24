@@ -5,13 +5,13 @@
     "email": "github@hummer98"
   },
   "metadata": {
-    "description": "Firestore 操作スキルとして firex CLI / MCP サーバーを Claude Code に配布するマーケットプレイス"
+    "description": "Marketplace for distributing the firex Firestore CLI / MCP server as a Claude Code plugin."
   },
   "plugins": [
     {
       "name": "firex",
       "source": "./",
-      "description": "Firestore 操作スキル。ドキュメント取得・クエリ・インポート/エクスポート・リアルタイム監視・MCP サーバー利用を npx @hummer98/firex 経由で提供する。",
+      "description": "Firestore operations skill powered by npx @hummer98/firex. Covers document get/set/update/delete, collection queries, import/export, real-time watching, and MCP server integration.",
       "version": "0.7.8",
       "author": {
         "name": "hummer98"
