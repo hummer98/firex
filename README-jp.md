@@ -50,6 +50,22 @@ npm install -g @hummer98/firex
 pnpm add -g @hummer98/firex
 ```
 
+### Claude Code plugin として利用
+
+Claude Code のスキル + スラッシュコマンド配布としてもインストールできます（スキルが `npx @hummer98/firex` を呼ぶため npm の事前インストールは不要）:
+
+```
+/plugin marketplace add hummer98/firex
+/plugin install firex
+```
+
+更新:
+
+```
+/plugin update firex
+/reload-plugins
+```
+
 ## クイックスタート
 
 ### 1. 認証設定

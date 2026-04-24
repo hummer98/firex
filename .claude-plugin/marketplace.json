@@ -1,0 +1,35 @@
+{
+  "name": "hummer98-firex",
+  "owner": {
+    "name": "hummer98",
+    "email": "github@hummer98"
+  },
+  "plugins": [
+    {
+      "name": "firex",
+      "source": "./",
+      "description": "Firestore 操作スキル。ドキュメント取得・クエリ・インポート/エクスポート・リアルタイム監視・MCP サーバー利用を npx @hummer98/firex 経由で提供する。",
+      "version": "0.7.8",
+      "author": {
+        "name": "hummer98"
+      },
+      "repository": "https://github.com/hummer98/firex",
+      "license": "MIT",
+      "keywords": [
+        "claude-skill",
+        "firebase",
+        "firestore",
+        "cli",
+        "mcp"
+      ],
+      "category": "database",
+      "tags": [
+        "firebase",
+        "firestore",
+        "cli",
+        "mcp",
+        "npx"
+      ]
+    }
+  ]
+}

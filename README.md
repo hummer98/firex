@@ -50,6 +50,22 @@ npm install -g @hummer98/firex
 pnpm add -g @hummer98/firex
 ```
 
+### Claude Code plugin
+
+Install the firex skill + slash command package in Claude Code (no npm install required — the skill uses `npx @hummer98/firex`):
+
+```
+/plugin marketplace add hummer98/firex
+/plugin install firex
+```
+
+Update:
+
+```
+/plugin update firex
+/reload-plugins
+```
+
 ## Quick Start
 
 ### 1. Authentication Setup
