@@ -1,0 +1,22 @@
+# セッション固有（追跡不要）
+team.json
+task-state.json
+daemon.pid
+masters/
+proxy-port
+rate-limit.json
+logs/
+output/
+prompts/
+queue/
+traces/
+sessions/
+conductors/
+docs-snapshot/
+e2e-results/
+
+# 追跡すべき（上記以外）
+# config.json   — mainBranch 等の team 設定
+# tasks/        — タスク定義・runs の成果物
+# artifacts/    — 知見の記録
+# specs/        — 要件・設計
