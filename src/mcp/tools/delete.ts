@@ -13,6 +13,7 @@ import { ToonEncoder } from '../../presentation/toon-encoder.js';
 
 const DeleteSchema = {
   projectId: z.string().optional().describe('Firebase project ID (optional, uses default if not specified)'),
+  databaseId: z.string().optional().describe('Firestore database ID (optional, uses (default) if not specified)'),
   path: z.string().describe('Document or collection path'),
   recursive: z
     .boolean()
@@ -62,8 +63,8 @@ export function registerDeleteTool(server: McpServer, firestoreManager: Firestor
     'firestore_delete',
     'Delete a document from Firestore. Use recursive=true to delete an entire collection.',
     DeleteSchema,
-    async ({ projectId, path, recursive, format }) => {
-      const firestoreResult = await firestoreManager.getFirestore({ projectId });
+    async ({ projectId, databaseId, path, recursive, format }) => {
+      const firestoreResult = await firestoreManager.getFirestore({ projectId, databaseId });
 
       if (firestoreResult.isErr()) {
         return {

@@ -18,6 +18,7 @@ const ConfigSchema = z.object({
   projectId: z.string().optional(),
   credentialPath: z.string().optional(),
   databaseURL: z.string().optional(),
+  databaseId: z.string().optional(),
   emulatorHost: z.string().optional(),
   defaultListLimit: z.number().positive().optional(),
   watchShowInitial: z.boolean().optional(),
@@ -27,6 +28,7 @@ const ConfigSchema = z.object({
     projectId: z.string().optional(),
     credentialPath: z.string().optional(),
     databaseURL: z.string().optional(),
+    databaseId: z.string().optional(),
     emulatorHost: z.string().optional(),
     defaultListLimit: z.number().positive().optional(),
     watchShowInitial: z.boolean().optional(),
@@ -242,7 +244,7 @@ export class ConfigChecker {
           t('doctor.check.schema.invalid'),
           errors.join('\n'),
           `${t('doctor.check.schema.validFields')}: projectId (string), credentialPath (string), ` +
-            'defaultListLimit (number), watchShowInitial (boolean), verbose (boolean)'
+            'databaseId (string), defaultListLimit (number), watchShowInitial (boolean), verbose (boolean)'
         )
       );
     } catch (error) {

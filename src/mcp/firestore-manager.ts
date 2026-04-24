@@ -23,6 +23,7 @@ export type FirestoreManagerError =
  */
 export interface GetFirestoreOptions {
   projectId?: string;
+  databaseId?: string;
   credentialPath?: string;
 }
 
@@ -49,6 +50,7 @@ export class FirestoreManager {
     const configResult = await configService.loadConfig({
       cliFlags: {
         projectId: cliOptions.projectId,
+        databaseId: cliOptions.databaseId,
         credentialPath: cliOptions.credentialPath,
       },
     });
@@ -59,22 +61,27 @@ export class FirestoreManager {
   }
 
   /**
-   * Build cache key from resolved projectId and credentialPath
+   * Build cache key from resolved projectId, databaseId, and credentialPath
    */
-  private getCacheKey(projectId?: string, credentialPath?: string): string {
-    return `${projectId || ''}::${credentialPath || ''}`;
+  private getCacheKey(
+    projectId?: string,
+    databaseId?: string,
+    credentialPath?: string
+  ): string {
+    return `${projectId || ''}::${databaseId || ''}::${credentialPath || ''}`;
   }
 
   /**
    * Get Firestore instance, initializing if necessary.
-   * Returns cached instance if the same project/credential combination was previously initialized.
+   * Returns cached instance if the same project/database/credential combination was previously initialized.
    */
   async getFirestore(
     options: GetFirestoreOptions = {}
   ): Promise<Result<Firestore, FirestoreManagerError>> {
     const projectId = options.projectId || this.baseConfig?.projectId;
+    const databaseId = options.databaseId || this.baseConfig?.databaseId;
     const credentialPath = options.credentialPath || this.baseConfig?.credentialPath;
-    const cacheKey = this.getCacheKey(projectId, credentialPath);
+    const cacheKey = this.getCacheKey(projectId, databaseId, credentialPath);
 
     // Return cached instance if available
     const cached = this.cache.get(cacheKey);
@@ -89,6 +96,7 @@ export class FirestoreManager {
     const config: Config = {
       ...this.baseConfig,
       projectId: projectId,
+      databaseId: databaseId,
       credentialPath: credentialPath,
       defaultListLimit: this.baseConfig?.defaultListLimit ?? 100,
       watchShowInitial: this.baseConfig?.watchShowInitial ?? false,
@@ -147,12 +155,14 @@ export class FirestoreManager {
   }
 
   /**
-   * Get cached project IDs
+   * Get cached project IDs (deduplicated; a single projectId may have multiple
+   * cached entries for different databaseId / credentialPath combinations)
    */
   getCachedProjectIds(): string[] {
-    return Array.from(this.cache.keys())
+    const projectIds = Array.from(this.cache.keys())
       .map((key) => key.split('::')[0])
       .filter(Boolean);
+    return Array.from(new Set(projectIds));
   }
 
   /**

@@ -12,6 +12,7 @@ import { ToonEncoder } from '../../presentation/toon-encoder.js';
 
 const ExportSchema = {
   projectId: z.string().optional().describe('Firebase project ID (optional, uses default if not specified)'),
+  databaseId: z.string().optional().describe('Firestore database ID (optional, uses (default) if not specified)'),
   path: z.string().describe('Collection path to export'),
   recursive: z.boolean().optional().default(false).describe('If true, include subcollections'),
   limit: z.number().optional().describe('Maximum number of documents to export'),
@@ -57,8 +58,8 @@ export function registerExportTool(server: McpServer, firestoreManager: Firestor
     'firestore_export',
     'Export documents from a Firestore collection as JSON',
     ExportSchema,
-    async ({ projectId, path, recursive, limit, format }) => {
-      const firestoreResult = await firestoreManager.getFirestore({ projectId });
+    async ({ projectId, databaseId, path, recursive, limit, format }) => {
+      const firestoreResult = await firestoreManager.getFirestore({ projectId, databaseId });
 
       if (firestoreResult.isErr()) {
         return {

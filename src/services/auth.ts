@@ -72,8 +72,10 @@ export class AuthService {
         appName
       );
 
-      // Get Firestore instance
-      this.firestore = getFirestore(this.app);
+      // Get Firestore instance (pass databaseId when specified for named databases)
+      this.firestore = config.databaseId
+        ? getFirestore(this.app, config.databaseId)
+        : getFirestore(this.app);
 
       // If emulator host is set, connect to emulator
       if (config.emulatorHost) {

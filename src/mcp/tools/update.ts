@@ -13,6 +13,7 @@ import { ToonEncoder } from '../../presentation/toon-encoder.js';
 
 const UpdateSchema = {
   projectId: z.string().optional().describe('Firebase project ID (optional, uses default if not specified)'),
+  databaseId: z.string().optional().describe('Firestore database ID (optional, uses (default) if not specified)'),
   path: z.string().describe('Document path (e.g., users/user123)'),
   data: z.record(z.string(), z.unknown()).describe('Fields to update. Supports $fieldValue syntax: {"$fieldValue": "serverTimestamp"}, {"$fieldValue": "increment", "operand": 1}, {"$fieldValue": "arrayUnion", "elements": [...]}, {"$fieldValue": "arrayRemove", "elements": [...]}, {"$fieldValue": "delete"}. To store a value as Firestore Timestamp type (not a string), use $timestampValue syntax: {"$timestampValue": "2025-02-18T12:00:00Z"}. Without this wrapper, date strings are stored as plain strings.'),
   format: z.enum(['json', 'toon']).optional().default('json').describe('Output format (json or toon)'),
@@ -23,8 +24,8 @@ export function registerUpdateTool(server: McpServer, firestoreManager: Firestor
     'firestore_update',
     'Update specific fields in an existing Firestore document. The document must exist. Supports $fieldValue syntax for serverTimestamp, increment, arrayUnion, arrayRemove, delete operations. To store a value as Firestore Timestamp type (not a string), use $timestampValue syntax: {"$timestampValue": "2025-02-18T12:00:00Z"}. Without this wrapper, date strings are stored as plain strings.',
     UpdateSchema,
-    async ({ projectId, path, data, format }) => {
-      const firestoreResult = await firestoreManager.getFirestore({ projectId });
+    async ({ projectId, databaseId, path, data, format }) => {
+      const firestoreResult = await firestoreManager.getFirestore({ projectId, databaseId });
 
       if (firestoreResult.isErr()) {
         return {

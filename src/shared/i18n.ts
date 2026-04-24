@@ -34,6 +34,7 @@ export interface Messages {
   // Flag descriptions
   'flag.verbose': string;
   'flag.projectId': string;
+  'flag.databaseId': string;
   'flag.credentialPath': string;
   'flag.format': string;
   'flag.profile': string;
@@ -333,6 +334,7 @@ const jaMessages: Messages = {
   // Flag descriptions
   'flag.verbose': '詳細な出力を表示する',
   'flag.projectId': 'Firebase プロジェクトID',
+  'flag.databaseId': 'Firestore データベース ID (デフォルト: (default))',
   'flag.credentialPath': 'サービスアカウントキーファイルのパス',
   'flag.format': '出力形式 (json, yaml, table)',
   'flag.profile': '使用する設定プロファイル',
@@ -632,6 +634,7 @@ const enMessages: Messages = {
   // Flag descriptions
   'flag.verbose': 'Enable verbose mode for detailed output',
   'flag.projectId': 'Firebase Project ID',
+  'flag.databaseId': 'Firestore database ID (default: (default))',
   'flag.credentialPath': 'Path to service account key file',
   'flag.format': 'Output format (json, yaml, table)',
   'flag.profile': 'Configuration profile to use',

@@ -23,6 +23,7 @@ const packageJson = require('../../package.json');
  */
 export interface McpServerOptions {
   projectId?: string;
+  databaseId?: string;
   credentialPath?: string;
 }
 
@@ -37,6 +38,7 @@ export async function startMcpServer(options: McpServerOptions = {}): Promise<vo
   const firestoreManager = new FirestoreManager();
   await firestoreManager.initialize({
     projectId: options.projectId,
+    databaseId: options.databaseId,
     credentialPath: options.credentialPath,
   });
 

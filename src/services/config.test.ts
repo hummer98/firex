@@ -100,6 +100,51 @@ describe('ConfigService', () => {
       }
     });
 
+    it('should load databaseId from .firex.yaml file', async () => {
+      const configPath = path.join(tmpDir, '.firex.yaml');
+      await fs.writeFile(configPath, 'databaseId: file-db\n');
+
+      delete process.env.FIRESTORE_DATABASE_ID;
+
+      const result = await configService.loadConfig({ searchFrom: tmpDir });
+
+      expect(result.isOk()).toBe(true);
+      if (result.isOk()) {
+        expect(result.value.databaseId).toBe('file-db');
+      }
+    });
+
+    it('should prioritize FIRESTORE_DATABASE_ID env over file databaseId', async () => {
+      const configPath = path.join(tmpDir, '.firex.yaml');
+      await fs.writeFile(configPath, 'databaseId: file-db\n');
+
+      process.env.FIRESTORE_DATABASE_ID = 'env-db';
+
+      const result = await configService.loadConfig({ searchFrom: tmpDir });
+
+      expect(result.isOk()).toBe(true);
+      if (result.isOk()) {
+        expect(result.value.databaseId).toBe('env-db');
+      }
+    });
+
+    it('should prioritize cliFlags.databaseId over env and file', async () => {
+      const configPath = path.join(tmpDir, '.firex.yaml');
+      await fs.writeFile(configPath, 'databaseId: file-db\n');
+
+      process.env.FIRESTORE_DATABASE_ID = 'env-db';
+
+      const result = await configService.loadConfig({
+        searchFrom: tmpDir,
+        cliFlags: { databaseId: 'cli-db' },
+      });
+
+      expect(result.isOk()).toBe(true);
+      if (result.isOk()) {
+        expect(result.value.databaseId).toBe('cli-db');
+      }
+    });
+
     it('should support profile selection', async () => {
       const configPath = path.join(tmpDir, '.firex.yaml');
       await fs.writeFile(
@@ -166,6 +211,40 @@ describe('ConfigService', () => {
       expect(result.isOk()).toBe(true);
       if (result.isOk()) {
         expect(result.value.emulatorHost).toBe('localhost:8080');
+      }
+    });
+
+    it('should map FIRESTORE_DATABASE_ID to databaseId', async () => {
+      delete process.env.FIRESTORE_DATABASE_ID;
+      process.env.FIRESTORE_DATABASE_ID = 'my-db';
+
+      const result = await configService.loadConfig({ searchFrom: tmpDir });
+
+      expect(result.isOk()).toBe(true);
+      if (result.isOk()) {
+        expect(result.value.databaseId).toBe('my-db');
+      }
+    });
+
+    it('should treat empty FIRESTORE_DATABASE_ID as undefined', async () => {
+      process.env.FIRESTORE_DATABASE_ID = '';
+
+      const result = await configService.loadConfig({ searchFrom: tmpDir });
+
+      expect(result.isOk()).toBe(true);
+      if (result.isOk()) {
+        expect(result.value.databaseId).toBeUndefined();
+      }
+    });
+
+    it('should leave databaseId undefined when FIRESTORE_DATABASE_ID is not set', async () => {
+      delete process.env.FIRESTORE_DATABASE_ID;
+
+      const result = await configService.loadConfig({ searchFrom: tmpDir });
+
+      expect(result.isOk()).toBe(true);
+      if (result.isOk()) {
+        expect(result.value.databaseId).toBeUndefined();
       }
     });
 

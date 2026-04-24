@@ -16,6 +16,7 @@ const DocumentSchema = z.object({
 
 const ImportSchema = {
   projectId: z.string().optional().describe('Firebase project ID (optional, uses default if not specified)'),
+  databaseId: z.string().optional().describe('Firestore database ID (optional, uses (default) if not specified)'),
   path: z.string().describe('Collection path to import into'),
   documents: z.array(DocumentSchema).describe('Array of documents to import'),
   merge: z.boolean().optional().describe('If true, merge with existing documents'),
@@ -27,8 +28,8 @@ export function registerImportTool(server: McpServer, firestoreManager: Firestor
     'firestore_import',
     'Import documents into a Firestore collection',
     ImportSchema,
-    async ({ projectId, path, documents, merge, format }) => {
-      const firestoreResult = await firestoreManager.getFirestore({ projectId });
+    async ({ projectId, databaseId, path, documents, merge, format }) => {
+      const firestoreResult = await firestoreManager.getFirestore({ projectId, databaseId });
 
       if (firestoreResult.isErr()) {
         return {

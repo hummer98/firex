@@ -52,6 +52,10 @@ describe('BaseCommand', () => {
       expect(BaseCommand.baseFlags['project-id']).toBeDefined();
     });
 
+    it('should define database-id flag', () => {
+      expect(BaseCommand.baseFlags['database-id']).toBeDefined();
+    });
+
     it('should define credential-path flag', () => {
       expect(BaseCommand.baseFlags['credential-path']).toBeDefined();
     });

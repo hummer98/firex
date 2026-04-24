@@ -190,6 +190,38 @@ describe('ConfigChecker', () => {
         expect(result.value.status).toBe('success');
       }
     });
+
+    it('should accept databaseId at top level', () => {
+      const checker = new ConfigChecker();
+
+      const result = checker.validateConfigSchema({
+        projectId: 'my-project',
+        databaseId: 'my-db',
+      });
+
+      expect(result.isOk()).toBe(true);
+      if (result.isOk()) {
+        expect(result.value.status).toBe('success');
+      }
+    });
+
+    it('should accept databaseId in profiles sub-schema', () => {
+      const checker = new ConfigChecker();
+
+      const result = checker.validateConfigSchema({
+        profiles: {
+          staging: {
+            projectId: 'staging',
+            databaseId: 'staging-db',
+          },
+        },
+      });
+
+      expect(result.isOk()).toBe(true);
+      if (result.isOk()) {
+        expect(result.value.status).toBe('success');
+      }
+    });
   });
 
   describe('validateCollectionPaths', () => {

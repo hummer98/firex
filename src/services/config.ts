@@ -23,6 +23,7 @@ export interface Config {
   projectId?: string;
   credentialPath?: string;
   databaseURL?: string;
+  databaseId?: string;
   emulatorHost?: string;
   defaultListLimit: number;
   watchShowInitial: boolean;
@@ -255,6 +256,10 @@ export class ConfigService {
       config.databaseURL = process.env.FIRESTORE_DATABASE_URL;
     }
 
+    if (process.env.FIRESTORE_DATABASE_ID) {
+      config.databaseId = process.env.FIRESTORE_DATABASE_ID;
+    }
+
     // Parse numeric values
     if (process.env.FIREX_DEFAULT_LIMIT) {
       const limit = parseInt(process.env.FIREX_DEFAULT_LIMIT, 10);
@@ -355,6 +360,7 @@ export class ConfigService {
       projectId: config.projectId || '(not set)',
       credentialPath: config.credentialPath || '(not set)',
       databaseURL: config.databaseURL || '(not set)',
+      databaseId: config.databaseId || '(not set)',
       emulatorHost: config.emulatorHost || '(not set)',
       defaultListLimit: config.defaultListLimit,
       watchShowInitial: config.watchShowInitial,

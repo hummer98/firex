@@ -21,7 +21,9 @@ vi.mock('firebase-admin/firestore', () => ({
 
 // Import mocked modules for assertions
 import { initializeApp } from 'firebase-admin/app';
+import { getFirestore } from 'firebase-admin/firestore';
 const mockInitializeApp = vi.mocked(initializeApp);
+const mockGetFirestore = vi.mocked(getFirestore);
 
 describe('AuthService', () => {
   let authService: AuthService;
@@ -99,6 +101,31 @@ describe('AuthService', () => {
       expect(result2.isOk()).toBe(true);
       // initializeApp should only be called once
       expect(mockInitializeApp).toHaveBeenCalledTimes(1);
+    });
+
+    it('should call getFirestore with only app when databaseId is not specified', async () => {
+      const result = await authService.initialize(testConfig);
+
+      expect(result.isOk()).toBe(true);
+      expect(mockGetFirestore).toHaveBeenCalledWith(mockApp);
+    });
+
+    it('should call getFirestore with app and databaseId when databaseId is specified', async () => {
+      const config: Config = { ...testConfig, databaseId: 'my-db' };
+
+      const result = await authService.initialize(config);
+
+      expect(result.isOk()).toBe(true);
+      expect(mockGetFirestore).toHaveBeenCalledWith(mockApp, 'my-db');
+    });
+
+    it('should call getFirestore without databaseId when databaseId is empty string', async () => {
+      const config: Config = { ...testConfig, databaseId: '' };
+
+      const result = await authService.initialize(config);
+
+      expect(result.isOk()).toBe(true);
+      expect(mockGetFirestore).toHaveBeenCalledWith(mockApp);
     });
   });
 

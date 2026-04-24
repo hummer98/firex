@@ -15,6 +15,7 @@ import { TimezoneService } from '../../services/timezone.js';
 
 const GetSchema = {
   projectId: z.string().optional().describe('Firebase project ID (optional, uses default if not specified)'),
+  databaseId: z.string().optional().describe('Firestore database ID (optional, uses (default) if not specified)'),
   path: z.string().describe('Document path (e.g., users/user123)'),
   format: z.enum(['json', 'toon']).optional().default('json').describe('Output format (json or toon)'),
   timezone: z.string().optional().describe('Timezone (IANA format, e.g., Asia/Tokyo)'),
@@ -27,8 +28,8 @@ export function registerGetTool(server: McpServer, firestoreManager: FirestoreMa
     'firestore_get',
     'Get a document from Firestore by its path',
     GetSchema,
-    async ({ projectId, path, format, timezone, dateFormat, rawOutput }) => {
-      const firestoreResult = await firestoreManager.getFirestore({ projectId });
+    async ({ projectId, databaseId, path, format, timezone, dateFormat, rawOutput }) => {
+      const firestoreResult = await firestoreManager.getFirestore({ projectId, databaseId });
 
       if (firestoreResult.isErr()) {
         return {

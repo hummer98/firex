@@ -28,12 +28,20 @@ export class McpCommand extends Command {
       command: '<%= config.bin %> mcp --project-id my-project --credential-path /path/to/key.json',
       description: 'Start with both project ID and service account key',
     },
+    {
+      command: '<%= config.bin %> mcp --project-id my-project --database-id my-db',
+      description: 'Start targeting a named Firestore database (other than (default))',
+    },
   ];
 
   static override flags = {
     'project-id': Flags.string({
       description: 'Firebase project ID',
       env: 'FIRESTORE_PROJECT_ID',
+    }),
+    'database-id': Flags.string({
+      description: 'Firestore database ID (default: (default))',
+      env: 'FIRESTORE_DATABASE_ID',
     }),
     'credential-path': Flags.string({
       description: 'Path to service account key file',
@@ -49,6 +57,7 @@ export class McpCommand extends Command {
     // stdout is reserved for JSON-RPC communication
     await startMcpServer({
       projectId: flags['project-id'],
+      databaseId: flags['database-id'],
       credentialPath: flags['credential-path'],
     });
   }

@@ -39,6 +39,10 @@ export abstract class BaseCommand extends Command {
       description: t('flag.projectId'),
       env: 'FIRESTORE_PROJECT_ID',
     }),
+    'database-id': Flags.string({
+      description: t('flag.databaseId'),
+      env: 'FIRESTORE_DATABASE_ID',
+    }),
     'credential-path': Flags.string({
       description: t('flag.credentialPath'),
       // Note: Don't use env: 'GOOGLE_APPLICATION_CREDENTIALS' here.
@@ -131,6 +135,7 @@ export abstract class BaseCommand extends Command {
     const configResult = await this.configService.loadConfig({
       cliFlags: {
         projectId: flags['project-id'] as string | undefined,
+        databaseId: flags['database-id'] as string | undefined,
         credentialPath: flags['credential-path'] as string | undefined,
         verbose: verbose,
       },

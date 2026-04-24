@@ -13,6 +13,7 @@ import type { OutputFormat } from '../../shared/types.js';
 
 const CollectionsSchema = {
   projectId: z.string().optional().describe('Firebase project ID (optional, uses default if not specified)'),
+  databaseId: z.string().optional().describe('Firestore database ID (optional, uses (default) if not specified)'),
   documentPath: z
     .string()
     .optional()
@@ -25,8 +26,8 @@ export function registerCollectionsTool(server: McpServer, firestoreManager: Fir
     'firestore_collections',
     'List collections in Firestore. Provide a document path to list its subcollections, or omit to list root collections.',
     CollectionsSchema,
-    async ({ projectId, documentPath, format }) => {
-      const firestoreResult = await firestoreManager.getFirestore({ projectId });
+    async ({ projectId, databaseId, documentPath, format }) => {
+      const firestoreResult = await firestoreManager.getFirestore({ projectId, databaseId });
 
       if (firestoreResult.isErr()) {
         return {

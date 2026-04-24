@@ -14,6 +14,7 @@ import { ToonEncoder } from '../../presentation/toon-encoder.js';
 
 const SetSchema = {
   projectId: z.string().optional().describe('Firebase project ID (optional, uses default if not specified)'),
+  databaseId: z.string().optional().describe('Firestore database ID (optional, uses (default) if not specified)'),
   path: z.string().describe('Document path (e.g., users/user123)'),
   data: z.record(z.string(), z.unknown()).describe('Document data to write. Supports $fieldValue syntax: {"$fieldValue": "serverTimestamp"}, {"$fieldValue": "increment", "operand": 1}, {"$fieldValue": "arrayUnion", "elements": [...]}, {"$fieldValue": "arrayRemove", "elements": [...]}, {"$fieldValue": "delete"}. To store a value as Firestore Timestamp type (not a string), use $timestampValue syntax: {"$timestampValue": "2025-02-18T12:00:00Z"}. Without this wrapper, date strings are stored as plain strings.'),
   merge: z.boolean().optional().describe('If true, merge with existing data instead of overwriting'),
@@ -25,8 +26,8 @@ export function registerSetTool(server: McpServer, firestoreManager: FirestoreMa
     'firestore_set',
     'Create or update a document in Firestore. Use merge=true to partially update existing documents. Supports $fieldValue syntax for serverTimestamp, increment, arrayUnion, arrayRemove, delete operations. To store a value as Firestore Timestamp type (not a string), use $timestampValue syntax: {"$timestampValue": "2025-02-18T12:00:00Z"}. Without this wrapper, date strings are stored as plain strings.',
     SetSchema,
-    async ({ projectId, path, data, merge, format }) => {
-      const firestoreResult = await firestoreManager.getFirestore({ projectId });
+    async ({ projectId, databaseId, path, data, merge, format }) => {
+      const firestoreResult = await firestoreManager.getFirestore({ projectId, databaseId });
 
       if (firestoreResult.isErr()) {
         return {

@@ -108,6 +108,7 @@ Create a `.firex.yaml` file in your project root:
 ```yaml
 # .firex.yaml
 projectId: your-project-id
+databaseId: my-db            # Optional. Omit for (default) database.
 credentialPath: ./service-account.json
 defaultListLimit: 100
 watchShowInitial: true
@@ -116,6 +117,7 @@ watchShowInitial: true
 profiles:
   staging:
     projectId: your-staging-project
+    databaseId: staging-db
   production:
     projectId: your-production-project
 ```
@@ -160,6 +162,7 @@ firex get <document-path> [options]
 - `--timestamp-format <format>`: Timestamp display format (iso, none). Default: iso
 - `--timezone <zone>`: Timezone for timestamp display (local, utc, or IANA timezone like Asia/Tokyo)
 - `--project-id <id>`: Firebase project ID
+- `--database-id <id>`: Firestore database ID (defaults to `(default)` when omitted)
 - `--credential-path <path>`: Path to service account key file
 - `--verbose, -v`: Enable verbose output
 
@@ -167,6 +170,9 @@ firex get <document-path> [options]
 ```bash
 # Read document in JSON format
 firex get users/user123 --format json
+
+# Read document from a named (non-default) Firestore database
+firex get users/user123 --project-id foo --database-id my-db
 
 # Read document in table format
 firex get users/user123 --format table
@@ -446,6 +452,7 @@ timezone: Asia/Tokyo     # local, utc, or IANA timezone (respects TZ env var)
 ```yaml
 # Project configuration
 projectId: your-firebase-project-id
+databaseId: my-db                       # Optional. Omit to use the (default) Firestore database.
 credentialPath: ./path/to/service-account.json
 databaseURL: https://your-project.firebaseio.com
 
@@ -464,6 +471,7 @@ profiles:
     emulatorHost: localhost:8080
   staging:
     projectId: staging-project
+    databaseId: staging-db
   production:
     projectId: prod-project
     credentialPath: ./prod-service-account.json
@@ -482,8 +490,9 @@ firex list users --profile staging
 |----------|-------------|
 | `GOOGLE_APPLICATION_CREDENTIALS` | Path to service account key file |
 | `FIRESTORE_PROJECT_ID` | Firebase project ID |
+| `FIRESTORE_DATABASE_ID` | Firestore database ID (named database; defaults to `(default)` when omitted) |
 | `FIRESTORE_EMULATOR_HOST` | Firestore emulator host (e.g., localhost:8080) |
-| `FIRESTORE_DATABASE_URL` | Firestore database URL |
+| `FIRESTORE_DATABASE_URL` | Realtime Database URL (distinct from `FIRESTORE_DATABASE_ID`; required only when using Realtime DB) |
 | `FIREX_DEFAULT_LIMIT` | Default limit for list command |
 | `FIREX_WATCH_SHOW_INITIAL` | Show initial data in watch mode (true/false) |
 | `FIREX_VERBOSE` | Enable verbose output (true/false) |

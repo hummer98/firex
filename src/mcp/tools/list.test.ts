@@ -90,6 +90,26 @@ describe('firestore_list tool', () => {
     );
   });
 
+  it('should declare databaseId in its schema', () => {
+    const toolMock = mockServer.tool as ReturnType<typeof vi.fn>;
+    const schema = toolMock.mock.calls[0][2];
+    expect(schema.databaseId).toBeDefined();
+  });
+
+  it('should forward databaseId to FirestoreManager.getFirestore', async () => {
+    await registeredHandler({
+      projectId: 'my-project',
+      path: 'users',
+      format: 'json',
+      databaseId: 'my-db',
+    } as any);
+
+    expect(mockFirestoreManager.getFirestore).toHaveBeenCalledWith({
+      projectId: 'my-project',
+      databaseId: 'my-db',
+    });
+  });
+
   it('should return documents list on success', async () => {
     const result = await registeredHandler({ path: 'users', format: 'json' });
 

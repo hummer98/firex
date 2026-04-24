@@ -28,6 +28,7 @@ const OrderBySchema = z.object({
 
 const ListSchema = {
   projectId: z.string().optional().describe('Firebase project ID (optional, uses default if not specified)'),
+  databaseId: z.string().optional().describe('Firestore database ID (optional, uses (default) if not specified)'),
   path: z.string().describe('Collection path (e.g., users)'),
   where: z.array(WhereConditionSchema).optional().describe('Filter conditions'),
   orderBy: z.array(OrderBySchema).optional().describe('Sort order'),
@@ -43,8 +44,8 @@ export function registerListTool(server: McpServer, firestoreManager: FirestoreM
     'firestore_list',
     'Query documents from a Firestore collection with optional filters, sorting, and pagination',
     ListSchema,
-    async ({ projectId, path, where, orderBy, limit, format, timezone, dateFormat, rawOutput }) => {
-      const firestoreResult = await firestoreManager.getFirestore({ projectId });
+    async ({ projectId, databaseId, path, where, orderBy, limit, format, timezone, dateFormat, rawOutput }) => {
+      const firestoreResult = await firestoreManager.getFirestore({ projectId, databaseId });
 
       if (firestoreResult.isErr()) {
         return {

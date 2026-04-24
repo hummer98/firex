@@ -65,6 +65,26 @@ describe('firestore_import tool', () => {
     );
   });
 
+  it('should declare databaseId in its schema', () => {
+    const toolMock = mockServer.tool as ReturnType<typeof vi.fn>;
+    const schema = toolMock.mock.calls[0][2];
+    expect(schema.databaseId).toBeDefined();
+  });
+
+  it('should forward databaseId to FirestoreManager.getFirestore', async () => {
+    await registeredHandler({
+      projectId: 'my-project',
+      path: 'users',
+      documents: [{ id: 'u1', data: { name: 'x' } }],
+      databaseId: 'my-db',
+    } as any);
+
+    expect(mockFirestoreManager.getFirestore).toHaveBeenCalledWith({
+      projectId: 'my-project',
+      databaseId: 'my-db',
+    });
+  });
+
   it('should import documents successfully', async () => {
     const documents = [
       { id: 'user1', data: { name: 'User 1' } },
