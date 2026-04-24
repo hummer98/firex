@@ -33,6 +33,10 @@
     "emulator:start": "firebase emulators:start --only firestore",
     "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s"
   },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
   "keywords": [
     "firebase",
     "firestore",

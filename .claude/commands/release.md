@@ -126,8 +126,8 @@ npm version patch  # または minor / major
 タグ push 後、GitHub Actions の `.github/workflows/release.yml` が自動で以下を実行する：
 
 1. tag と package.json / plugin.json / marketplace.json のバージョン整合性を検証
-2. `npm publish --access public` で npm 公開
-3. GitHub Release を作成
+2. `npm publish --provenance --access public` で npm 公開（OIDC Trusted Publishing）
+3. GitHub Release を作成（CHANGELOG の該当バージョンセクションをリリースノートとして抽出）
 
 Claude Code plugin としての配布は **marketplace.json を master ブランチに置くだけ**で完了する（GitHub がマニフェストを配信）。ユーザーは以下で取得する:
 
@@ -138,15 +138,23 @@ Claude Code plugin としての配布は **marketplace.json を master ブラン
 
 そのため、追加のアップロード/公開手順は不要。release.yml が落ちていないかは `gh run list --workflow=release.yml` で確認する。
 
-### 7. GitHubリリース作成
+### 7. CI 完走を待つ
 
-リリースノートをCHANGELOGから抽出し、GitHubリリースを作成：
+タグ push 後、GitHub Actions の `release.yml` が自動で以下を実行する:
+1. バージョン整合検証
+2. テスト・ビルド
+3. OIDC で `npm publish --provenance --access public`
+4. CHANGELOG から該当バージョンを抽出して GitHub Release 作成
+
+CI 完走を確認:
 
 ```bash
-gh release create vX.Y.Z \
-  --title "firex vX.Y.Z" \
-  --notes "[CHANGELOGから抽出したリリースノート]"
+sleep 5
+RUN_ID=$(gh run list --workflow=release.yml --limit=1 --json databaseId --jq '.[0].databaseId')
+gh run watch ${RUN_ID} --exit-status
 ```
+
+CI が成功すれば npm 公開 & GitHub Release 作成まで完了している。失敗時は `gh run view ${RUN_ID} --log-failed` でログ確認。
 
 ### 8. ローカルインストール（--local指定時のみ）
 
@@ -168,8 +176,7 @@ npm link
 - GitHubリリースURL
 - **--local指定時のみ**: ローカルインストール完了の旨
 - 主な変更内容のサマリー
-- npm 公開状況: CI (release.yml) が自動実行。失敗時は `gh run list --workflow=release.yml` で確認。
-  - 手動公開が必要な場合: `npm publish --access public`
+- npm 公開状況: CI (release.yml) が OIDC で自動 publish。GitHub Release も CI が自動作成。
 - Claude Code plugin 更新: `/plugin update firex` でユーザーが取得可能
 
 ## 注意事項
@@ -178,7 +185,6 @@ npm link
 - 必ずmasterブランチで実行してください
 - リリース作成前にテストが通っていることを確認してください
 - バージョン番号は手動で確認・承認を得てから進めてください
-- npm publishは手動で実行してください（npm loginが完了していることを確認）
 
 ## エラー処理
 
@@ -212,9 +218,6 @@ npm version patch  # または minor / major
 
 # タグ push 後、release.yml が自動で npm publish + GitHub Release 作成
 gh run list --workflow=release.yml --limit 3
-
-# 手動で公開する場合
-npm publish --access public
 
 # プラグインバージョン手動同期（通常は不要）
 npm run sync:plugin-version
