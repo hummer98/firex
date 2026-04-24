@@ -1,6 +1,6 @@
 {
   "name": "firex",
-  "version": "0.7.8",
+  "version": "0.8.0",
   "description": "Firestore operations skill powered by npx @hummer98/firex. Covers document get/set/update/delete, collection queries, import/export, real-time watching, and MCP server integration.",
   "author": {
     "name": "hummer98"
