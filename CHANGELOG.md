@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.1] - 2026-04-26
+
+### Fixed
+- **プラグイン配布物から壊れた `.mcp.json` を除去**
+  - v0.8.0 / v0.9.0 のプラグインに、メンテナのローカル絶対パス
+    (`/Users/yamamoto/git/firex/bin/run.js`) を含む `.mcp.json` が混入していた
+  - その結果、プラグインを `/plugin install firex` で導入したユーザーの
+    MCP サーバーが起動しないか、別マシンの絶対パスを参照する状態になっていた
+  - リポジトリから `.mcp.json` を削除し、`.gitignore` で開発者個別の
+    プロジェクト設定として扱うようにした
+  - プラグインから MCP サーバーを利用したい場合は SKILL.md / README に
+    記載されている `claude mcp add firex -- npx @hummer98/firex mcp` で
+    手動登録する
+
 ## [0.9.0] - 2026-04-26
 
 ### Changed
@@ -227,7 +241,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - API key and OAuth token masking
 - Secure file permission recommendations
 
-[Unreleased]: https://github.com/hummer98/firex/compare/v0.9.0...HEAD
+[Unreleased]: https://github.com/hummer98/firex/compare/v0.9.1...HEAD
+[0.9.1]: https://github.com/hummer98/firex/compare/v0.9.0...v0.9.1
 [0.9.0]: https://github.com/hummer98/firex/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/hummer98/firex/compare/v0.7.8...v0.8.0
 [0.7.8]: https://github.com/hummer98/firex/compare/v0.7.7...v0.7.8
