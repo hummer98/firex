@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.0] - 2026-04-26
+
+### Changed
+- **`firex list` の出力にデフォルトで `_metadata` を同梱**
+  - 各ドキュメントに `id` / `path` / Firestore タイムスタンプを含む `_metadata` フィールドが付与される
+  - `get` コマンドや `list --watch` モードと挙動を統一（従来 `list` のみメタデータ非同梱で不揃いだった）
+  - 既存の `_metadata` 不要なフィールド名へのアクセス（`d.name` 等）は影響なし
+
+### Added
+- **`--no-metadata` フラグ**を `firex list` に追加。データフィールドのみが必要な場合に `_metadata` を出力から除外できる
+
 ## [0.8.0] - 2026-04-25
 
 ### Added
@@ -216,7 +227,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - API key and OAuth token masking
 - Secure file permission recommendations
 
-[Unreleased]: https://github.com/hummer98/firex/compare/v0.8.0...HEAD
+[Unreleased]: https://github.com/hummer98/firex/compare/v0.9.0...HEAD
+[0.9.0]: https://github.com/hummer98/firex/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/hummer98/firex/compare/v0.7.8...v0.8.0
 [0.7.8]: https://github.com/hummer98/firex/compare/v0.7.7...v0.7.8
 [0.7.7]: https://github.com/hummer98/firex/compare/v0.7.6...v0.7.7
