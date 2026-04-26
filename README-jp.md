@@ -213,11 +213,17 @@ firex list <collection-path> [options]
 - `--timestamp-format <format>`: タイムスタンプの表示形式（iso, none）。デフォルト: iso
 - `--timezone <zone>`: タイムスタンプ表示のタイムゾーン（local, utc, または Asia/Tokyo のような IANA タイムゾーン）
 - `--watch, -w`: リアルタイムでコレクションの変更を監視
+- `--no-metadata`: 出力から `_metadata`（document ID、パス等）を除外する。デフォルトでは含まれる。
+
+> 各ドキュメントには `_metadata` フィールドが付与され、`id` / `path` / Firestore のタイムスタンプを参照できます。データフィールドのみが必要なときは `--no-metadata` を指定してください。
 
 **例:**
 ```bash
-# 全ユーザーを一覧表示
+# 全ユーザーを一覧表示（各ドキュメントに _metadata が付く）
 firex list users
+
+# データフィールドだけが必要なら _metadata を外す
+firex list users --no-metadata
 
 # フィルタ付きで一覧表示
 firex list users --where "status==active"

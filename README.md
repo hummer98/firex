@@ -213,11 +213,17 @@ firex list <collection-path> [options]
 - `--timestamp-format <format>`: Timestamp display format (iso, none). Default: iso
 - `--timezone <zone>`: Timezone for timestamp display (local, utc, or IANA timezone like Asia/Tokyo)
 - `--watch, -w`: Watch collection for real-time changes
+- `--no-metadata`: Exclude `_metadata` (document ID, path, etc.) from output. Metadata is included by default.
+
+> Each returned document includes a `_metadata` field with the document `id`, `path`, and Firestore timestamps. Use `--no-metadata` to drop it when only the data fields are needed.
 
 **Examples:**
 ```bash
-# List all users
+# List all users (includes _metadata for each document)
 firex list users
+
+# Drop _metadata when you only need data fields
+firex list users --no-metadata
 
 # List with filter
 firex list users --where "status==active"

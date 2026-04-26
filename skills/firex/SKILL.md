@@ -56,6 +56,16 @@ npx @hummer98/firex list orders \
 
 サポート演算子: `==`, `!=`, `<`, `<=`, `>`, `>=`, `array-contains`, `array-contains-any`, `in`, `not-in`
 
+`list` の出力には各ドキュメントの `_metadata`（`id` / `path` / タイムスタンプ）が**デフォルトで含まれる**。データフィールドだけが欲しい場合は `--no-metadata` を付ける。
+
+```bash
+# _metadata を含む（デフォルト）
+npx @hummer98/firex list users
+
+# データのみ
+npx @hummer98/firex list users --no-metadata
+```
+
 ## 出力フォーマット
 
 すべてのコマンドで `--format` を指定できる。

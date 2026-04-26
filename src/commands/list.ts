@@ -44,7 +44,11 @@ export class ListCommand extends BaseCommand {
     },
     {
       command: '<%= config.bin %> list users --quiet',
-      description: 'Output only data without summary/metadata',
+      description: 'Suppress summary lines (count, execution time)',
+    },
+    {
+      command: '<%= config.bin %> list users --no-metadata',
+      description: 'Exclude _metadata (document ID, path, etc.) from output',
     },
     // Query examples
     {
@@ -136,6 +140,10 @@ export class ListCommand extends BaseCommand {
       description: t('flag.quiet'),
       default: false,
     }),
+    'no-metadata': Flags.boolean({
+      description: t('flag.noMetadata'),
+      default: false,
+    }),
   };
 
   async run(): Promise<void> {
@@ -148,6 +156,7 @@ export class ListCommand extends BaseCommand {
     const watch = flags.watch;
     const showInitial = flags['show-initial'];
     const quiet = flags.quiet;
+    const includeMetadata = !flags['no-metadata'];
 
     // Initialize config
     const initResult = await this.initialize();
@@ -237,7 +246,8 @@ export class ListCommand extends BaseCommand {
         parsedOrderBy,
         format,
         showInitial || this.loadedConfig?.watchShowInitial || false,
-        outputFormatter
+        outputFormatter,
+        includeMetadata
       );
     } else {
       // Query mode
@@ -251,7 +261,8 @@ export class ListCommand extends BaseCommand {
         format,
         outputFormatter,
         quiet,
-        timestampOptions
+        timestampOptions,
+        includeMetadata
       );
     }
   }
@@ -334,7 +345,8 @@ export class ListCommand extends BaseCommand {
     format: OutputFormat,
     outputFormatter: OutputFormatter,
     quiet: boolean,
-    timestampOptions?: TimestampFormatOptions
+    timestampOptions?: TimestampFormatOptions,
+    includeMetadata: boolean = true
   ): Promise<void> {
     const queryBuilder = new QueryBuilder(firestore);
 
@@ -365,7 +377,7 @@ export class ListCommand extends BaseCommand {
     const formatResult = outputFormatter.formatDocuments(
       documents,
       format,
-      {},
+      { includeMetadata },
       timestampOptions
     );
 
@@ -391,7 +403,8 @@ export class ListCommand extends BaseCommand {
     _orderBy: OrderBy[],
     format: OutputFormat,
     showInitial: boolean,
-    outputFormatter: OutputFormatter
+    outputFormatter: OutputFormatter,
+    includeMetadata: boolean = true
   ): Promise<void> {
     const watchService = new WatchService(firestore);
 
@@ -400,7 +413,7 @@ export class ListCommand extends BaseCommand {
 
     const onChange = (change: DocumentChange): void => {
       const formatResult = outputFormatter.formatChange(change, format, {
-        includeMetadata: true,
+        includeMetadata,
       });
 
       if (formatResult.isOk()) {

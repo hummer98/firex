@@ -61,6 +61,7 @@ export interface Messages {
   'flag.rawOutput': string;
   'flag.noColor': string;
   'flag.noDateFormat': string;
+  'flag.noMetadata': string;
 
   // Success messages
   'msg.documentCreated': string;
@@ -351,7 +352,7 @@ const jaMessages: Messages = {
   'flag.includeSubcollections': 'サブコレクションを含める',
   'flag.batchSize': 'バッチサイズ (デフォルト: 500)',
   'flag.show': '現在の設定を表示する',
-  'flag.quiet': 'メタ情報を非表示にして純粋なデータのみ出力',
+  'flag.quiet': '件数や実行時間などのサマリ行を出力しない',
   'flag.json': 'JSON形式で出力 (--format=json のエイリアス)',
   'flag.yaml': 'YAML形式で出力 (--format=yaml のエイリアス)',
   'flag.table': 'テーブル形式で出力 (--format=table のエイリアス)',
@@ -361,6 +362,7 @@ const jaMessages: Messages = {
   'flag.rawOutput': '全整形処理を無効化',
   'flag.noColor': 'ANSIカラーコードを無効化',
   'flag.noDateFormat': '日付フォーマット変換のみを無効化',
+  'flag.noMetadata': '_metadata（document ID やパス等）を出力に含めない',
 
   // Success messages
   'msg.documentCreated': 'ドキュメントを作成しました',
@@ -651,7 +653,7 @@ const enMessages: Messages = {
   'flag.includeSubcollections': 'Include subcollections',
   'flag.batchSize': 'Batch size (default: 500)',
   'flag.show': 'Show current configuration',
-  'flag.quiet': 'Suppress meta information and output only pure data',
+  'flag.quiet': 'Suppress summary lines (count, execution time)',
   'flag.json': 'Output in JSON format (alias for --format=json)',
   'flag.yaml': 'Output in YAML format (alias for --format=yaml)',
   'flag.table': 'Output in table format (alias for --format=table)',
@@ -661,6 +663,7 @@ const enMessages: Messages = {
   'flag.rawOutput': 'Disable all formatting',
   'flag.noColor': 'Disable ANSI color codes',
   'flag.noDateFormat': 'Disable date format conversion only',
+  'flag.noMetadata': 'Exclude _metadata (document ID, path, etc.) from output',
 
   // Success messages
   'msg.documentCreated': 'Document created',
