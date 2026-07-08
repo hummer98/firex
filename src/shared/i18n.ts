@@ -77,6 +77,7 @@ export interface Messages {
   'err.invalidJson': string;
   'err.authFailed': string;
   'err.permissionDenied': string;
+  'err.nonInteractiveRequiresYes': string;
 
   // Prompts
   'prompt.confirmDelete': string;
@@ -379,6 +380,7 @@ const jaMessages: Messages = {
   'err.invalidJson': 'JSONの形式が不正です',
   'err.authFailed': '認証に失敗しました',
   'err.permissionDenied': '権限がありません',
+  'err.nonInteractiveRequiresYes': '非対話実行では -y が必要です（確認プロンプトを表示できません）',
 
   // Prompts
   'prompt.confirmDelete': 'を削除しますか？',
@@ -681,6 +683,7 @@ const enMessages: Messages = {
   'err.invalidJson': 'Invalid JSON format',
   'err.authFailed': 'Authentication failed',
   'err.permissionDenied': 'Permission denied',
+  'err.nonInteractiveRequiresYes': '-y is required for non-interactive execution (confirmation prompt cannot be shown)',
 
   // Prompts
   'prompt.confirmDelete': 'Are you sure you want to delete',

@@ -67,6 +67,13 @@ export class DeleteCommand extends BaseCommand {
     const recursive = flags.recursive;
     const skipConfirm = flags.yes;
 
+    // A confirmation prompt cannot be shown without a TTY; fail loudly
+    // instead of silently no-op'ing (see #4).
+    if (!skipConfirm && !process.stdout.isTTY) {
+      this.handleError(t('err.nonInteractiveRequiresYes'), 'validation');
+      return;
+    }
+
     // Initialize config
     const initResult = await this.initialize();
     if (initResult.isErr()) {
