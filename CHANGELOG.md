@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.2] - 2026-07-09
+
+### Fixed
+- **`delete`: 非対話実行で `-y` を省くと何も削除せず正常終了していた問題を修正**（Issue #4）
+  - stdout が TTY でない状態（`execSync` 経由の非対話実行やパイプ）で `-y`/`--yes` を省略すると、確認プロンプトを表示できないまま何も削除せず exit 0 で終了していた
+  - 非対話実行時に `-y` がない場合は明示的なエラーで exit 非0 にするよう変更。silent no-op による見えない失敗を防止
+- **`delete --recursive` がドキュメントパスを受け付けない問題を修正**（Issue #5）
+  - `--recursive` はこれまでコレクションパスにのみ許可されており、ドキュメント配下のサブコレクションを含めて削除するには呼び出し側が個々のサブコレクション名を列挙する必要があった
+  - firebase-admin の `recursiveDelete()` はドキュメント参照も受け付けるため、CLI 側の人工的な制限を撤廃し、ドキュメントパス + `--recursive` でサブコレクション込みの削除に対応
+- **`list --format json` が空コレクションで有効な JSON を出力しない問題を修正**（Issue #6）
+  - 空コレクションに対して `--format json` を指定しても、出力なし（`--quiet` 時）またはテキストメッセージ（`--quiet` なし時）になり、`jq` や `JSON.parse` で扱えなかった
+  - 空コレクションでも `--format json` 指定時は `[]` を出力するようにし、JSON 出力の契約を非空時と統一
+
 ## [0.9.1] - 2026-04-26
 
 ### Fixed
@@ -241,7 +254,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - API key and OAuth token masking
 - Secure file permission recommendations
 
-[Unreleased]: https://github.com/hummer98/firex/compare/v0.9.1...HEAD
+[Unreleased]: https://github.com/hummer98/firex/compare/v0.9.2...HEAD
+[0.9.2]: https://github.com/hummer98/firex/compare/v0.9.1...v0.9.2
 [0.9.1]: https://github.com/hummer98/firex/compare/v0.9.0...v0.9.1
 [0.9.0]: https://github.com/hummer98/firex/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/hummer98/firex/compare/v0.7.8...v0.8.0
