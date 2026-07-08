@@ -34,6 +34,10 @@ export class DeleteCommand extends BaseCommand {
       command: '<%= config.bin %> delete users/user123/orders --recursive --yes',
       description: 'Delete all documents in a subcollection',
     },
+    {
+      command: '<%= config.bin %> delete users/user123 --recursive --yes',
+      description: 'Delete a document and all its subcollections',
+    },
   ];
 
   static override args = {
@@ -85,17 +89,14 @@ export class DeleteCommand extends BaseCommand {
     const isDocument = firestoreOps.isDocumentPath(path);
     const isCollection = firestoreOps.isCollectionPath(path);
 
-    if (recursive && !isCollection) {
-      this.handleError(
-        '--recursive can only be used with collection paths',
-        'validation'
-      );
-      return;
-    }
-
     if (isDocument) {
-      // Single document deletion
-      await this.deleteDocument(firestoreOps, path, skipConfirm, promptService);
+      if (recursive) {
+        // Recursive document deletion (document + subcollections)
+        await this.deleteDocumentRecursive(firestore, path, skipConfirm, promptService);
+      } else {
+        // Single document deletion
+        await this.deleteDocument(firestoreOps, path, skipConfirm, promptService);
+      }
     } else if (isCollection) {
       if (recursive) {
         // Recursive collection deletion
@@ -183,6 +184,47 @@ export class DeleteCommand extends BaseCommand {
 
     if (result.value.deletedCount === 0) {
       console.log('Cancelled or no documents to delete');
+    } else {
+      console.log(`${result.value.deletedCount} ${t('msg.documentsDeleted')}`);
+    }
+  }
+
+  /**
+   * Delete a document and its subcollections recursively
+   */
+  private async deleteDocumentRecursive(
+    firestore: any,
+    path: string,
+    skipConfirm: boolean,
+    promptService: PromptService
+  ): Promise<void> {
+    const batchProcessor = new BatchProcessor(firestore);
+
+    const confirmCallback = async (): Promise<boolean> => {
+      if (skipConfirm) {
+        return true;
+      }
+
+      const confirmResult = await promptService.confirm(
+        `${t('prompt.confirmDelete')} "${path}" (${t('prompt.confirmDeleteDocumentRecursive')})`
+      );
+
+      if (confirmResult.isErr()) {
+        return false;
+      }
+
+      return confirmResult.value;
+    };
+
+    const result = await batchProcessor.deleteDocument(path, confirmCallback);
+
+    if (result.isErr()) {
+      this.handleError(result.error.message, 'firestore');
+      return;
+    }
+
+    if (result.value.deletedCount === 0) {
+      console.log('Cancelled');
     } else {
       console.log(`${result.value.deletedCount} ${t('msg.documentsDeleted')}`);
     }

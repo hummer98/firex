@@ -81,6 +81,7 @@ export interface Messages {
   // Prompts
   'prompt.confirmDelete': string;
   'prompt.confirmDeleteCollection': string;
+  'prompt.confirmDeleteDocumentRecursive': string;
 
   // Export/Import runtime messages
   'msg.exporting': string;
@@ -382,6 +383,7 @@ const jaMessages: Messages = {
   // Prompts
   'prompt.confirmDelete': 'を削除しますか？',
   'prompt.confirmDeleteCollection': 'コレクション内の全ドキュメントを削除しますか？',
+  'prompt.confirmDeleteDocumentRecursive': 'サブコレクションを含めて削除しますか？',
 
   // Export/Import runtime messages
   'msg.exporting': 'コレクションをエクスポートしています',
@@ -683,6 +685,7 @@ const enMessages: Messages = {
   // Prompts
   'prompt.confirmDelete': 'Are you sure you want to delete',
   'prompt.confirmDeleteCollection': 'Delete all documents in collection?',
+  'prompt.confirmDeleteDocumentRecursive': 'including all subcollections?',
 
   // Export/Import runtime messages
   'msg.exporting': 'Exporting collection',

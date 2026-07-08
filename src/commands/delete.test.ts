@@ -3,6 +3,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import type { Config } from '@oclif/core';
 import { DeleteCommand } from './delete';
 import { FirestoreOps } from '../domain/firestore-ops';
 import { BatchProcessor } from '../domain/batch-processor';
@@ -84,6 +85,71 @@ describe('DeleteCommand', () => {
     it('should support recursive collection deletion via BatchProcessor', () => {
       const batchProcessor = new BatchProcessor(mockFirestore as any);
       expect(batchProcessor.deleteCollection).toBeDefined();
+    });
+
+    it('should support recursive document deletion via BatchProcessor', () => {
+      const batchProcessor = new BatchProcessor(mockFirestore as any);
+      expect(batchProcessor.deleteDocument).toBeDefined();
+    });
+
+    it('should classify a document path as recursive-eligible (no collection-only restriction)', () => {
+      const firestoreOps = new FirestoreOps(mockFirestore as any);
+      const isDocument = firestoreOps.isDocumentPath('users/user123');
+      const isCollection = firestoreOps.isCollectionPath('users/user123');
+
+      // The old validation rejected `recursive && !isCollection`. A document
+      // path must remain a valid target for --recursive.
+      expect(isDocument).toBe(true);
+      expect(isCollection).toBe(false);
+    });
+
+    it('should route document path + --recursive to BatchProcessor.deleteDocument (recursiveDelete equivalent)', async () => {
+      const mockDocRef = {
+        delete: vi.fn().mockResolvedValue(undefined),
+        listCollections: vi.fn().mockResolvedValue([]),
+      };
+      mockFirestore.doc.mockReturnValue(mockDocRef);
+
+      const deleteDocumentSpy = vi.spyOn(BatchProcessor.prototype, 'deleteDocument');
+
+      const command = new DeleteCommand([], {} as Config);
+      const promptService = new PromptService();
+
+      await (command as any).deleteDocumentRecursive(
+        mockFirestore,
+        'users/user123',
+        true,
+        promptService
+      );
+
+      // The old CLI-side restriction ("--recursive can only be used with
+      // collection paths") is gone: a document path + --recursive now
+      // reaches BatchProcessor.deleteDocument, which deletes the document
+      // reference and all of its subcollections.
+      expect(deleteDocumentSpy).toHaveBeenCalledWith('users/user123', expect.any(Function));
+      expect(mockDocRef.delete).toHaveBeenCalled();
+
+      deleteDocumentSpy.mockRestore();
+    });
+
+    it('should still route collection path + --recursive to BatchProcessor.deleteCollection (regression)', async () => {
+      const mockCollectionRef = {
+        limit: vi.fn().mockReturnValue({
+          get: vi.fn().mockResolvedValue({ empty: true, size: 0, docs: [] }),
+        }),
+      };
+      mockFirestore.collection.mockReturnValue(mockCollectionRef);
+
+      const deleteCollectionSpy = vi.spyOn(BatchProcessor.prototype, 'deleteCollection');
+
+      const command = new DeleteCommand([], {} as Config);
+      const promptService = new PromptService();
+
+      await (command as any).deleteCollection(mockFirestore, 'users', true, promptService);
+
+      expect(deleteCollectionSpy).toHaveBeenCalledWith('users', expect.any(Function));
+
+      deleteCollectionSpy.mockRestore();
     });
   });
 
