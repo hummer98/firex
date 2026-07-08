@@ -344,4 +344,50 @@ export class BatchProcessor {
       });
     }
   }
+
+  /**
+   * Delete a document and all its subcollections recursively
+   */
+  async deleteDocument(
+    path: string,
+    confirmCallback: () => Promise<boolean>
+  ): Promise<Result<DeleteResult, BatchProcessorError>> {
+    try {
+      // Ask for confirmation
+      const confirmed = await confirmCallback();
+      if (!confirmed) {
+        return ok({ deletedCount: 0 });
+      }
+
+      let deletedCount = 0;
+      const docRef = this.firestore.doc(path);
+
+      // Recursively delete subcollections
+      const subcollections = await docRef.listCollections();
+      for (const subcol of subcollections) {
+        const subResult = await this.deleteCollection(
+          subcol.path,
+          async () => true // Auto-confirm for subcollections
+        );
+
+        if (subResult.isOk()) {
+          deletedCount += subResult.value.deletedCount;
+        }
+      }
+
+      // Delete the document itself
+      await docRef.delete();
+      deletedCount += 1;
+
+      return ok({ deletedCount });
+    } catch (error) {
+      return err({
+        type: 'FIRESTORE_ERROR',
+        message: `ドキュメントの削除に失敗しました: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+        originalError: error instanceof Error ? error : new Error(String(error)),
+      });
+    }
+  }
 }

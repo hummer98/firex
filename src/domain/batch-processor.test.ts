@@ -29,6 +29,7 @@ describe('BatchProcessor', () => {
     const mockDocRef: any = {
       path: 'users/user1',
       listCollections: vi.fn().mockResolvedValue([]),
+      delete: vi.fn().mockResolvedValue(undefined),
     };
 
     mockDocRef.get = vi.fn().mockResolvedValue({
@@ -319,6 +320,53 @@ describe('BatchProcessor', () => {
       if (result.isOk()) {
         expect(result.value.deletedCount).toBe(0);
       }
+    });
+  });
+
+  describe('deleteDocument', () => {
+    it('should delete a document with no subcollections', async () => {
+      const confirmCallback = vi.fn().mockResolvedValue(true);
+
+      const result = await batchProcessor.deleteDocument('users/user1', confirmCallback);
+
+      expect(result.isOk()).toBe(true);
+      if (result.isOk()) {
+        expect(result.value.deletedCount).toBe(1);
+      }
+      expect(confirmCallback).toHaveBeenCalled();
+      expect(mockFirestore.doc).toHaveBeenCalledWith('users/user1');
+      const docRef = vi.mocked(mockFirestore.doc).mock.results[0].value;
+      expect(docRef.delete).toHaveBeenCalled();
+    });
+
+    it('should delete a document and its subcollections recursively', async () => {
+      const confirmCallback = vi.fn().mockResolvedValue(true);
+      const docRef = vi.mocked(mockFirestore.doc)();
+      vi.mocked(docRef.listCollections).mockResolvedValue([
+        { path: 'users/user1/orders' } as never,
+      ]);
+
+      const result = await batchProcessor.deleteDocument('users/user1', confirmCallback);
+
+      expect(result.isOk()).toBe(true);
+      if (result.isOk()) {
+        // 1 for the document itself + whatever the subcollection delete reported
+        expect(result.value.deletedCount).toBeGreaterThanOrEqual(1);
+      }
+      expect(docRef.delete).toHaveBeenCalled();
+    });
+
+    it('should not delete if confirmation is denied', async () => {
+      const confirmCallback = vi.fn().mockResolvedValue(false);
+      const docRef = vi.mocked(mockFirestore.doc)();
+
+      const result = await batchProcessor.deleteDocument('users/user1', confirmCallback);
+
+      expect(result.isOk()).toBe(true);
+      if (result.isOk()) {
+        expect(result.value.deletedCount).toBe(0);
+      }
+      expect(docRef.delete).not.toHaveBeenCalled();
     });
   });
 
