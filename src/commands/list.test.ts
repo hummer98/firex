@@ -3,6 +3,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import type { Config } from '@oclif/core';
 import { ListCommand } from './list';
 import { QueryBuilder } from '../domain/query-builder';
 import { WatchService } from '../domain/watch-service';
@@ -194,6 +195,126 @@ describe('ListCommand', () => {
       if (result.isOk()) {
         expect(result.value).toBe('[]');
       }
+    });
+  });
+
+  describe('queryCollection empty result output (issue #6)', () => {
+    let logSpy: ReturnType<typeof vi.spyOn>;
+
+    beforeEach(() => {
+      logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    });
+
+    function mockEmptyExecuteQuery(): void {
+      vi.spyOn(QueryBuilder.prototype, 'executeQuery').mockResolvedValue(
+        ok({ documents: [], executionTimeMs: 5 })
+      );
+    }
+
+    function mockNonEmptyExecuteQuery(): void {
+      vi.spyOn(QueryBuilder.prototype, 'executeQuery').mockResolvedValue(
+        ok({ documents: mockDocuments, executionTimeMs: 5 })
+      );
+    }
+
+    it('should output exactly "[]" for --format json on empty collection (quiet=false)', async () => {
+      mockEmptyExecuteQuery();
+      const cmd = new ListCommand([], {} as Config);
+      const outputFormatter = new OutputFormatter();
+
+      await (cmd as any).queryCollection(
+        mockFirestore,
+        'users/uid/provisionalFriends',
+        [],
+        [],
+        100,
+        'json',
+        outputFormatter,
+        false // quiet
+      );
+
+      expect(logSpy).toHaveBeenCalledTimes(1);
+      expect(logSpy).toHaveBeenCalledWith('[]');
+    });
+
+    it('should output exactly "[]" for --format json on empty collection (quiet=true)', async () => {
+      mockEmptyExecuteQuery();
+      const cmd = new ListCommand([], {} as Config);
+      const outputFormatter = new OutputFormatter();
+
+      await (cmd as any).queryCollection(
+        mockFirestore,
+        'users/uid/provisionalFriends',
+        [],
+        [],
+        100,
+        'json',
+        outputFormatter,
+        true // quiet
+      );
+
+      expect(logSpy).toHaveBeenCalledTimes(1);
+      expect(logSpy).toHaveBeenCalledWith('[]');
+    });
+
+    it('should still output formatted documents for --format json on non-empty collection', async () => {
+      mockNonEmptyExecuteQuery();
+      const cmd = new ListCommand([], {} as Config);
+      const outputFormatter = new OutputFormatter();
+
+      await (cmd as any).queryCollection(
+        mockFirestore,
+        'users',
+        [],
+        [],
+        100,
+        'json',
+        outputFormatter,
+        true // quiet
+      );
+
+      expect(logSpy).toHaveBeenCalledTimes(1);
+      const parsed = JSON.parse(logSpy.mock.calls[0][0] as string);
+      expect(parsed).toHaveLength(2);
+      expect(parsed[0].name).toBe('Alice');
+    });
+
+    it('should keep the human-readable empty-collection message for non-json formats (quiet=false)', async () => {
+      mockEmptyExecuteQuery();
+      const cmd = new ListCommand([], {} as Config);
+      const outputFormatter = new OutputFormatter();
+
+      await (cmd as any).queryCollection(
+        mockFirestore,
+        'users',
+        [],
+        [],
+        100,
+        'yaml',
+        outputFormatter,
+        false // quiet
+      );
+
+      expect(logSpy).toHaveBeenCalledWith('No matching documents found');
+    });
+
+    it('should suppress all output for non-json formats on empty collection when quiet=true', async () => {
+      mockEmptyExecuteQuery();
+      const cmd = new ListCommand([], {} as Config);
+      const outputFormatter = new OutputFormatter();
+
+      await (cmd as any).queryCollection(
+        mockFirestore,
+        'users',
+        [],
+        [],
+        100,
+        'yaml',
+        outputFormatter,
+        true // quiet
+      );
+
+      expect(logSpy).not.toHaveBeenCalled();
     });
   });
 

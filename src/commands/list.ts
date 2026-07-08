@@ -366,6 +366,10 @@ export class ListCommand extends BaseCommand {
     const { documents, executionTimeMs } = result.value;
 
     if (documents.length === 0) {
+      if (format === 'json') {
+        console.log('[]');
+        return;
+      }
       if (!quiet) {
         console.log('No matching documents found');
         console.log(`\nExecution time: ${executionTimeMs}ms`);
