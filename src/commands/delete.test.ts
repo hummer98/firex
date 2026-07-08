@@ -9,6 +9,7 @@ import { FirestoreOps } from '../domain/firestore-ops';
 import { BatchProcessor } from '../domain/batch-processor';
 import { PromptService } from '../presentation/prompt-service';
 import { ok, err } from '../shared/types';
+import { setLocale, getLocale, type SupportedLocale } from '../shared/i18n';
 
 // Mock Firestore
 const mockFirestore = {
@@ -184,13 +185,17 @@ describe('DeleteCommand', () => {
 
   describe('non-interactive execution guard (issue #4)', () => {
     let originalIsTTY: boolean | undefined;
+    let originalLocale: SupportedLocale;
 
     beforeEach(() => {
       originalIsTTY = process.stdout.isTTY;
+      originalLocale = getLocale();
+      setLocale('ja');
     });
 
     afterEach(() => {
       process.stdout.isTTY = originalIsTTY;
+      setLocale(originalLocale);
     });
 
     function createCommand(flags: { recursive: boolean; yes: boolean }): DeleteCommand {
