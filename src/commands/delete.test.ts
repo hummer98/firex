@@ -181,4 +181,64 @@ describe('DeleteCommand', () => {
       expect(result.isOk()).toBe(true);
     });
   });
+
+  describe('non-interactive execution guard (issue #4)', () => {
+    let originalIsTTY: boolean | undefined;
+
+    beforeEach(() => {
+      originalIsTTY = process.stdout.isTTY;
+    });
+
+    afterEach(() => {
+      process.stdout.isTTY = originalIsTTY;
+    });
+
+    function createCommand(flags: { recursive: boolean; yes: boolean }): DeleteCommand {
+      const cmd = new DeleteCommand([], {} as Config);
+      vi.spyOn(cmd as any, 'parse').mockResolvedValue({
+        args: { path: 'users/doc1' },
+        flags,
+      });
+      return cmd;
+    }
+
+    it('fails loudly and performs no deletion when non-TTY and --yes is omitted', async () => {
+      process.stdout.isTTY = false;
+      const cmd = createCommand({ recursive: false, yes: false });
+      const initializeSpy = vi.spyOn(cmd as any, 'initialize');
+
+      await expect(cmd.run()).rejects.toMatchObject({ oclif: { exit: 1 } });
+
+      expect(console.error).toHaveBeenCalledWith(
+        expect.stringContaining('非対話実行では -y が必要です')
+      );
+      expect(initializeSpy).not.toHaveBeenCalled();
+    });
+
+    it('proceeds past the guard when non-TTY and --yes is specified', async () => {
+      process.stdout.isTTY = false;
+      const cmd = createCommand({ recursive: false, yes: true });
+      const initializeSpy = vi
+        .spyOn(cmd as any, 'initialize')
+        .mockResolvedValue(err({ type: 'CONFIG_ERROR', message: 'stop after guard' }));
+      vi.spyOn(cmd as any, 'handleError').mockImplementation(() => {});
+
+      await cmd.run();
+
+      expect(initializeSpy).toHaveBeenCalled();
+    });
+
+    it('proceeds past the guard on a TTY even when --yes is omitted', async () => {
+      process.stdout.isTTY = true;
+      const cmd = createCommand({ recursive: false, yes: false });
+      const initializeSpy = vi
+        .spyOn(cmd as any, 'initialize')
+        .mockResolvedValue(err({ type: 'CONFIG_ERROR', message: 'stop after guard' }));
+      vi.spyOn(cmd as any, 'handleError').mockImplementation(() => {});
+
+      await cmd.run();
+
+      expect(initializeSpy).toHaveBeenCalled();
+    });
+  });
 });
