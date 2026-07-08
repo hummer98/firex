@@ -75,5 +75,8 @@ firestore_export/
 # AI development tools runtime logs
 .kiro/runtime/
 
+# Local Claude Code project-scoped runtime state (session history, caches, etc.)
+.config/
+
 # NPM package artifacts
 *.tgz
